@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from typing import AsyncGenerator
 from services.openai_service import openai_service
 from models.schemas import EnhanceRequest, IdeasRequest, AIResponse
-from config.settings import MIN_CHARACTERS
+from config.settings import settings
 
 router = APIRouter(prefix="/api/ai", tags=["AI"])
 
@@ -23,10 +23,10 @@ async def enhance_text(request: EnhanceRequest) -> AIResponse:
     """
     try:
         # Validate input
-        if not request.text or len(request.text.strip()) < MIN_CHARACTERS:
+        if not request.text or len(request.text.strip()) < settings.MIN_CHARACTERS:
             raise HTTPException(
                 status_code=400, 
-                detail=f"Text must be at least {MIN_CHARACTERS} characters long"
+                detail=f"Text must be at least {settings.MIN_CHARACTERS} characters long"
             )
         
         # Process enhancement
@@ -61,10 +61,10 @@ async def generate_ideas(request: IdeasRequest) -> AIResponse:
     """
     try:
         # Validate input
-        if not request.text or len(request.text.strip()) < MIN_CHARACTERS:
+        if not request.text or len(request.text.strip()) < settings.MIN_CHARACTERS:
             raise HTTPException(
                 status_code=400, 
-                detail=f"Text must be at least {MIN_CHARACTERS} characters long"
+                detail=f"Text must be at least {settings.MIN_CHARACTERS} characters long"
             )
         
         # Process idea generation

@@ -3,7 +3,7 @@ OpenAI service for handling AI operations
 """
 import openai
 from typing import AsyncGenerator
-from config.settings import OPENAI_API_KEY, OPENAI_MODEL, ENHANCE_SYSTEM_PROMPT, IDEAS_SYSTEM_PROMPT
+from config.settings import settings
 
 
 class OpenAIService:
@@ -11,7 +11,7 @@ class OpenAIService:
     
     def __init__(self):
         """Initialize OpenAI client"""
-        openai.api_key = OPENAI_API_KEY
+        openai.api_key = settings.OPENAI_API_KEY.get_secret_value()
     
     async def enhance_text(self, text: str, selection_info: str = None) -> AsyncGenerator[str, None]:
         """
@@ -28,7 +28,7 @@ class OpenAIService:
         if selection_info:
             user_prompt += f"\nSelection context: {selection_info}"
         
-        return await self._call_openai_api(ENHANCE_SYSTEM_PROMPT, user_prompt)
+        return await self._call_openai_api(settings.ENHANCE_SYSTEM_PROMPT, user_prompt)
     
     async def generate_ideas(self, text: str, selection_info: str = None) -> AsyncGenerator[str, None]:
         """
@@ -45,7 +45,7 @@ class OpenAIService:
         if selection_info:
             user_prompt += f"\nSelection context: {selection_info}"
         
-        return await self._call_openai_api(IDEAS_SYSTEM_PROMPT, user_prompt)
+        return await self._call_openai_api(settings.IDEAS_SYSTEM_PROMPT, user_prompt)
     
     async def _call_openai_api(
         self, 
@@ -63,8 +63,8 @@ class OpenAIService:
             Response text chunks
         """
         try:
-            response = await self.client.chat.completions.create(
-                model=OPENAI_MODEL,
+            response = await openai.chat.completions.create(
+                model=settings.OPENAI_MODEL,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}

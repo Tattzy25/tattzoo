@@ -6,7 +6,7 @@ It orchestrates all routers and middleware for the application.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from config.settings import ALLOWED_ORIGINS, DEBUG
+from config.settings import settings
 from routers import ai_router, health_router
 
 
@@ -21,13 +21,13 @@ def create_app() -> FastAPI:
         title="Tattty Backend API",
         version="1.0.0",
         description="Backend API for Tattty tattoo generator with AI enhancement",
-        debug=DEBUG
+        debug=settings.DEBUG
     )
     
     # Configure CORS middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=ALLOWED_ORIGINS,
+        allow_origins=settings.ALLOWED_ORIGINS,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -49,6 +49,5 @@ if __name__ == "__main__":
     Entry point for running the application directly
     """
     import uvicorn
-    from config.settings import HOST, PORT
     
-    uvicorn.run(app, host=HOST, port=PORT)
+    uvicorn.run(app, host=settings.HOST, port=settings.PORT)

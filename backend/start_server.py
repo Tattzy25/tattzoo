@@ -9,8 +9,11 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# Import settings to trigger validation
+from config.settings import settings
+
 # Check if OpenAI API key is set
-if not os.getenv("OPENAI_API_KEY"):
+if not settings.OPENAI_API_KEY:
     print("❌ ERROR: OPENAI_API_KEY environment variable is not set!")
     print("Please create a .env file in the backend directory with:")
     print("OPENAI_API_KEY=your_actual_openai_api_key")
@@ -23,13 +26,13 @@ import uvicorn
 
 if __name__ == "__main__":
     print("🚀 Starting Tattty Backend API...")
-    print(f"🔑 OpenAI API Key: {'*' * 20}{os.getenv('OPENAI_API_KEY')[-4:]}")
-    print("🤖 Model: GPT-5-nano-2025-08-07")
-    print("🌐 Server: http://localhost:8000")
+    print(f"🔑 OpenAI API Key: {'*' * 20}{settings.OPENAI_API_KEY.get_secret_value()[-4:]}")
+    print(f"🤖 Model: {settings.OPENAI_MODEL}")
+    print(f"🌐 Server: http://{settings.HOST}:{settings.PORT}")
     print("📋 Available endpoints:")
     print("   POST /api/ai/enhance - Enhance tattoo descriptions")
     print("   POST /api/ai/ideas   - Generate tattoo ideas")
     print("   GET  /health        - Health check")
     print("-" * 50)
     
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=settings.HOST, port=settings.PORT)
