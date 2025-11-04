@@ -1,13 +1,9 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_ZAPIER_WEBHOOK_URL: string;
   readonly VITE_LOG_WEBHOOK_URL_HEALTH: string;
   // Add more env variables here as needed
-  readonly VITE_GOOGLE_MAPS_API_KEY?: string;
   readonly VITE_OPENAI_API_KEY?: string;
-  readonly VITE_REPLICATE_API_KEY?: string;
-  readonly VITE_DATABASE_URL?: string;
   // Google OAuth
   readonly VITE_GOOGLE_CLIENT_ID?: string;
   readonly VITE_GOOGLE_REDIRECT_URI?: string;
