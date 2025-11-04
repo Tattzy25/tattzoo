@@ -1,0 +1,375 @@
+@import url('https://fonts.googleapis.com/css2?family=Rock+Salt&family=Orbitron:wght@400;500;600;700;800;900&family=Roboto+Condensed:wght@300;400;700&display=swap');
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  --background: #2a2a2a;
+  --foreground: #ffffff;
+  --card: #1a1a1b;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1b;
+  --popover-foreground: #ffffff;
+  --primary: #57f1d6;
+  --primary-foreground: #0C0C0D;
+  --secondary: #1f1f20;
+  --secondary-foreground: #ffffff;
+  --muted: #2a2a2b;
+  --muted-foreground: #9ca3af;
+  --accent: #57f1d6;
+  --accent-foreground: #0C0C0D;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.05);
+  --input-background: #1a1a1b;
+  --switch-background: #404040;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #57f1d6;
+  --chart-1: #57f1d6;
+  --chart-2: #60a5fa;
+  --chart-3: #a78bfa;
+  --chart-4: #f472b6;
+  --chart-5: #fb923c;
+  --radius: 1rem;
+  --sidebar: #0C0C0D;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #57f1d6;
+  --sidebar-primary-foreground: #0C0C0D;
+  --sidebar-accent: #1a1a1b;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #57f1d6;
+  
+  /* TaTTTy Brand Colors */
+  --teal-echo-1: rgba(87, 241, 214, 0.8);
+  --teal-echo-2: rgba(87, 241, 214, 0.5);
+  --teal-echo-3: rgba(87, 241, 214, 0.3);
+  --teal-echo-shadow: 2px 2px 0px var(--teal-echo-1), 4px 4px 0px var(--teal-echo-2), 6px 6px 0px var(--teal-echo-3);
+}
+
+.dark {
+  --background: #2D2D2D;
+  --foreground: #ffffff;
+  --card: #1a1a1b;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1b;
+  --popover-foreground: #ffffff;
+  --primary: #57f1d6;
+  --primary-foreground: #2D2D2D;
+  --secondary: #1f1f20;
+  --secondary-foreground: #ffffff;
+  --muted: #2a2a2b;
+  --muted-foreground: #9ca3af;
+  --accent: #57f1d6;
+  --accent-foreground: #0C0C0D;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.05);
+  --ring: #57f1d6;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: #57f1d6;
+  --chart-2: #60a5fa;
+  --chart-3: #a78bfa;
+  --chart-4: #f472b6;
+  --chart-5: #fb923c;
+  --sidebar: #0C0C0D;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #57f1d6;
+  --sidebar-primary-foreground: #0C0C0D;
+  --sidebar-accent: #1a1a1b;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #57f1d6;
+  
+  /* TaTTTy Brand Colors */
+  --teal-echo-1: rgba(87, 241, 214, 0.8);
+  --teal-echo-2: rgba(87, 241, 214, 0.5);
+  --teal-echo-3: rgba(87, 241, 214, 0.3);
+  --teal-echo-shadow: 2px 2px 0px var(--teal-echo-1), 4px 4px 0px var(--teal-echo-2), 6px 6px 0px var(--teal-echo-3);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: hidden;
+    /* Screenshot protection - not foolproof but adds friction */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  html {
+    overflow-x: hidden;
+  }
+  
+  /* Allow text selection for inputs and textareas */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+  
+  /* Prevent right-click context menu on images */
+  img {
+    pointer-events: none;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+  }
+  
+  /* Allow pointer events on interactive elements */
+  button img,
+  a img {
+    pointer-events: auto;
+  }
+}
+
+/**
+ * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
+ */
+@layer base {
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+    h1 {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h4 {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    p {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+
+    label {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    button {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    input {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+  }
+}
+
+html {
+  font-size: var(--font-size);
+}
+
+/* Utility class for teal echo effect */
+.teal-echo {
+  text-shadow: var(--teal-echo-shadow);
+}
+
+/* === Output Type Buttons === */
+/* === removing default button style ===*/
+.output-type-button {
+  margin: 0;
+  height: auto;
+  background: transparent;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+}
+
+/* button styling */
+.output-type-button {
+  --border-right: 6px;
+  --text-stroke-color: rgba(255,255,255,0.6);
+  --animation-color: #57f1d6;
+  --fs-size: 2.5em;
+  letter-spacing: 3px;
+  text-decoration: none;
+  font-size: var(--fs-size);
+  font-family: "Arial";
+  position: relative;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--text-stroke-color);
+}
+
+/* this is the text, when you hover on button */
+.output-type-button .hover-text {
+  position: absolute;
+  box-sizing: border-box;
+  content: attr(data-text);
+  color: var(--animation-color);
+  width: 0%;
+  inset: 0;
+  border-right: var(--border-right) solid var(--animation-color);
+  overflow: hidden;
+  transition: 0.5s;
+  -webkit-text-stroke: 1px var(--animation-color);
+}
+
+/* hover */
+.output-type-button:hover .hover-text {
+  width: 100%;
+  filter: drop-shadow(0 0 23px var(--animation-color));
+}
+
+/* active state */
+.output-type-button[data-active="true"] .hover-text {
+  width: 100%;
+  filter: drop-shadow(0 0 23px var(--animation-color));
+}
+
+/* Visual Editor Styles */
+[data-editable="true"] {
+  transition: all 0.2s ease;
+}
+
+.edit-mode-active [data-editable="true"]:hover {
+  outline: 2px dashed #57f1d6;
+  outline-offset: 4px;
+  cursor: pointer;
+}
+
+.editor-selected {
+  outline: 3px solid #57f1d6 !important;
+  outline-offset: 4px;
+  box-shadow: 0 0 20px rgba(87, 241, 214, 0.4);
+  animation: pulse-outline 2s ease-in-out infinite;
+}
+
+@keyframes pulse-outline {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(87, 241, 214, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(87, 241, 214, 0.6);
+  }
+}
+
+.dragging {
+  opacity: 0.5;
+  cursor: grabbing !important;
+}
+
+.edit-mode-active [data-editable="true"] {
+  position: relative;
+}
+
+.edit-mode-active [data-editable="true"]::after {
+  content: '✎';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #57f1d6;
+  color: #0C0C0D;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.edit-mode-active [data-editable="true"]:hover::after {
+  opacity: 1;
+}
+
+/* Validation Error Animations */
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

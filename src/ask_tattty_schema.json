@@ -1,0 +1,200 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ask TaTTTy Schema - Simple",
+  "description": "Database schema for Ask TaTTTy feature - button click to SUBMIT",
+  "version": "1.0.0",
+  "scope": "Ask TaTTTy button → Enhance/Ideas → Display → SUBMIT button ONLY",
+  
+  "flow": {
+    "step_1": "User types in Q1/Q2 textarea (React state)",
+    "step_2": "User clicks 'Ask TaTTTy' button",
+    "step_3": "User selects 'Enhance My Text' or 'Give Me Ideas'",
+    "step_4": "Backend processes request (your Python AI)",
+    "step_5": "Backend calls log_ask_tattty_request() to track",
+    "step_6": "Result streams/displays in textarea (React state)",
+    "step_7": "User clicks 'SUBMIT' button (SaveChip component)",
+    "step_8": "Data saved to session storage (NOT database)"
+  },
+  
+  "what_this_tracks": [
+    "Every Ask TaTTTy API call",
+    "Input text (what user typed)",
+    "Output text (AI result)",
+    "Response time",
+    "Success/failure",
+    "Optional session ID for grouping"
+  ],
+  
+  "what_this_does_not_track": [
+    "Keys or licenses (not needed)",
+    "Payments (PayPal handles it)",
+    "User accounts (no login/logout)",
+    "Final generation (that's different)",
+    "IP addresses",
+    "User agents"
+  ],
+  
+  "tables": {
+    "ask_tattty_requests": {
+      "purpose": "Track every Ask TaTTTy API call from button click to result",
+      "when_logged": "After backend successfully processes enhance/ideas request",
+      "fields": {
+        "id": "UUID - Primary key",
+        "session_id": "VARCHAR(255) - Optional session identifier (can be NULL)",
+        "action_type": "VARCHAR(50) - 'enhance' or 'ideas'",
+        "input_text": "TEXT - Original text user typed",
+        "output_text": "TEXT - AI-enhanced result",
+        "input_char_count": "INTEGER - Length of input",
+        "output_char_count": "INTEGER - Length of output",
+        "response_time_ms": "INTEGER - Backend processing time",
+        "was_successful": "BOOLEAN - True if success, false if error",
+        "error_message": "TEXT - Error message if failed",
+        "created_at": "TIMESTAMP - When request was made"
+      },
+      "indexes": [
+        "idx_ask_tattty_action (action_type)",
+        "idx_ask_tattty_created (created_at DESC)",
+        "idx_ask_tattty_session (session_id WHERE session_id IS NOT NULL)"
+      ],
+      "analytics": {
+        "most_popular_action": "SELECT action_type, COUNT(*) FROM ask_tattty_requests GROUP BY action_type",
+        "average_response_time": "SELECT AVG(response_time_ms) FROM ask_tattty_requests WHERE was_successful = true",
+        "success_rate": "SELECT (COUNT(*) FILTER (WHERE was_successful = true)::float / COUNT(*)) * 100 FROM ask_tattty_requests",
+        "hourly_activity": "SELECT DATE_TRUNC('hour', created_at), COUNT(*) FROM ask_tattty_requests GROUP BY 1 ORDER BY 1 DESC"
+      }
+    },
+    
+    "ask_tattty_config": {
+      "purpose": "API configuration per environment (dev/staging/production)",
+      "fields": {
+        "id": "UUID - Primary key",
+        "environment": "VARCHAR(20) UNIQUE - 'development', 'staging', or 'production'",
+        "api_base_url": "VARCHAR(255) - Backend URL (http://localhost:8000 or https://api.tattty.com)",
+        "enhance_endpoint": "VARCHAR(100) - Default: '/api/ai/enhance'",
+        "ideas_endpoint": "VARCHAR(100) - Default: '/api/ai/ideas'",
+        "request_timeout_ms": "INTEGER - Default: 30000 (30 seconds)",
+        "min_characters": "INTEGER - Validation rule, default: 10",
+        "streaming_throttle_ms": "INTEGER - UI update throttle, default: 50",
+        "is_active": "BOOLEAN - Only one environment active at a time",
+        "created_at": "TIMESTAMP",
+        "updated_at": "TIMESTAMP"
+      },
+      "usage": "Frontend reads active config to know which API endpoint to call"
+    },
+    
+    "ask_tattty_content": {
+      "purpose": "UI labels and error messages (multi-language support)",
+      "fields": {
+        "id": "UUID - Primary key",
+        "language": "VARCHAR(10) UNIQUE - ISO 639-1 code (e.g., 'en', 'es', 'fr')",
+        "button_text": "VARCHAR(50) - Main button label, default: 'Ask TaTTTy'",
+        "loading_text": "VARCHAR(50) - Loading state, default: 'Thinking...'",
+        "enhance_button": "VARCHAR(50) - Enhance option, default: 'Enhance My Text'",
+        "ideas_button": "VARCHAR(50) - Ideas option, default: 'Give Me Ideas'",
+        "revert_button": "VARCHAR(50) - Revert button, default: 'Back'",
+        "re_enhance_button": "VARCHAR(50) - Re-enhance button, default: 'Redo'",
+        "revert_tooltip": "VARCHAR(200) - Tooltip for revert",
+        "re_enhance_tooltip": "VARCHAR(200) - Tooltip for re-enhance",
+        "empty_text_error": "VARCHAR(100) - Error when no text, default: 'Write Something First!'",
+        "text_too_short_error": "VARCHAR(100) - Error when too short, default: 'Add More Details!'",
+        "created_at": "TIMESTAMP",
+        "updated_at": "TIMESTAMP"
+      },
+      "usage": "Frontend reads content based on user's language preference"
+    }
+  },
+  
+  "functions": {
+    "log_ask_tattty_request": {
+      "purpose": "Log Ask TaTTTy API call with all details",
+      "when_to_call": "After backend successfully processes enhance/ideas request",
+      "parameters": {
+        "session_id_value": "VARCHAR - Session identifier (optional, can be NULL)",
+        "action": "VARCHAR - 'enhance' or 'ideas'",
+        "input": "TEXT - Original text user typed",
+        "output": "TEXT - AI-enhanced result",
+        "response_ms": "INTEGER - Backend processing time in milliseconds",
+        "is_successful": "BOOLEAN - True if success, false if error",
+        "err_msg": "TEXT - Error message (optional, NULL if success)"
+      },
+      "returns": "UUID - ID of inserted request record",
+      "example": "SELECT log_ask_tattty_request('session_abc123', 'enhance', 'dragon tattoo', 'A fierce dragon...', 1250, true, NULL);"
+    },
+    
+    "update_updated_at_column": {
+      "purpose": "Auto-update updated_at timestamp on row change",
+      "applied_to": ["ask_tattty_config", "ask_tattty_content"]
+    }
+  },
+  
+  "backend_integration": {
+    "language": "Python (or any backend)",
+    "when_user_clicks_ask_tattty": {
+      "step_1": "Frontend sends POST request to /api/ai/enhance or /api/ai/ideas",
+      "step_2": "Backend processes request with your AI",
+      "step_3": "Backend calls log_ask_tattty_request() to track",
+      "step_4": "Backend returns result to frontend (streaming or JSON)",
+      "step_5": "Frontend displays result in textarea"
+    },
+    "example_python_code": {
+      "description": "After processing AI request, log it to database",
+      "code": [
+        "import psycopg2",
+        "",
+        "# After AI processing completes",
+        "cursor.execute(",
+        "  \"SELECT log_ask_tattty_request(%s, %s, %s, %s, %s, %s, %s)\",",
+        "  (",
+        "    session_id,        # from frontend",
+        "    'enhance',         # or 'ideas'",
+        "    input_text,        # what user typed",
+        "    ai_result,         # AI output",
+        "    response_time_ms,  # how long it took",
+        "    True,              # was successful",
+        "    None               # no error",
+        "  )",
+        ")",
+        "conn.commit()"
+      ]
+    }
+  },
+  
+  "frontend_integration": {
+    "session_id_generation": {
+      "description": "Optional - generate session ID to group related requests",
+      "code": "const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;",
+      "usage": "Include in API request body so backend can log it"
+    },
+    "api_request_example": {
+      "endpoint": "POST /api/ai/enhance",
+      "body": {
+        "session_id": "session_1730745600_abc123",
+        "type": "enhance",
+        "contextType": "tattty",
+        "targetText": "dragon tattoo",
+        "hasSelection": false
+      },
+      "response": {
+        "result": "A fierce dragon with emerald scales soaring through storm clouds"
+      }
+    }
+  },
+  
+  "deployment": {
+    "step_1": "Create Neon PostgreSQL database",
+    "step_2": "Run ask_tattty_schema.sql in Neon SQL editor",
+    "step_3": "Verify tables: ask_tattty_requests, ask_tattty_config, ask_tattty_content",
+    "step_4": "Update ask_tattty_config.is_active for your environment",
+    "step_5": "Backend calls log_ask_tattty_request() after each API request",
+    "step_6": "Done! Check ask_tattty_requests table to see tracked activity"
+  },
+  
+  "analytics_queries": {
+    "total_requests_today": "SELECT COUNT(*) FROM ask_tattty_requests WHERE created_at > CURRENT_DATE",
+    "enhance_vs_ideas": "SELECT action_type, COUNT(*) FROM ask_tattty_requests GROUP BY action_type",
+    "average_response_time": "SELECT AVG(response_time_ms) FROM ask_tattty_requests WHERE was_successful = true",
+    "success_rate": "SELECT (COUNT(*) FILTER (WHERE was_successful = true)::float / COUNT(*)) * 100 FROM ask_tattty_requests",
+    "failed_requests": "SELECT * FROM ask_tattty_requests WHERE was_successful = false ORDER BY created_at DESC",
+    "busiest_hours": "SELECT DATE_TRUNC('hour', created_at) as hour, COUNT(*) FROM ask_tattty_requests WHERE created_at > NOW() - INTERVAL '7 days' GROUP BY hour ORDER BY count DESC LIMIT 10"
+  }
+}

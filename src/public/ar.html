@@ -1,0 +1,322 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #000;
+    }
+    #container { 
+      position: relative; 
+      width: 100vw; 
+      height: 100vh; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #videoElement { 
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #canvasElement { 
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #controls {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      z-index: 100;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 16px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #57f1d6;
+      border: 1px solid #57f1d6;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(10px);
+      letter-spacing: 0.5px;
+    }
+    .btn:hover {
+      background: rgba(87, 241, 214, 0.2);
+      box-shadow: 0 0 15px rgba(87, 241, 214, 0.4);
+    }
+    .btn.active {
+      background: #57f1d6;
+      color: #000;
+    }
+    #closeBtn {
+      margin-left: auto;
+      background: rgba(239, 68, 68, 0.9);
+      border-color: #ef4444;
+      color: white;
+    }
+    #closeBtn:hover {
+      background: rgba(239, 68, 68, 1);
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+    }
+    #loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #57f1d6;
+      font-size: 18px;
+      text-align: center;
+      z-index: 50;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px 30px;
+      border-radius: 12px;
+      border: 1px solid #57f1d6;
+    }
+    .spinner {
+      border: 3px solid rgba(87, 241, 214, 0.3);
+      border-top: 3px solid #57f1d6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div class="spinner"></div>
+    <div>Loading AR Experience...</div>
+  </div>
+
+  <div id="container">
+    <video id="videoElement" autoplay playsinline></video>
+    <canvas id="canvasElement"></canvas>
+  </div>
+
+  <div id="controls">
+    <button class="btn active" data-part="forearm-inner-left">Forearm (L)</button>
+    <button class="btn" data-part="forearm-inner-right">Forearm (R)</button>
+    <button class="btn" data-part="upper-arm-left">Upper Arm (L)</button>
+    <button class="btn" data-part="upper-arm-right">Upper Arm (R)</button>
+    <button class="btn" data-part="calf-left">Calf (L)</button>
+    <button class="btn" data-part="calf-right">Calf (R)</button>
+    <button id="closeBtn" class="btn">Close ✕</button>
+  </div>
+
+  <script>
+    console.log('[AR] Starting AR experience...');
+    
+    const params = new URLSearchParams(location.search);
+    const tattooSrc = params.get('tattoo');
+    
+    console.log('[AR] Tattoo data URL length:', tattooSrc ? tattooSrc.length : 0);
+    
+    if (!tattooSrc) {
+      console.error('[AR] No tattoo image provided in URL params');
+      alert('No tattoo image provided');
+      window.close();
+    }
+
+    const videoElement = document.getElementById('videoElement');
+    const canvasElement = document.getElementById('canvasElement');
+    const canvasCtx = canvasElement.getContext('2d');
+    const loading = document.getElementById('loading');
+    const closeBtn = document.getElementById('closeBtn');
+    
+    let selectedBodyPart = 'forearm-inner-left';
+    let tattooImage = null;
+    let poseDetector = null;
+
+    // BlazePose keypoint indices (33-point model)
+    const POSE_LANDMARKS = {
+      LEFT_SHOULDER: 11,
+      RIGHT_SHOULDER: 12,
+      LEFT_ELBOW: 13,
+      RIGHT_ELBOW: 14,
+      LEFT_WRIST: 15,
+      RIGHT_WRIST: 16,
+      LEFT_HIP: 23,
+      RIGHT_HIP: 24,
+      LEFT_KNEE: 25,
+      RIGHT_KNEE: 26,
+      LEFT_ANKLE: 27,
+      RIGHT_ANKLE: 28,
+    };
+
+    // Define body part mappings
+    const BODY_PARTS = {
+      'forearm-inner-left': { p1: POSE_LANDMARKS.LEFT_WRIST, p2: POSE_LANDMARKS.LEFT_ELBOW, scale: 0.15 },
+      'forearm-inner-right': { p1: POSE_LANDMARKS.RIGHT_WRIST, p2: POSE_LANDMARKS.RIGHT_ELBOW, scale: 0.15 },
+      'upper-arm-left': { p1: POSE_LANDMARKS.LEFT_ELBOW, p2: POSE_LANDMARKS.LEFT_SHOULDER, scale: 0.18 },
+      'upper-arm-right': { p1: POSE_LANDMARKS.RIGHT_ELBOW, p2: POSE_LANDMARKS.RIGHT_SHOULDER, scale: 0.18 },
+      'calf-left': { p1: POSE_LANDMARKS.LEFT_ANKLE, p2: POSE_LANDMARKS.LEFT_KNEE, scale: 0.2 },
+      'calf-right': { p1: POSE_LANDMARKS.RIGHT_ANKLE, p2: POSE_LANDMARKS.RIGHT_KNEE, scale: 0.2 },
+    };
+
+    // Load tattoo image
+    const img = new Image();
+    // Only set crossOrigin for external URLs, not data URLs
+    if (!tattooSrc.startsWith('data:')) {
+      img.crossOrigin = 'anonymous';
+    }
+    img.onload = () => {
+      tattooImage = img;
+      console.log('[AR] Tattoo image loaded:', img.width, 'x', img.height);
+    };
+    img.onerror = (e) => {
+      console.error('[AR] Failed to load tattoo image:', e);
+      alert('Failed to load tattoo image. The image may be too large or corrupted.');
+      loading.style.display = 'none';
+    };
+    console.log('[AR] Loading tattoo image...');
+    img.src = tattooSrc;
+
+    // Body part selection
+    document.querySelectorAll('.btn[data-part]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn[data-part]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedBodyPart = btn.dataset.part;
+      });
+    });
+
+    closeBtn.addEventListener('click', () => {
+      window.close();
+    });
+
+    // Initialize MediaPipe Pose
+    function initPose() {
+      const pose = new Pose({
+        locateFile: (file) => {
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+        }
+      });
+
+      pose.setOptions({
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        enableSegmentation: false,
+        smoothSegmentation: false,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+
+      pose.onResults(onPoseResults);
+      poseDetector = pose;
+
+      // Setup camera
+      const camera = new Camera(videoElement, {
+        onFrame: async () => {
+          if (poseDetector) {
+            await poseDetector.send({ image: videoElement });
+          }
+        },
+        width: 1280,
+        height: 720
+      });
+
+      camera.start();
+      
+      // Hide loading after camera starts
+      setTimeout(() => {
+        loading.style.display = 'none';
+      }, 1500);
+    }
+
+    // Process pose results and render tattoo
+    function onPoseResults(results) {
+      // Resize canvas to match video
+      canvasElement.width = videoElement.videoWidth;
+      canvasElement.height = videoElement.videoHeight;
+
+      // Clear canvas
+      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+      if (!results.poseLandmarks || !tattooImage) {
+        return;
+      }
+
+      const landmarks = results.poseLandmarks;
+      const bodyPart = BODY_PARTS[selectedBodyPart];
+      
+      if (!bodyPart) return;
+
+      const p1 = landmarks[bodyPart.p1];
+      const p2 = landmarks[bodyPart.p2];
+
+      if (!p1 || !p2) return;
+
+      // Convert normalized coordinates to canvas coordinates
+      const x1 = p1.x * canvasElement.width;
+      const y1 = p1.y * canvasElement.height;
+      const x2 = p2.x * canvasElement.width;
+      const y2 = p2.y * canvasElement.height;
+
+      // Calculate midpoint
+      const midX = (x1 + x2) / 2;
+      const midY = (y1 + y2) / 2;
+
+      // Calculate direction vector and angle
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const angle = Math.atan2(dy, dx);
+      const distance = Math.hypot(dx, dy);
+
+      // Scale tattoo based on limb length
+      const tattooWidth = distance * bodyPart.scale;
+      const tattooHeight = tattooWidth * (tattooImage.height / tattooImage.width);
+
+      // Draw tattoo with rotation
+      canvasCtx.save();
+      canvasCtx.translate(midX, midY);
+      canvasCtx.rotate(angle);
+      canvasCtx.globalAlpha = 0.85; // Slight transparency for realism
+      canvasCtx.drawImage(
+        tattooImage,
+        -tattooWidth / 2,
+        -tattooHeight / 2,
+        tattooWidth,
+        tattooHeight
+      );
+      canvasCtx.restore();
+
+      // Optional: Draw debug points
+      if (false) { // Set to true for debugging
+        canvasCtx.fillStyle = '#57f1d6';
+        canvasCtx.beginPath();
+        canvasCtx.arc(x1, y1, 5, 0, 2 * Math.PI);
+        canvasCtx.arc(x2, y2, 5, 0, 2 * Math.PI);
+        canvasCtx.fill();
+      }
+    }
+
+    // Start everything
+    initPose();
+  </script>
+</body>
+</html>

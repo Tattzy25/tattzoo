@@ -1,0 +1,30 @@
+.card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, hsla(169, 85%, 64%, 0.12), hsla(169, 85%, 64%, 0.05));
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+}
+
+.title {
+  text-shadow: 0 0 30px rgba(87, 241, 214, 0.6), 2px 2px 6px rgba(0, 0, 0, 0.9);
+  letter-spacing: 3px;
+}
+
+.price {
+  text-shadow: 0 0 25px rgba(87, 241, 214, 0.6);
+}
+
+.iconContainer {
+  background: linear-gradient(135deg, rgba(87, 241, 214, 0.25), rgba(87, 241, 214, 0.1));
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #57f1d6, #3dd5c0);
+  color: #0C0C0D;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  text-shadow: none;
+}
+
+.secondaryButton {
+  color: #57f1d6;
+}

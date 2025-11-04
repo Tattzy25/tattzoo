@@ -1,0 +1,109 @@
+# Node
+node_modules/
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Build outputs
+dist/
+build/
+.vite/
+.cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Dependency directories
+.pnp/
+.pnp.js
+
+# Optional npm cache directory
+.npm/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment files
+.env
+.env.*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Misc
+*.local
+*.log
+*.sql
+
+# Yarn v2/v3
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Storybook
+out/
+
+# JetBrains
+*.iml
+
+# Parcel
+.cache/
+
+# ESLint cache
+.eslintcache
+
+# Jest
+jest.cache
+
+# Next / other frameworks (safe to ignore if not used)
+.next/
+.nuxt/
+
+# Lockfiles: usually committed (commented out). Uncomment only if you specifically want to ignore them
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Large binary/media that may have been added accidentally
+*.psd
+*.ai
+*.sketch
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+*.mov
+
+# Windows PowerShell history
+ConsoleHost_history.txt
+
+# Coverage reports
+coverage/
+
+# VS Code workspace storage
+.vscode-server/
+
+# Local build artifacts
+out-tsc/
+
+# End of file
