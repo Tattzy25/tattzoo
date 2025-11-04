@@ -23,8 +23,12 @@ import os
 import logging
 from typing import List, Optional
 from dotenv import load_dotenv
-from pydantic import BaseSettings, Field, validator
-from pydantic.types import SecretStr
+try:
+    from pydantic.v1 import BaseSettings, Field, validator
+    from pydantic.v1.types import SecretStr
+except ImportError:
+    from pydantic import BaseSettings, Field, validator
+    from pydantic.types import SecretStr
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -108,6 +112,13 @@ class Settings(BaseSettings):
         ge=0
     )
     
+    # Database Configuration
+    DATABASE_URL: str = Field(
+        default="",
+        description="PostgreSQL database connection URL",
+        env="DATABASE_URL"
+    )
+    
     # System Prompts (not environment-configurable as they are static content)
     ENHANCE_SYSTEM_PROMPT: str = """You are a tattoo design expert specializing in text enhancement. 
 Your task is to take a user's tattoo description and improve it to be more descriptive, 
@@ -128,7 +139,7 @@ multiple creative tattoo ideas. Focus on:
 - Ensure diversity in styles and approaches"""
     
     class Config:
-        env_file = ".env"
+        env_file = ".env.local"
         env_file_encoding = "utf-8"
         case_sensitive = False
         

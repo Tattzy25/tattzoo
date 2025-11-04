@@ -4,10 +4,15 @@ Main FastAPI application for Tattty Backend
 This is the entry point for the Tattty tattoo generator backend API.
 It orchestrates all routers and middleware for the application.
 """
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config.settings import settings
 from routers import ai_router, health_router
+from db.database import init_database
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
@@ -36,6 +41,13 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(health_router.router)
     app.include_router(ai_router.router)
+    
+    # Initialize database connection
+    try:
+        init_database()
+        logger.info("✅ Database initialization completed")
+    except Exception as e:
+        logger.warning(f"⚠️ Database initialization skipped: {e}")
     
     return app
 
