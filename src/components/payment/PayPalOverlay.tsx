@@ -14,6 +14,7 @@ interface PayPalOverlayProps {
 }
 
 export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentError, inline = false }: PayPalOverlayProps) {
+  const BACKEND_API_URL = (import.meta as any)?.env?.VITE_BACKEND_API_URL || 'http://localhost:8000';
   const [email, setEmail] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
@@ -141,11 +142,49 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
       return;
     }
     
-    // MOCK: Generate a license key (in production, this comes from backend)
-    const mockLicenseKey = generateMockKey();
-    
-    // Trigger success callback (parent handles loading state)
-    onPaymentSuccess(email, mockLicenseKey);
+    // Request license issuance from backend
+    try {
+      const resp = await fetch(`${BACKEND_API_URL}/api/key/issue`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text();
+        onPaymentError('License issuance failed', `HTTP ${resp.status}: ${text}`);
+        // Reset form
+        setEmail('');
+        setCardNumber('');
+        setExpiry('');
+        setCvv('');
+        return;
+      }
+
+      const data = await resp.json();
+      const issuedKey = data?.key || data?.licenseKey || '';
+      if (!issuedKey) {
+        onPaymentError('License issuance failed', 'Backend returned no key');
+        // Reset form
+        setEmail('');
+        setCardNumber('');
+        setExpiry('');
+        setCvv('');
+        return;
+      }
+
+      // Trigger success callback with real issued key
+      onPaymentSuccess(email, issuedKey);
+    } catch (err: any) {
+      onPaymentError('License issuance failed', err?.message || 'Network error');
+      // Reset form
+      setEmail('');
+      setCardNumber('');
+      setExpiry('');
+      setCvv('');
+      return;
+    }
     
     // Reset form
     setEmail('');
@@ -154,15 +193,7 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
     setCvv('');
   };
 
-  // Mock key generator for demo
-  const generateMockKey = (): string => {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    const segment = () => Array.from({ length: 4 }, () => 
-      chars.charAt(Math.floor(Math.random() * chars.length))
-    ).join('');
-    
-    return `TATY-${segment()}-${segment()}-${segment()}`;
-  };
+  // (Removed mock key generator; keys now issued by backend)
 
   // Format card number with spaces
   const handleCardNumberChange = (value: string) => {

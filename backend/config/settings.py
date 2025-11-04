@@ -111,12 +111,36 @@ class Settings(BaseSettings):
         env="STREAMING_THROTTLE_MS",
         ge=0
     )
-    
+
     # Database Configuration
     DATABASE_URL: str = Field(
         default="",
         description="PostgreSQL database connection URL",
         env="DATABASE_URL"
+    )
+
+    # Key Management Configuration
+    KEY_PREFIX: str = Field(
+        default="TZY",
+        description="Prefix for generated license keys",
+        env="KEY_PREFIX"
+    )
+    IMAGES_DAILY_CAP: int = Field(
+        default=20,
+        description="Daily cap for image generations per key",
+        env="IMAGES_DAILY_CAP",
+        ge=1
+    )
+    AR_VIEWS_DAILY_CAP: int = Field(
+        default=20,
+        description="Daily cap for AR views per key",
+        env="AR_VIEWS_DAILY_CAP",
+        ge=1
+    )
+    EMAIL_FINGERPRINT_SALT: str = Field(
+        default="change-me",
+        description="Secret salt for HMAC email fingerprinting",
+        env="EMAIL_FINGERPRINT_SALT"
     )
     
     # System Prompts (not environment-configurable as they are static content)

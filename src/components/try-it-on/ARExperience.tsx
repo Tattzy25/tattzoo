@@ -6,6 +6,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
+import { useLicense } from '../../contexts/LicenseContext';
 
 interface ARExperienceProps {
   tattooDataUrl: string;
@@ -53,6 +54,7 @@ export function ARExperience({ tattooDataUrl, onClose }: ARExperienceProps) {
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const hasInitializedRef = useRef<boolean>(false);
+  const { trackArView, isVerified } = useLicense();
 
   // Load tattoo image
   useEffect(() => {
@@ -216,6 +218,11 @@ export function ARExperience({ tattooDataUrl, onClose }: ARExperienceProps) {
 
         detectPose();
         setIsLoading(false);
+
+        // Track AR view usage after successful initialization
+        if (isVerified) {
+          trackArView();
+        }
         
         // Hide instructions after 5 seconds
         setTimeout(() => setShowInstructions(false), 5000);

@@ -8,8 +8,8 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config.settings import settings
-from routers import ai_router, health_router
-from db.database import init_database
+from routers import ai_router, health_router, key_router
+from db.database_asyncpg import init_database
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -41,6 +41,7 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(health_router.router)
     app.include_router(ai_router.router)
+    app.include_router(key_router.router)
     
     # Initialize database connection
     try:

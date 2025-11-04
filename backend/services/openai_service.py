@@ -28,7 +28,8 @@ class OpenAIService:
         if selection_info:
             user_prompt += f"\nSelection context: {selection_info}"
         
-        return await self._call_openai_api(settings.ENHANCE_SYSTEM_PROMPT, user_prompt)
+        async for chunk in self._call_openai_api(settings.ENHANCE_SYSTEM_PROMPT, user_prompt):
+            yield chunk
     
     async def generate_ideas(self, text: str, selection_info: str = None) -> AsyncGenerator[str, None]:
         """
@@ -45,7 +46,8 @@ class OpenAIService:
         if selection_info:
             user_prompt += f"\nSelection context: {selection_info}"
         
-        return await self._call_openai_api(settings.IDEAS_SYSTEM_PROMPT, user_prompt)
+        async for chunk in self._call_openai_api(settings.IDEAS_SYSTEM_PROMPT, user_prompt):
+            yield chunk
     
     async def _call_openai_api(
         self, 
@@ -63,7 +65,7 @@ class OpenAIService:
             Response text chunks
         """
         try:
-            response = await openai.chat.completions.create(
+            response = openai.chat.completions.create(
                 model=settings.OPENAI_MODEL,
                 messages=[
                     {"role": "system", "content": system_prompt},

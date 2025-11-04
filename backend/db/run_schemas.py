@@ -33,6 +33,10 @@ def get_database_url():
         # Try alternative environment variables
         database_url = os.environ.get('POSTGRES_URL')
     
+    # Normalize SQLAlchemy-style URLs for asyncpg
+    if database_url and database_url.startswith('postgresql+asyncpg://'):
+        database_url = database_url.replace('postgresql+asyncpg://', 'postgresql://', 1)
+
     if not database_url:
         print("❌ DATABASE_URL environment variable is not set")
         print("Please ensure DATABASE_URL is set in your .env file")
@@ -98,6 +102,7 @@ async def main():
     
     # Recommended execution order (you can adjust this based on dependencies)
     execution_order = [
+        'key_management_schema.sql',
         'ask_tattty_schema.sql',
         'tattoo_styles_schema.sql', 
         'tattoo_moods_schema.sql',

@@ -1,5 +1,5 @@
 
-  # TaTTTy — Comprehensive README
+# TaTTTy — Comprehensive README
 
   ## Project snapshot — what this is about
   TaTTTy is a Vite + React single-page app (TypeScript) that helps users generate tattoo concepts and preview them using an AR "Try It On" experience. Key capabilities:
@@ -180,6 +180,29 @@
   2. Move static content from `src/data/` to API endpoints and fetch at app init.
   3. Implement server-side license verification for production.
   4. If you have a large tracked folder (e.g., `node_modules`), run the preview commands above and then apply the `git rm --cached` + commit sequence when ready.
+
+  ---
+
+  ## Database Schema Files
+
+  The project includes PostgreSQL database schema files located in `backend/neon_db/`:
+
+  - `ask_tattty` - Main Ask TaTTTy API request tracking and configuration
+  - `frontend_database_schema` - Frontend-specific UI content and user preferences
+  - `skin_tones` - Skin tone reference data for tattoo visualization
+  - `tattoo_colors` - Tattoo color palette and options
+  - `tattoo_moods` - Mood/thematic categories for tattoo generation
+  - `tattoo_placements` - Body placement locations for tattoos
+  - `tattoo_sizes` - Size options and dimensions for tattoos
+  - `tattoo_styles` - Artistic style categories for tattoos
+
+  These files contain complete PostgreSQL-compatible SQL schemas with:
+  - Table definitions with proper constraints and indexes
+  - Sample data for development and testing
+  - Functions and triggers for automated operations
+  - Multi-language support for UI content
+
+  To execute these schemas against a PostgreSQL database, use the `run_schemas.py` script in the `backend/db/` directory.
 
   ---
 

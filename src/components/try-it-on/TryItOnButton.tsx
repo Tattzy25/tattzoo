@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Scan } from 'lucide-react';
 import { ARExperience } from './ARExperience';
+import { useLicense } from '../../contexts/LicenseContext';
 
 interface TryItOnButtonProps {
   imageDataUrl: string;
@@ -12,6 +13,7 @@ export function TryItOnButton({
   const [showAR, setShowAR] = useState(false);
   const [arKey, setArKey] = useState(0); // Force remount with key
   const isEmbedded = window.self !== window.top;
+  const { isVerified } = useLicense();
   
   useEffect(() => {
     console.log('[TryItOn] 🎬 TryItOnButton mounted');
@@ -22,6 +24,12 @@ export function TryItOnButton({
   }, [isEmbedded]);
   
   const handleClick = () => {
+    // Require license verification for AR usage
+    if (!isVerified) {
+      alert('🔒 Please enter your license key to use the AR camera.');
+      return;
+    }
+
     if (!imageDataUrl) {
       console.error('[TryItOn] No image data URL provided');
       alert('Unable to load tattoo image. Please try generating again.');

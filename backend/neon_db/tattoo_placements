@@ -1,0 +1,129 @@
+-- ============================================================================
+-- Tattoo Placements
+-- ============================================================================
+
+-- Drop existing table if it exists
+DROP TABLE IF EXISTS tattoo_placements CASCADE;
+
+-- Create tattoo_placements table
+CREATE TABLE tattoo_placements (
+    id SERIAL PRIMARY KEY,
+    placement_name VARCHAR(100) NOT NULL UNIQUE,
+    slug VARCHAR(100) NOT NULL UNIQUE,
+    body_area VARCHAR(50) NOT NULL,
+    body_side VARCHAR(20) DEFAULT 'both',
+    description TEXT,
+    pain_level INTEGER DEFAULT 3 CHECK (pain_level BETWEEN 1 AND 10),
+    visibility_level INTEGER DEFAULT 5 CHECK (visibility_level BETWEEN 1 AND 10),
+    popularity_rank INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index for faster lookups
+CREATE INDEX idx_tattoo_placements_slug ON tattoo_placements(slug);
+CREATE INDEX idx_tattoo_placements_body_area ON tattoo_placements(body_area);
+CREATE INDEX idx_tattoo_placements_pain_level ON tattoo_placements(pain_level);
+CREATE INDEX idx_tattoo_placements_visibility ON tattoo_placements(visibility_level);
+CREATE INDEX idx_tattoo_placements_popularity ON tattoo_placements(popularity_rank);
+CREATE INDEX idx_tattoo_placements_active ON tattoo_placements(is_active);
+
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to automatically update updated_at
+CREATE TRIGGER trigger_tattoo_placements_updated_at
+    BEFORE UPDATE ON tattoo_placements
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Insert tattoo placements data
+INSERT INTO tattoo_placements (placement_name, slug, body_area, body_side, description, pain_level, visibility_level, popularity_rank) VALUES
+('Ankle', 'ankle', 'leg', 'both', 'Around the ankle bone', 6, 7, 8),
+('Armband', 'armband', 'arm', 'both', 'Band around the upper arm', 4, 8, 12),
+('Back', 'back', 'torso', 'center', 'Large area of the back', 5, 3, 6),
+('Back of Neck', 'back-of-neck', 'neck', 'center', 'Nape of the neck', 7, 6, 15),
+('Bicep', 'bicep', 'arm', 'both', 'Front of the upper arm', 3, 7, 4),
+('Calf', 'calf', 'leg', 'both', 'Back of the lower leg', 4, 6, 9),
+('Chest', 'chest', 'torso', 'center', 'Center of the chest', 6, 5, 7),
+('Collarbone', 'collarbone', 'torso', 'both', 'Along the collarbone', 8, 6, 16),
+('Finger', 'finger', 'hand', 'both', 'On fingers', 8, 9, 20),
+('Foot', 'foot', 'foot', 'both', 'Top or side of the foot', 9, 8, 18),
+('Forearm', 'forearm', 'arm', 'both', 'Front of the lower arm', 4, 8, 3),
+('Full Back', 'full-back', 'torso', 'center', 'Entire back area', 6, 3, 13),
+('Full Sleeve', 'full-sleeve', 'arm', 'both', 'Arm from shoulder to wrist', 5, 9, 5),
+('Hand', 'hand', 'hand', 'both', 'Back of the hand', 8, 10, 19),
+('Hip', 'hip', 'torso', 'both', 'Side of the hip', 5, 4, 14),
+('Inner Arm', 'inner-arm', 'arm', 'both', 'Inside of the arm', 7, 4, 17),
+('Inner Bicep', 'inner-bicep', 'arm', 'both', 'Inside of the upper arm', 7, 3, 21),
+('Inner Wrist', 'inner-wrist', 'arm', 'both', 'Inside of the wrist', 7, 5, 22),
+('Knuckles', 'knuckles', 'hand', 'both', 'Across the knuckles', 9, 10, 23),
+('Lower Back', 'lower-back', 'torso', 'center', 'Small of the back', 5, 4, 11),
+('Neck', 'neck', 'neck', 'both', 'Side of the neck', 8, 9, 24),
+('Rib Cage', 'rib-cage', 'torso', 'both', 'Side of the rib cage', 9, 4, 25),
+('Shoulder', 'shoulder', 'arm', 'both', 'Shoulder cap', 4, 6, 10),
+('Side', 'side', 'torso', 'both', 'Side of the torso', 8, 3, 26),
+('Side of Neck', 'side-of-neck', 'neck', 'both', 'Side of the neck', 8, 9, 27),
+('Sternum', 'sternum', 'torso', 'center', 'Center of the chest between breasts', 8, 5, 28),
+('Stomach', 'stomach', 'torso', 'center', 'Abdominal area', 7, 4, 29),
+('Thigh', 'thigh', 'leg', 'both', 'Front or side of the thigh', 5, 5, 2),
+('Throat', 'throat', 'neck', 'center', 'Front of the neck', 9, 10, 30),
+('Upper Arm', 'upper-arm', 'arm', 'both', 'Upper part of the arm', 4, 7, 1),
+('Upper Back', 'upper-back', 'torso', 'center', 'Upper portion of the back', 5, 3, 31),
+('Wrist', 'wrist', 'arm', 'both', 'Around the wrist', 6, 8, 32)
+ON CONFLICT (placement_name) DO UPDATE SET
+    slug = EXCLUDED.slug,
+    body_area = EXCLUDED.body_area,
+    body_side = EXCLUDED.body_side,
+    description = EXCLUDED.description,
+    pain_level = EXCLUDED.pain_level,
+    visibility_level = EXCLUDED.visibility_level,
+    popularity_rank = EXCLUDED.popularity_rank,
+    updated_at = CURRENT_TIMESTAMP;
+
+-- Create a view for active placements
+CREATE OR REPLACE VIEW active_tattoo_placements AS
+SELECT id, placement_name, slug, body_area, body_side, description, pain_level, visibility_level, popularity_rank, created_at, updated_at
+FROM tattoo_placements
+WHERE is_active = TRUE
+ORDER BY popularity_rank ASC, placement_name ASC;
+
+-- Create a view for placements by body area
+CREATE OR REPLACE VIEW tattoo_placements_by_area AS
+SELECT 
+    body_area,
+    COUNT(*) as placement_count,
+    ARRAY_AGG(placement_name ORDER BY popularity_rank) as placements
+FROM tattoo_placements
+WHERE is_active = TRUE
+GROUP BY body_area
+ORDER BY body_area;
+
+-- Create a view for placements by pain level
+CREATE OR REPLACE VIEW tattoo_placements_by_pain AS
+SELECT 
+    pain_level,
+    COUNT(*) as placement_count,
+    ARRAY_AGG(placement_name ORDER BY popularity_rank) as placements
+FROM tattoo_placements
+WHERE is_active = TRUE
+GROUP BY pain_level
+ORDER BY pain_level DESC;
+
+-- Create a view for placements by visibility
+CREATE OR REPLACE VIEW tattoo_placements_by_visibility AS
+SELECT 
+    visibility_level,
+    COUNT(*) as placement_count,
+    ARRAY_AGG(placement_name ORDER BY popularity_rank) as placements
+FROM tattoo_placements
+WHERE is_active = TRUE
+GROUP BY visibility_level
+ORDER BY visibility_level DESC;

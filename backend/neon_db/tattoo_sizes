@@ -1,0 +1,141 @@
+-- ============================================================================
+-- Tattoo Sizes
+-- ============================================================================
+
+-- Drop existing table if it exists
+DROP TABLE IF EXISTS tattoo_sizes CASCADE;
+
+-- Create tattoo_sizes table
+CREATE TABLE tattoo_sizes (
+    id SERIAL PRIMARY KEY,
+    size_name VARCHAR(100) NOT NULL UNIQUE,
+    slug VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    min_width_cm DECIMAL(5,2) DEFAULT 0.0,
+    max_width_cm DECIMAL(5,2) DEFAULT 0.0,
+    min_height_cm DECIMAL(5,2) DEFAULT 0.0,
+    max_height_cm DECIMAL(5,2) DEFAULT 0.0,
+    approximate_time_minutes INTEGER DEFAULT 0,
+    approximate_cost_low DECIMAL(10,2) DEFAULT 0.0,
+    approximate_cost_high DECIMAL(10,2) DEFAULT 0.0,
+    complexity_level INTEGER DEFAULT 3 CHECK (complexity_level BETWEEN 1 AND 5),
+    popularity_rank INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index for faster lookups
+CREATE INDEX idx_tattoo_sizes_slug ON tattoo_sizes(slug);
+CREATE INDEX idx_tattoo_sizes_complexity ON tattoo_sizes(complexity_level);
+CREATE INDEX idx_tattoo_sizes_popularity ON tattoo_sizes(popularity_rank);
+CREATE INDEX idx_tattoo_sizes_active ON tattoo_sizes(is_active);
+CREATE INDEX idx_tattoo_sizes_dimensions ON tattoo_sizes(min_width_cm, max_width_cm, min_height_cm, max_height_cm);
+
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to automatically update updated_at
+CREATE TRIGGER trigger_tattoo_sizes_updated_at
+    BEFORE UPDATE ON tattoo_sizes
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Insert tattoo sizes data
+INSERT INTO tattoo_sizes (size_name, slug, description, min_width_cm, max_width_cm, min_height_cm, max_height_cm, approximate_time_minutes, approximate_cost_low, approximate_cost_high, complexity_level, popularity_rank) VALUES
+('Extra Small', 'extra-small', 'Very small, delicate tattoos', 0.5, 2.0, 0.5, 2.0, 30, 50.00, 150.00, 2, 5),
+('Small', 'small', 'Small tattoos, good for first tattoos or subtle placements', 2.1, 5.0, 2.1, 5.0, 60, 100.00, 300.00, 2, 4),
+('Medium', 'medium', 'Medium-sized tattoos with more detail', 5.1, 10.0, 5.1, 10.0, 120, 200.00, 600.00, 3, 3),
+('Large', 'large', 'Large tattoos covering significant area', 10.1, 20.0, 10.1, 20.0, 240, 400.00, 1200.00, 4, 2),
+('Extra Large', 'extra-large', 'Very large tattoos, often covering entire limbs or large body areas', 20.1, 50.0, 20.1, 50.0, 480, 800.00, 2500.00, 5, 6),
+('Mini', 'mini', 'Tiny, minimalist tattoos', 0.1, 1.0, 0.1, 1.0, 15, 30.00, 80.00, 1, 1),
+('Palm-sized', 'palm-sized', 'About the size of a palm', 8.0, 12.0, 8.0, 12.0, 180, 300.00, 800.00, 3, 7),
+('Forearm-length', 'forearm-length', 'Length of a forearm', 25.0, 35.0, 5.0, 10.0, 360, 600.00, 1800.00, 4, 8),
+('Full Sleeve', 'full-sleeve', 'Covers entire arm from shoulder to wrist', 40.0, 50.0, 15.0, 25.0, 1200, 2000.00, 5000.00, 5, 9),
+('Half Sleeve', 'half-sleeve', 'Covers half of the arm', 20.0, 30.0, 15.0, 20.0, 600, 1000.00, 2500.00, 4, 10),
+('Back Piece', 'back-piece', 'Large tattoo covering most of the back', 40.0, 60.0, 30.0, 50.0, 1800, 3000.00, 8000.00, 5, 11),
+('Chest Piece', 'chest-piece', 'Tattoo covering the chest area', 25.0, 40.0, 15.0, 25.0, 900, 1500.00, 4000.00, 5, 12),
+('Thigh Piece', 'thigh-piece', 'Large tattoo covering the thigh', 25.0, 40.0, 20.0, 30.0, 900, 1500.00, 4000.00, 4, 13),
+('Calf Piece', 'calf-piece', 'Tattoo covering the calf', 20.0, 30.0, 15.0, 20.0, 600, 1000.00, 2500.00, 4, 14),
+('Rib Panel', 'rib-panel', 'Vertical tattoo on the rib cage', 15.0, 25.0, 20.0, 30.0, 720, 1200.00, 3000.00, 4, 15),
+('Necklace', 'necklace', 'Tattoo that wraps around the neck like a necklace', 30.0, 40.0, 2.0, 5.0, 300, 500.00, 1500.00, 3, 16),
+('Ankle Band', 'ankle-band', 'Tattoo that wraps around the ankle', 15.0, 20.0, 2.0, 4.0, 120, 200.00, 600.00, 2, 17),
+('Wrist Band', 'wrist-band', 'Tattoo that wraps around the wrist', 12.0, 18.0, 2.0, 4.0, 90, 150.00, 450.00, 2, 18),
+('Finger', 'finger', 'Tattoo on a finger', 1.0, 3.0, 0.5, 1.5, 20, 40.00, 100.00, 2, 19),
+('Hand', 'hand', 'Tattoo on the back of the hand', 8.0, 12.0, 6.0, 10.0, 180, 300.00, 800.00, 4, 20),
+('Foot', 'foot', 'Tattoo on the top of the foot', 10.0, 15.0, 6.0, 8.0, 150, 250.00, 700.00, 3, 21),
+('Shoulder Cap', 'shoulder-cap', 'Tattoo covering the shoulder', 12.0, 18.0, 12.0, 18.0, 240, 400.00, 1200.00, 3, 22),
+('Collarbone', 'collarbone', 'Tattoo along the collarbone', 15.0, 25.0, 2.0, 4.0, 120, 200.00, 600.00, 3, 23),
+('Behind Ear', 'behind-ear', 'Small tattoo behind the ear', 2.0, 4.0, 2.0, 4.0, 45, 75.00, 200.00, 2, 24),
+('Nape of Neck', 'nape-of-neck', 'Tattoo on the back of the neck', 5.0, 10.0, 3.0, 6.0, 90, 150.00, 450.00, 2, 25)
+ON CONFLICT (size_name) DO UPDATE SET
+    slug = EXCLUDED.slug,
+    description = EXCLUDED.description,
+    min_width_cm = EXCLUDED.min_width_cm,
+    max_width_cm = EXCLUDED.max_width_cm,
+    min_height_cm = EXCLUDED.min_height_cm,
+    max_height_cm = EXCLUDED.max_height_cm,
+    approximate_time_minutes = EXCLUDED.approximate_time_minutes,
+    approximate_cost_low = EXCLUDED.approximate_cost_low,
+    approximate_cost_high = EXCLUDED.approximate_cost_high,
+    complexity_level = EXCLUDED.complexity_level,
+    popularity_rank = EXCLUDED.popularity_rank,
+    updated_at = CURRENT_TIMESTAMP;
+
+-- Create a view for active sizes
+CREATE OR REPLACE VIEW active_tattoo_sizes AS
+SELECT id, size_name, slug, description, min_width_cm, max_width_cm, min_height_cm, max_height_cm, approximate_time_minutes, approximate_cost_low, approximate_cost_high, complexity_level, popularity_rank, created_at, updated_at
+FROM tattoo_sizes
+WHERE is_active = TRUE
+ORDER BY popularity_rank ASC, size_name ASC;
+
+-- Create a view for sizes by complexity
+CREATE OR REPLACE VIEW tattoo_sizes_by_complexity AS
+SELECT 
+    complexity_level,
+    COUNT(*) as size_count,
+    ARRAY_AGG(size_name ORDER BY popularity_rank) as sizes
+FROM tattoo_sizes
+WHERE is_active = TRUE
+GROUP BY complexity_level
+ORDER BY complexity_level;
+
+-- Create a view for size categories
+CREATE OR REPLACE VIEW tattoo_size_categories AS
+SELECT 
+    CASE 
+        WHEN max_width_cm <= 5.0 THEN 'Small'
+        WHEN max_width_cm <= 15.0 THEN 'Medium' 
+        WHEN max_width_cm <= 30.0 THEN 'Large'
+        ELSE 'Extra Large'
+    END as size_category,
+    COUNT(*) as size_count,
+    ARRAY_AGG(size_name ORDER BY popularity_rank) as sizes
+FROM tattoo_sizes
+WHERE is_active = TRUE
+GROUP BY 
+    CASE 
+        WHEN max_width_cm <= 5.0 THEN 'Small'
+        WHEN max_width_cm <= 15.0 THEN 'Medium' 
+        WHEN max_width_cm <= 30.0 THEN 'Large'
+        ELSE 'Extra Large'
+    END
+ORDER BY size_category;
+
+-- Create a view for approximate pricing ranges
+CREATE OR REPLACE VIEW tattoo_size_pricing AS
+SELECT 
+    size_name,
+    approximate_cost_low,
+    approximate_cost_high,
+    ROUND((approximate_cost_low + approximate_cost_high) / 2, 2) as average_cost,
+    approximate_time_minutes
+FROM tattoo_sizes
+WHERE is_active = TRUE
+ORDER BY average_cost ASC;

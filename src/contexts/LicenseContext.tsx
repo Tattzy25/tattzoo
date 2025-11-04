@@ -26,6 +26,7 @@ interface LicenseContextValue {
   canGenerate: () => boolean;
   getRemainingGenerations: () => number;
   trackGeneration: () => void;
+  trackArView: () => void;
   getResetTime: () => Date | null;
 }
 
@@ -33,6 +34,7 @@ const LicenseContext = createContext<LicenseContextValue | undefined>(undefined)
 
 const STORAGE_KEY = 'tatty_license';
 const MAX_GENERATIONS_PER_HOUR = 3;
+const BACKEND_API_URL = (import.meta as any)?.env?.VITE_BACKEND_API_URL || 'http://localhost:8000';
 
 export function LicenseProvider({ children }: { children: ReactNode }) {
   const [license, setLicense] = useState<LicenseData | null>(null);
@@ -61,29 +63,51 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
   }, [license]);
 
   const verifyLicense = async (key: string, email: string): Promise<boolean> => {
-    // Frontend-only validation
-    // In production, this would call an API endpoint to verify against database
-    
-    // Simple format validation
+    // Basic input format validation before network call
     const keyPattern = /^TATY-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
     if (!keyPattern.test(key) || !emailPattern.test(email)) {
       return false;
     }
 
-    // Successful verification
-    const newLicense: LicenseData = {
-      key,
-      email,
-      verified: true,
-      usageCount: 0,
-      windowStart: null,
-      totalGenerated: 0,
-    };
+    // Call backend to validate license status
+    try {
+      const response = await fetch(`${BACKEND_API_URL}/api/key/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, email }),
+        signal: AbortSignal.timeout(8000),
+      });
 
-    setLicense(newLicense);
-    return true;
+      if (!response.ok) {
+        console.error('License validation failed:', response.status, response.statusText);
+        return false;
+      }
+
+      const data = await response.json();
+      // Accept a variety of possible response shapes
+      const isValid = data?.valid ?? data?.ok ?? data?.status === 'valid';
+      const isActive = data?.active ?? true; // default true if not provided
+
+      if (!isValid || isActive === false) {
+        return false;
+      }
+
+      const newLicense: LicenseData = {
+        key,
+        email,
+        verified: true,
+        usageCount: 0,
+        windowStart: null,
+        totalGenerated: 0,
+      };
+
+      setLicense(newLicense);
+      return true;
+    } catch (err) {
+      console.error('Network error during license validation:', err);
+      return false;
+    }
   };
 
   const clearLicense = () => {
@@ -126,15 +150,31 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
     return Math.max(0, MAX_GENERATIONS_PER_HOUR - license.usageCount);
   };
 
-  const trackGeneration = () => {
+  const recordUsage = (action: 'image' | 'ar') => {
     if (!license) return;
+    // Fire-and-forget backend usage call; UI relies on local counter for immediate feedback
+    try {
+      void fetch(`${BACKEND_API_URL}/api/key/use`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: license.key, email: license.email, action }),
+        signal: AbortSignal.timeout(8000),
+      }).then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          console.warn('Usage tracking failed:', res.status, text);
+        }
+      }).catch((err) => {
+        console.warn('Usage tracking network error:', err);
+      });
+    } catch (err) {
+      console.warn('Usage tracking error:', err);
+    }
 
+    // Update local hourly window counters (UX rate-limit indicator)
     const now = new Date();
     const windowStart = license.windowStart ? new Date(license.windowStart) : null;
-
-    // Check if we need to reset the window
     if (!windowStart || (now.getTime() - windowStart.getTime()) / (1000 * 60 * 60) >= 1) {
-      // Start new window
       setLicense({
         ...license,
         usageCount: 1,
@@ -142,7 +182,6 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
         totalGenerated: license.totalGenerated + 1,
       });
     } else {
-      // Increment in current window
       setLicense({
         ...license,
         usageCount: license.usageCount + 1,
@@ -150,6 +189,9 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
       });
     }
   };
+
+  const trackGeneration = () => recordUsage('image');
+  const trackArView = () => recordUsage('ar');
 
   const getResetTime = (): Date | null => {
     if (!license || !license.windowStart) return null;
@@ -168,6 +210,7 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
     canGenerate,
     getRemainingGenerations,
     trackGeneration,
+    trackArView,
     getResetTime,
   };
 

@@ -113,11 +113,6 @@ export interface APIErrorResponse {
 
 export const CONTEXT_DESCRIPTIONS = {
   tattty: 'Main TaTTTy generator - two questions format with style options',
-  freestyle: 'Freestyle generator - single creative prompt with optional constraints',
-  couples: 'Couple tattoos - matching or complementary designs',
-  coverup: 'Cover-up designs - hiding existing tattoos',
-  extend: 'Extending existing tattoos - adding to current designs',
-  weird: 'Experimental/surreal designs - unconventional requests',
   general: 'General purpose - no specific context',
 };
 
