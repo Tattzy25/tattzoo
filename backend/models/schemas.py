@@ -26,6 +26,7 @@ class IdeasRequest(BaseModel):
 class AIResponse(BaseModel):
     """Response schema for AI operations"""
     content: str
+    result: Optional[str] = None
     success: bool
     error: Optional[str] = None
 

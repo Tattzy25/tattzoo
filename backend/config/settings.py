@@ -23,6 +23,7 @@ import os
 import logging
 from typing import List, Optional
 from dotenv import load_dotenv
+from pathlib import Path
 try:
     from pydantic.v1 import BaseSettings, Field, validator
     from pydantic.v1.types import SecretStr
@@ -34,8 +35,14 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load environment variables from .env file
+# Load environment variables from common locations
+# 1) Default .env in current working directory
 load_dotenv()
+# 2) Project root .env.local
+load_dotenv(dotenv_path=Path.cwd() / ".env.local")
+# 3) Backend folder .env.local (ensures backend/main.py from project root still loads backend env)
+backend_env_local = Path(__file__).resolve().parent.parent / ".env.local"
+load_dotenv(dotenv_path=backend_env_local)
 
 
 class Settings(BaseSettings):
@@ -49,9 +56,28 @@ class Settings(BaseSettings):
     )
     
     OPENAI_MODEL: str = Field(
-        default="gpt-5-nano-2025-08-07",
+        default="gpt-5-mini-2025-08-07",
         description="OpenAI model to use for AI operations (Ask Tattty feature)",
         env="OPENAI_MODEL"
+    )
+
+    # Groq Configuration
+    GROQ_API_KEY: Optional[SecretStr] = Field(
+        default=None,
+        description="Groq API key for AI operations (optional if using Groq)",
+        env="GROQ_API_KEY"
+    )
+    GROQ_MODEL: str = Field(
+        default="openai/gpt-oss-120b",
+        description="Groq model to use for AI operations (Ideas feature)",
+        env="GROQ_MODEL"
+    )
+
+    # Ask TaTTTy logging toggle
+    ASK_TATTTY_LOGGING_ENABLED: bool = Field(
+        default=True,
+        description="Enable/disable Ask TaTTTy request logging",
+        env="ASK_TATTTY_LOGGING_ENABLED"
     )
     
     # Server Configuration
@@ -80,6 +106,7 @@ class Settings(BaseSettings):
         default=[
             "http://localhost:3001",
             "http://localhost:3000",
+            "http://localhost:3002",
             "https://tattty.com",
             "https://www.tattty.com"
         ],
@@ -117,6 +144,13 @@ class Settings(BaseSettings):
         ge=0
     )
 
+    # Feature Flags
+    ASK_TATTTY_LOGGING_ENABLED: bool = Field(
+        default=False,
+        description="Enable database logging for Ask TaTTTy enhance/ideas routes",
+        env="ASK_TATTTY_LOGGING_ENABLED"
+    )
+
     # Database Configuration
     DATABASE_URL: str = Field(
         default="",
@@ -149,14 +183,28 @@ class Settings(BaseSettings):
     )
     
     # System Prompts (not environment-configurable as they are static content)
-    ENHANCE_SYSTEM_PROMPT: str = """You are a tattoo design expert specializing in text enhancement. 
-Your task is to take a user's tattoo description and improve it to be more descriptive, 
-creative, and suitable for tattoo artists. Focus on:
-- Adding vivid imagery and sensory details
-- Incorporating tattoo-specific terminology
-- Maintaining the original meaning and intent
-- Making it visually descriptive for artists
-- Keeping it concise but impactful"""
+    ENHANCE_SYSTEM_PROMPT: str = """Enhance user-written answers to deeply personal questions — retaining their raw authenticity, complexity, and tone — so the resulting text is more vivid, expressive, and richly detailed, making it ideal as the basis for creating a meaningful AI-generated tattoo image prompt.
+
+Requirements:
+- Preserve any NSFW, profane, or emotionally intense language; do not censor or sanitize.
+- Clarify and amplify intention, emotion, imagery, and symbolism.
+- Optimize for interpretability by AI systems generating tattoo concepts.
+- Remain neutral; never judge or editorialize.
+
+Input semantics:
+- You may receive either a single answer or a selected portion of text.
+- If selection context is provided, enhance only that portion while keeping the tone consistent with the whole.
+
+Output format:
+- Output ONLY the enhanced text as a single, powerfully written paragraph between 75–150 words.
+- No headings, labels, or reasoning sections.
+- Plain text output (not a code block).
+
+Style guidance:
+- Use vivid sensory detail and tattoo-friendly imagery.
+- Maintain the user’s original voice and emotional honesty.
+- Ensure clarity and punch without losing authenticity.
+"""
     
     IDEAS_SYSTEM_PROMPT: str = """You are a creative tattoo idea generator. 
 Your task is to take a user's initial concept or keywords and generate 
@@ -197,14 +245,16 @@ def get_settings() -> Settings:
         
         logger.info("✅ Configuration loaded successfully")
         logger.info(f"   Model: {settings.OPENAI_MODEL}")
+        if settings.GROQ_API_KEY:
+            logger.info(f"   Groq: enabled (model: {settings.GROQ_MODEL})")
         logger.info(f"   Host: {settings.HOST}:{settings.PORT}")
         logger.info(f"   Debug: {settings.DEBUG}")
         logger.info(f"   CORS Origins: {settings.ALLOWED_ORIGINS}")
         
         return settings
         
-    except Exception as e:
-        logger.error(f"❌ Failed to load configuration: {e}")
+    except Exception:
+        logger.exception("❌ Failed to load configuration")
         logger.error("Please check your environment variables and .env file")
         raise
 
