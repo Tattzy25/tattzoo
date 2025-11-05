@@ -1,8 +1,8 @@
 """
 OpenAI service for handling AI operations
 """
-import openai
-from typing import AsyncGenerator
+from openai import OpenAI
+from typing import Tuple, Dict
 from config.settings import settings
 
 
@@ -11,9 +11,9 @@ class OpenAIService:
     
     def __init__(self):
         """Initialize OpenAI client"""
-        openai.api_key = settings.OPENAI_API_KEY.get_secret_value()
+        self.client = OpenAI(api_key=settings.OPENAI_API_KEY.get_secret_value())
     
-    async def enhance_text(self, text: str, selection_info: str = None) -> AsyncGenerator[str, None]:
+    async def enhance_text(self, text: str, selection_info: str = None) -> Tuple[str, Dict[str, int], str]:
         """
         Enhance tattoo description text using OpenAI
         
@@ -21,17 +21,17 @@ class OpenAIService:
             text: The text to enhance
             selection_info: Optional selection context
             
-        Yields:
-            Enhanced text chunks
+        Returns:
+            A tuple of (content, usage, model)
         """
         user_prompt = f"Enhance this tattoo description: {text}"
         if selection_info:
             user_prompt += f"\nSelection context: {selection_info}"
         
-        async for chunk in self._call_openai_api(settings.ENHANCE_SYSTEM_PROMPT, user_prompt):
-            yield chunk
-    
-    async def generate_ideas(self, text: str, selection_info: str = None) -> AsyncGenerator[str, None]:
+        content, usage, model = await self._call_openai_api(settings.ENHANCE_SYSTEM_PROMPT, user_prompt)
+        return content, usage, model
+
+    async def generate_ideas(self, text: str, selection_info: str = None) -> Tuple[str, Dict[str, int], str]:
         """
         Generate tattoo ideas using OpenAI
         
@@ -39,21 +39,21 @@ class OpenAIService:
             text: The concept or keywords
             selection_info: Optional selection context
             
-        Yields:
-            Idea text chunks
+        Returns:
+            A tuple of (content, usage, model)
         """
         user_prompt = f"Generate tattoo ideas based on: {text}"
         if selection_info:
             user_prompt += f"\nSelection context: {selection_info}"
         
-        async for chunk in self._call_openai_api(settings.IDEAS_SYSTEM_PROMPT, user_prompt):
-            yield chunk
-    
+        content, usage, model = await self._call_openai_api(settings.IDEAS_SYSTEM_PROMPT, user_prompt)
+        return content, usage, model
+
     async def _call_openai_api(
-        self, 
-        system_prompt: str, 
-        user_prompt: str
-    ) -> AsyncGenerator[str, None]:
+        self,
+        system_prompt: str,
+        user_prompt: str,
+    ) -> Tuple[str, Dict[str, int], str]:
         """
         Call OpenAI API with streaming support
         
@@ -61,27 +61,32 @@ class OpenAIService:
             system_prompt: The system role prompt
             user_prompt: The user input prompt
             
-        Yields:
-            Response text chunks
+        Returns:
+            content text, usage dict, and model string
         """
         try:
-            response = openai.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model=settings.OPENAI_MODEL,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
+                    {"role": "user", "content": user_prompt},
                 ],
-                stream=True,
                 max_tokens=1000,
-                temperature=0.7
+                temperature=0.7,
             )
-            
-            async for chunk in response:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
-                    
-        except Exception as e:
-            yield f"Error: {str(e)}"
+
+            content = response.choices[0].message.content if response.choices else ""
+            usage_obj = getattr(response, "usage", None) or {}
+            usage = {
+                "input_tokens": usage_obj.get("prompt_tokens", 0),
+                "output_tokens": usage_obj.get("completion_tokens", 0),
+                "total_tokens": usage_obj.get("total_tokens", 0),
+            }
+            model = getattr(response, "model", settings.OPENAI_MODEL)
+            return content, usage, model
+
+        except Exception:
+            # Propagate to caller
             raise
 
 

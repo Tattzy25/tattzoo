@@ -17,6 +17,12 @@ CREATE TABLE ask_tattty_requests (
     output_text TEXT NOT NULL,
     input_char_count INTEGER NOT NULL CHECK (input_char_count >= 0),
     output_char_count INTEGER NOT NULL CHECK (output_char_count >= 0),
+    -- Token usage and model/cost tracking
+    input_tokens INTEGER NOT NULL DEFAULT 0 CHECK (input_tokens >= 0),
+    output_tokens INTEGER NOT NULL DEFAULT 0 CHECK (output_tokens >= 0),
+    total_tokens INTEGER NOT NULL DEFAULT 0 CHECK (total_tokens >= 0),
+    model VARCHAR(100) NULL,
+    cost_usd NUMERIC(10,6) NOT NULL DEFAULT 0 CHECK (cost_usd >= 0),
     response_time_ms INTEGER NOT NULL CHECK (response_time_ms >= 0),
     was_successful BOOLEAN NOT NULL DEFAULT true,
     error_message TEXT NULL,
@@ -82,7 +88,12 @@ CREATE OR REPLACE FUNCTION log_ask_tattty_request(
     response_ms INTEGER,
     session_id_value VARCHAR DEFAULT NULL,
     is_successful BOOLEAN DEFAULT true,
-    err_msg TEXT DEFAULT NULL
+    err_msg TEXT DEFAULT NULL,
+    in_tokens INTEGER DEFAULT 0,
+    out_tokens INTEGER DEFAULT 0,
+    tot_tokens INTEGER DEFAULT 0,
+    model_name VARCHAR DEFAULT NULL,
+    cost NUMERIC DEFAULT 0
 ) RETURNS UUID AS $$
 DECLARE
     request_id UUID;
@@ -101,6 +112,11 @@ BEGIN
         output_text,
         input_char_count,
         output_char_count,
+        input_tokens,
+        output_tokens,
+        total_tokens,
+        model,
+        cost_usd,
         response_time_ms,
         was_successful,
         error_message
@@ -111,6 +127,11 @@ BEGIN
         output,
         input_len,
         output_len,
+        COALESCE(in_tokens, 0),
+        COALESCE(out_tokens, 0),
+        COALESCE(tot_tokens, COALESCE(in_tokens,0) + COALESCE(out_tokens,0)),
+        model_name,
+        COALESCE(cost, 0),
         response_ms,
         is_successful,
         err_msg

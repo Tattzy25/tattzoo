@@ -27,6 +27,8 @@ async def enhance_text(
     """
     start_time = time.time()
     enhanced_text = ""
+    usage = None
+    model_name = settings.OPENAI_MODEL
     was_successful = True
     error_message = None
     
@@ -38,12 +40,11 @@ async def enhance_text(
                 detail=f"Text must be at least {settings.MIN_CHARACTERS} characters long"
             )
         
-        # Process enhancement
-        async for chunk in openai_service.enhance_text(
-            request.targetText, 
+        # Process enhancement (non-stream, with usage)
+        enhanced_text, usage, model_name = await openai_service.enhance_text(
+            request.targetText,
             request.selection_info
-        ):
-            enhanced_text += chunk
+        )
         
         return AIResponse(content=enhanced_text, success=True)
         
@@ -67,7 +68,9 @@ async def enhance_text(
             output_text=enhanced_text,
             response_time_ms=response_time_ms,
             was_successful=was_successful,
-            error_message=error_message
+            error_message=error_message,
+            usage=usage,
+            model=model_name
         )
 
 
@@ -86,6 +89,8 @@ async def generate_ideas(
     """
     start_time = time.time()
     ideas_text = ""
+    usage = None
+    model_name = settings.OPENAI_MODEL
     was_successful = True
     error_message = None
     
@@ -96,12 +101,11 @@ async def generate_ideas(
             # Use a default prompt for empty text to generate creative ideas
             request.targetText = "creative tattoo ideas"
         
-        # Process idea generation
-        async for chunk in openai_service.generate_ideas(
-            request.targetText, 
+        # Process idea generation (non-stream, with usage)
+        ideas_text, usage, model_name = await openai_service.generate_ideas(
+            request.targetText,
             request.selection_info
-        ):
-            ideas_text += chunk
+        )
         
         return AIResponse(content=ideas_text, success=True)
         
@@ -125,7 +129,9 @@ async def generate_ideas(
             output_text=ideas_text,
             response_time_ms=response_time_ms,
             was_successful=was_successful,
-            error_message=error_message
+            error_message=error_message,
+            usage=usage,
+            model=model_name
         )
 
 
