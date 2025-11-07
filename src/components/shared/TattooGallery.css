@@ -1,0 +1,80 @@
+/* Title font and shadow */
+.tg-title {
+  font-family: 'Rock Salt', cursive;
+}
+.tg-text-shadow {
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9), 0 8px 24px rgba(0, 0, 0, 0.8);
+}
+
+/* Grid item box shadow */
+.tg-grid-item {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 0, 0, 0.7);
+}
+
+/* Heart button default and active states */
+.tg-heart-btn {
+  background-color: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.tg-heart-btn-active {
+  background-color: #57f1d6;
+}
+.tg-heart-icon {
+  color: #ffffff;
+}
+.tg-heart-icon-active {
+  color: #0C0C0D;
+}
+
+/* Load more button */
+.tg-loadmore {
+  background-color: #57f1d6 !important;
+  color: #0C0C0D !important;
+}
+
+/* No results card look */
+.tg-noresults {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background: linear-gradient(90deg, hsla(0, 0%, 100%, 0.2), hsla(0, 0%, 100%, 0.05));
+  border-radius: 70px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+/* Lightbox controls */
+.tg-lightbox-close {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.tg-lightbox-arrow {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.tg-lightbox-icon {
+  color: #ffffff;
+}
+
+/* Lightbox image */
+.tg-lightbox-img {
+  object-fit: contain;
+}
+
+/* Lightbox favorite button */
+.tg-lightbox-fav {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.tg-lightbox-fav-active {
+  background-color: #57f1d6;
+  color: #0C0C0D;
+}
+
+/* small accessibility focus outlines for icon buttons */
+.tg-heart-btn:focus,
+.tg-lightbox-close:focus,
+.tg-lightbox-arrow:focus,
+.tg-lightbox-fav:focus {
+  outline: 2px solid rgba(87, 241, 214, 0.6);
+  outline-offset: 2px;
+}

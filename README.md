@@ -1,4 +1,3 @@
-
 # TaTTTy — Comprehensive README
 
   ## Project snapshot — what this is about
@@ -189,7 +188,6 @@
 
   - `ask_tattty` - Main Ask TaTTTy API request tracking and configuration
   - `frontend_database_schema` - Frontend-specific UI content and user preferences
-  - `skin_tones` - Skin tone reference data for tattoo visualization
   - `tattoo_colors` - Tattoo color palette and options
   - `tattoo_moods` - Mood/thematic categories for tattoo generation
   - `tattoo_placements` - Body placement locations for tattoos
@@ -210,4 +208,3 @@
 
   ---
   _Generated/updated by project tooling — keep this file in repo root for deploy and documentation._
-  

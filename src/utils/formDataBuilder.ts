@@ -14,7 +14,6 @@ interface GenerationPayload {
   size?: string | null;
   color?: string;
   mood?: string;
-  skintone?: number;
   images?: File[];
   generatorType?: string;
   [key: string]: any;

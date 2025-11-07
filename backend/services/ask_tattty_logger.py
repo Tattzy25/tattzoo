@@ -59,7 +59,6 @@ class AskTatttyLogger:
                 # Example pricing; unknown models default to 0 cost
                 "gpt-4o-mini": {"input_per_1K": 0.0003, "output_per_1K": 0.0015},
                 "gpt-4o": {"input_per_1K": 0.005, "output_per_1K": 0.015},
-                "gpt-3.5-turbo": {"input_per_1K": 0.0005, "output_per_1K": 0.0015},
             }
             model_name = model or "unknown"
             rates = pricing.get(model_name, {"input_per_1K": 0.0, "output_per_1K": 0.0})
@@ -96,9 +95,9 @@ class AskTatttyLogger:
             return request_id
             
         except Exception as e:
-            logger.error(f"❌ Failed to log Ask TaTTTy request: {e}")
-            # Don't raise the error - logging failure shouldn't break the API
-            return None
+            # Fail loud: include stack trace and propagate the error
+            logger.exception("❌ Failed to log Ask TaTTTy request")
+            raise
 
 
 # Global logger instance

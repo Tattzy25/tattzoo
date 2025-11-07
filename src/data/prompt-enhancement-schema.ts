@@ -147,19 +147,6 @@ export interface PromptEnhancementRequest {
   // ============================================================
   
   /**
-   * Skin Tone
-   * From: SkintonePicker slider
-   * Range: 0-100
-   * Default: 50
-   * 
-   * Used by LLM to understand:
-   * - How tattoo will look on specific skin tone
-   * - Contrast requirements
-   * - Color adjustments needed
-   */
-  skintone: number;
-  
-  /**
    * Output Type
    * From: OutputTypeButtons component
    * 
@@ -240,7 +227,6 @@ export const EXAMPLE_ENHANCEMENT_REQUEST_TATTTY: PromptEnhancementRequest = {
   mood: 'Nostalgic',
   
   // Technical specs
-  skintone: 45,
   outputType: 'stencil',
   aspectRatio: '1:1'
 };
@@ -269,7 +255,6 @@ export const EXAMPLE_ENHANCEMENT_REQUEST_FREESTYLE: PromptEnhancementRequest = {
   mood: 'Mysterious',
   
   // Technical specs
-  skintone: 60,
   outputType: 'color',
   aspectRatio: '9:16'
 };
@@ -286,7 +271,6 @@ INSTRUCTIONS:
 - Include style-specific terminology (e.g., "bold outlines" for Traditional, "photorealistic shading" for Realism)
 - Specify composition based on aspect ratio
 - Account for output type (stencil = emphasis on linework, color = emphasis on shading/color)
-- Consider skin tone for contrast and visibility
 - Incorporate mood into visual atmosphere
 - Keep prompt under 500 words
 - Focus on visual elements, not emotions or abstract concepts
@@ -294,8 +278,6 @@ INSTRUCTIONS:
 Return ONLY the enhanced prompt, nothing else.`;
 
 export const buildLLMUserPrompt = (request: PromptEnhancementRequest): string => {
-  const skinToneDesc = request.skintone < 33 ? 'Light' : request.skintone < 66 ? 'Medium' : 'Dark';
-  
   return `Generate an enhanced tattoo design prompt based on these inputs:
 
 GENERATOR TYPE: ${request.generatorType.toUpperCase()}
@@ -314,7 +296,6 @@ MOOD & ATMOSPHERE:
 - Mood: ${request.mood}
 
 TECHNICAL REQUIREMENTS:
-- Skin Tone: ${request.skintone}/100 (${skinToneDesc})
 - Output Type: ${request.outputType}
 - Aspect Ratio: ${request.aspectRatio}
 
@@ -344,8 +325,6 @@ export const EXAMPLE_ENHANCEMENT_RESPONSE: PromptEnhancementResponse = {
  * ├─ placement (from StylePlacementSelector)
  * ├─ size (from SizeColorSelector)
  * ├─ mood (from MoodSelector)
- * ├─ skintone (from SkintonePicker)
- * ├─ outputType (from OutputTypeButtons)
  * └─ aspectRatio (from AspectRatio)
  * 
  * STEP 2: SEND TO LLM API
@@ -390,7 +369,6 @@ export const FIELD_REQUIREMENTS = {
   
   // OPTIONAL (but always sent with defaults)
   OPTIONAL_WITH_DEFAULTS: [
-    'skintone',        // Default: 50
     'outputType',      // Default: 'stencil'
     'aspectRatio',     // Default: '1:1'
   ],

@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ask TaTTTy Schema - Complete (v2)",
+  "description": "End-to-end schema for Ask TaTTTy across UI, API, backend, and database. Reflects Groq routing for enhance/ideas and updated CORS.",
+  "version": "2.0.0",
+  "scope": "Ask TaTTTy end-to-end (UI → API → DB → Ops)",
+
+  "providers": {
+    "default": "groq",
+    "models": {
+      "groq": "settings.GROQ_MODEL",
+      "openai": "settings.OPENAI_MODEL"
+    },
+    "notes": "Enhance and ideas currently route to Groq. Switchable via backend settings if a valid OpenAI key is provided."
+  },
+
+  "flow": {
+    "step_1": "User types in Q1/Q2 textarea (React state)",
+    "step_2": "User clicks 'Ask TaTTTy' and chooses Enhance or Ideas",
+    "step_3": "Frontend POSTs to /api/ai/enhance or /api/ai/ideas",
+    "step_4": "Backend validates and processes via Groq (non-streaming or SSE streaming)",
+    "step_5": "Backend logs request via log_ask_tattty_request()",
+    "step_6": "Frontend updates textarea with result (JSON.result or accumulated SSE tokens)",
+    "step_7": "User may click SUBMIT to proceed (session-based save only)"
+  },
+
+  "api_contract": {
+    "endpoints": {
+      "enhance": {
+        "method": "POST",
+        "path": "/api/ai/enhance",
+        "request": {
+          "type": "object",
+          "required": ["type", "contextType", "targetText", "hasSelection"],
+          "properties": {
+            "type": { "type": "string", "enum": ["enhance"] },
+            "contextType": {
+              "type": "string",
+              "enum": ["couples", "coverup", "extend", "tattty", "freestyle", "weird", "general"]
+            },
+            "targetText": { "type": "string", "minLength": 10 },
+            "hasSelection": { "type": "boolean" },
+            "selection_info": { "type": "string", "nullable": true }
+          }
+        },
+        "response": {
+          "type": "object",
+          "required": ["content", "success"],
+          "properties": {
+            "content": { "type": "string" },
+            "result": { "type": "string" },
+            "success": { "type": "boolean" },
+            "error": { "type": "string" }
+          },
+          "notes": "Frontend uses data.result for non-streaming; for streaming, accumulate 'token' chunks."
+        },
+        "streaming_sse": {
+          "contentType": "text/event-stream",
+          "format": [
+            "data: {\"token\": \"chunk text\"}",
+            "data: {\"token\": \" more text\"}",
+            "data: {\"done\": true}"
+          ]
+        }
+      },
+      "ideas": {
+        "method": "POST",
+        "path": "/api/ai/ideas",
+        "request": {
+          "type": "object",
+          "required": ["type", "contextType", "targetText", "hasSelection"],
+          "properties": {
+            "type": { "type": "string", "enum": ["ideas"] },
+            "contextType": {
+              "type": "string",
+              "enum": ["couples", "coverup", "extend", "tattty", "freestyle", "weird", "general"]
+            },
+            "targetText": { "type": "string" },
+            "hasSelection": { "type": "boolean" },
+            "selection_info": { "type": "string", "nullable": true }
+          }
+        },
+        "response": {
+          "type": "object",
+          "required": ["content", "success"],
+          "properties": {
+            "content": { "type": "string" },
+            "result": { "type": "string" },
+            "success": { "type": "boolean" },
+            "error": { "type": "string" }
+          }
+        }
+      }
+    },
+    "examples": {
+      "enhance_request": {
+        "type": "enhance",
+        "contextType": "tattty",
+        "targetText": "dragon tattoo",
+        "hasSelection": false
+      },
+      "enhance_response": {
+        "content": "A fierce dragon with emerald scales soaring through storm clouds",
+        "result": "A fierce dragon with emerald scales soaring through storm clouds",
+        "success": true
+      }
+    }
+  },
+
+  "database": {
+    "tables": {
+      "ask_tattty_requests": {
+        "purpose": "Track every Ask TaTTTy API call from button click to result",
+        "fields": {
+          "id": "UUID PRIMARY KEY DEFAULT uuid_generate_v4()",
+          "session_id": "VARCHAR(255) NULL",
+          "action_type": "VARCHAR(50) NOT NULL CHECK (action_type IN ('enhance','ideas'))",
+          "input_text": "TEXT NOT NULL",
+          "output_text": "TEXT NOT NULL",
+          "input_char_count": "INTEGER NOT NULL CHECK (input_char_count >= 0)",
+          "output_char_count": "INTEGER NOT NULL CHECK (output_char_count >= 0)",
+          "input_tokens": "INTEGER NOT NULL DEFAULT 0 CHECK (input_tokens >= 0)",
+          "output_tokens": "INTEGER NOT NULL DEFAULT 0 CHECK (output_tokens >= 0)",
+          "total_tokens": "INTEGER NOT NULL DEFAULT 0 CHECK (total_tokens >= 0)",
+          "model": "VARCHAR(100) NULL",
+          "cost_usd": "NUMERIC(10,6) NOT NULL DEFAULT 0 CHECK (cost_usd >= 0)",
+          "response_time_ms": "INTEGER NOT NULL CHECK (response_time_ms >= 0)",
+          "was_successful": "BOOLEAN NOT NULL DEFAULT true",
+          "error_message": "TEXT NULL",
+          "created_at": "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        },
+        "indexes": [
+          "idx_ask_tattty_action ON action_type",
+          "idx_ask_tattty_created ON created_at DESC",
+          "idx_ask_tattty_session ON session_id WHERE session_id IS NOT NULL",
+          "idx_ask_tattty_success ON was_successful"
+        ]
+      },
+      "ask_tattty_config": {
+        "purpose": "API configuration per environment (dev/staging/production)",
+        "fields": {
+          "id": "UUID PRIMARY KEY DEFAULT uuid_generate_v4()",
+          "environment": "VARCHAR(20) UNIQUE NOT NULL CHECK (environment IN ('development','staging','production'))",
+          "api_base_url": "VARCHAR(255) NOT NULL",
+          "enhance_endpoint": "VARCHAR(100) NOT NULL DEFAULT '/api/ai/enhance'",
+          "ideas_endpoint": "VARCHAR(100) NOT NULL DEFAULT '/api/ai/ideas'",
+          "request_timeout_ms": "INTEGER NOT NULL DEFAULT 30000 CHECK (request_timeout_ms >= 1000)",
+          "min_characters": "INTEGER NOT NULL DEFAULT 10 CHECK (min_characters >= 0)",
+          "streaming_throttle_ms": "INTEGER NOT NULL DEFAULT 50 CHECK (streaming_throttle_ms >= 0)",
+          "is_active": "BOOLEAN NOT NULL DEFAULT false",
+          "created_at": "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP",
+          "updated_at": "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        },
+        "triggers": ["trigger_update_ask_tattty_config_updated_at BEFORE UPDATE SET updated_at=CURRENT_TIMESTAMP"]
+      },
+      "ask_tattty_content": {
+        "purpose": "UI labels and error messages (multi-language support)",
+        "fields": {
+          "id": "UUID PRIMARY KEY DEFAULT uuid_generate_v4()",
+          "language": "VARCHAR(10) UNIQUE NOT NULL",
+          "button_text": "VARCHAR(50) NOT NULL DEFAULT 'Ask TaTTTy'",
+          "loading_text": "VARCHAR(50) NOT NULL DEFAULT 'Thinking...'",
+          "enhance_button": "VARCHAR(50) NOT NULL DEFAULT 'Enhance My Text'",
+          "ideas_button": "VARCHAR(50) NOT NULL DEFAULT 'Give Me Ideas'",
+          "revert_button": "VARCHAR(50) NOT NULL DEFAULT 'Back'",
+          "re_enhance_button": "VARCHAR(50) NOT NULL DEFAULT 'Redo'",
+          "revert_tooltip": "VARCHAR(200) NOT NULL DEFAULT 'Revert to original text'",
+          "re_enhance_tooltip": "VARCHAR(200) NOT NULL DEFAULT 'Re-enhance with new result'",
+          "empty_text_error": "VARCHAR(100) NOT NULL DEFAULT 'Write Something First!'",
+          "text_too_short_error": "VARCHAR(100) NOT NULL DEFAULT 'Add More Details!'",
+          "created_at": "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP",
+          "updated_at": "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        },
+        "triggers": ["trigger_update_ask_tattty_content_updated_at BEFORE UPDATE SET updated_at=CURRENT_TIMESTAMP"]
+      }
+    },
+    "functions": {
+      "log_ask_tattty_request": {
+        "signature": "(session_id VARCHAR, action_type VARCHAR, input_text TEXT, output_text TEXT, response_time_ms INTEGER, was_successful BOOLEAN, error_message TEXT, usage JSONB, model VARCHAR) RETURNS UUID",
+        "purpose": "Insert a fully detailed record into ask_tattty_requests and return the new id"
+      },
+      "update_updated_at_column": {
+        "purpose": "Trigger helper to auto-update updated_at timestamps"
+      }
+    },
+    "views": {
+      "vw_ask_tattty_action_stats": "action counts and percentages",
+      "vw_ask_tattty_success_stats": "success/fail totals and success rate",
+      "vw_ask_tattty_hourly_activity": "hourly request counts with success/fail splits"
+    }
+  },
+
+  "backend_settings": {
+    "allowed_origins": ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+    "min_characters": 10,
+    "timeout_ms": 30000,
+    "streaming_throttle_ms": 50,
+    "notes": "Ensure frontend dev origin is listed to avoid CORS errors."
+  },
+
+  "environment": {
+    "frontend": {
+      "vars": ["VITE_API_URL", "VITE_BACKEND_API_URL"],
+      "base_url_default": "http://localhost:8000"
+    },
+    "backend": {
+      "vars": ["GROQ_API_KEY", "OPENAI_API_KEY"],
+      "switching": "Prefer Groq unless OpenAI key configured and provider switch enabled"
+    }
+  },
+
+  "deployment": {
+    "steps": [
+      "Create Neon PostgreSQL database",
+      "Run backend/neon_db/ask_tattty SQL to create tables/functions/views",
+      "Set active environment in ask_tattty_config",
+      "Ensure backend CORS includes the frontend origin",
+      "Verify /api/ai/health returns healthy"
+    ]
+  },
+
+  "analytics_queries": {
+    "total_requests_today": "SELECT COUNT(*) FROM ask_tattty_requests WHERE created_at > CURRENT_DATE;",
+    "enhance_vs_ideas": "SELECT action_type, COUNT(*) FROM ask_tattty_requests GROUP BY action_type;",
+    "success_rate_7d": "SELECT ROUND(COUNT(*) FILTER (WHERE was_successful) * 100.0 / COUNT(*), 2) AS success_rate FROM ask_tattty_requests WHERE created_at > CURRENT_TIMESTAMP - INTERVAL '7 days';"
+  }
+}

@@ -110,7 +110,6 @@ ALL tattoo images must have transparent backgrounds (.png with alpha channel). T
 - [ ] Add thigh, full sleeve placements
 - [ ] Save AR screenshots
 - [ ] Multiple tattoos at once
-- [ ] Skin tone adjustment
 - [ ] 3D depth mapping (MediaPipe BlazePose GHUM)
 
 ## Debugging

@@ -1,0 +1,41 @@
+.heroBorderShadow {
+  border-bottom-color: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.leftPanelNoScrollbar {
+  /* Keep content scrollable on desktop but hide native scrollbar visually */
+}
+
+/* Apply Firefox-only rule only where supported */
+@supports (scrollbar-width: none) {
+  .leftPanelNoScrollbar {
+    scrollbar-width: none; /* Firefox only */
+  }
+}
+
+.leftPanelNoScrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.titleShadow {
+  text-shadow: 0 6px 18px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.viewAllButton {
+  background: linear-gradient(90deg, #6ee7b7, #14b8a6);
+  color: white;
+  box-shadow: 0 8px 30px rgba(20, 184, 166, 0.18);
+}
+
+.footerTopShadow {
+  border-top-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Mobile-only wrapper margin to replace inline marginTop */
+.mobileFooterWrapper {
+  margin-top: 80px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1), transparent);
+}

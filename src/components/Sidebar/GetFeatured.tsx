@@ -1,18 +1,18 @@
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
+import './GetFeatured.css'; // added import
 
 export function GetFeatured() {
   return (
-    <div style={{ paddingTop: '100px' }}>
-      <div className="w-full text-center mb-8" style={{ fontFamily: 'Rock Salt, cursive' }}>
-        <div className="text-[40px]" style={{ textShadow: '0 4px 12px rgba(0, 0, 0, 0.9), 0 8px 24px rgba(0, 0, 0, 0.8)' }}>GET</div>
-        <div className="text-[48px]" style={{ textShadow: '0 4px 12px rgba(0, 0, 0, 0.9), 0 8px 24px rgba(0, 0, 0, 0.8)' }}>FEATURED</div>
+    <div className="get-featured-root">
+      <div className="w-full text-center mb-8 get-featured-title">
+        <div className="text-[40px] get-featured-line">GET</div>
+        <div className="text-[48px] get-featured-line">FEATURED</div>
       </div>
       
       <Card className="group overflow-hidden hover:shadow-lg transition-shadow">
         <div className="relative aspect-square overflow-hidden">
-          <ImageWithFallback
+          <img
             src="" // Imported from placeholder-images.ts - see featuredDesign.image
             alt="Phoenix Rising"
             className="w-full h-full object-cover transition-transform group-hover:scale-110"
@@ -26,7 +26,7 @@ export function GetFeatured() {
             <div className="flex-1">
               <h3 className="text-base md:text-lg mb-1">Phoenix Rising</h3>
               <div className="flex items-center gap-2">
-                <ImageWithFallback
+                <img
                   src="" // Imported from placeholder-images.ts - see featuredDesign.avatar
                   alt="Sarah M."
                   className="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover"
@@ -47,8 +47,14 @@ export function GetFeatured() {
               <MessageCircle size={14} className="md:w-4 md:h-4" />
               <span>187</span>
             </button>
-            <button className="flex items-center gap-1 hover:text-accent transition-colors ml-auto">
+            { /* Added aria-label and sr-only text for accessibility */ }
+            <button
+              className="flex items-center gap-1 hover:text-accent transition-colors ml-auto"
+              aria-label="Share design"
+              title="Share"
+            >
               <Share2 size={14} className="md:w-4 md:h-4" />
+              <span className="sr-only">Share</span>
             </button>
           </div>
         </CardContent>

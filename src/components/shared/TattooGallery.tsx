@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Heart, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card } from '../ui/card';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { Button } from '../ui/button';
+import './TattooGallery.css';
 
 interface Design {
   id: string;
@@ -138,9 +138,9 @@ export function TattooGallery({
     <div className="w-full space-y-6 pb-6">
       {/* Title */}
       {title && (
-        <div className="w-full text-center mb-8" style={{ fontFamily: 'Rock Salt, cursive' }}>
-          <div className="text-[40px]" style={{ textShadow: '0 4px 12px rgba(0, 0, 0, 0.9), 0 8px 24px rgba(0, 0, 0, 0.8)' }}>GET</div>
-          <div className="text-[48px]" style={{ textShadow: '0 4px 12px rgba(0, 0, 0, 0.9), 0 8px 24px rgba(0, 0, 0, 0.8)' }}>INSPIRED</div>
+        <div className="w-full text-center mb-8 tg-title">
+          <div className="text-[40px] tg-text-shadow">GET</div>
+          <div className="text-[48px] tg-text-shadow">INSPIRED</div>
         </div>
       )}
       
@@ -149,10 +149,7 @@ export function TattooGallery({
         {displayedDesigns.map((design, index) => (
           <div
             key={design.id}
-            className={`group relative aspect-square rounded-lg overflow-hidden border-2 border-border hover:border-primary transition-all ${columns === 3 && index === displayedDesigns.length - 1 ? 'hidden md:block' : ''}`}
-            style={{
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 0, 0, 0.7)',
-            }}
+            className={`group relative aspect-square rounded-lg overflow-hidden border-2 border-border hover:border-primary transition-all ${columns === 3 && index === displayedDesigns.length - 1 ? 'hidden md:block' : ''} tg-grid-item`}
           >
             {/* Heart Icon */}
             <button
@@ -160,18 +157,14 @@ export function TattooGallery({
                 e.stopPropagation();
                 handleFavorite(design.image, design.title);
               }}
-              className="absolute top-2 right-2 z-10 p-2 rounded-full transition-all"
-              style={{
-                backgroundColor: favorites.includes(design.image) ? '#57f1d6' : 'rgba(0, 0, 0, 0.6)',
-                backdropFilter: 'blur(10px)',
-              }}
+              className={`absolute top-2 right-2 z-10 p-2 rounded-full transition-all tg-heart-btn ${favorites.includes(design.image) ? 'tg-heart-btn-active' : ''}`}
+              title={favorites.includes(design.image) ? 'Remove from favorites' : 'Save to favorites'}
+              aria-label={favorites.includes(design.image) ? 'Remove from favorites' : 'Save to favorites'}
             >
               <Heart
                 size={18}
                 fill={favorites.includes(design.image) ? '#0C0C0D' : 'none'}
-                style={{
-                  color: favorites.includes(design.image) ? '#0C0C0D' : '#ffffff',
-                }}
+                className={favorites.includes(design.image) ? 'tg-heart-icon-active' : 'tg-heart-icon'}
               />
             </button>
 
@@ -183,7 +176,7 @@ export function TattooGallery({
                 setLightboxImage(design.image);
               }}
             >
-              <ImageWithFallback
+              <img
                 src={design.image}
                 alt={design.title}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
@@ -201,11 +194,8 @@ export function TattooGallery({
         <div className="flex justify-center mt-8">
           <Button
             onClick={onLoadMore}
-            className="px-8 py-4"
-            style={{
-              backgroundColor: '#57f1d6',
-              color: '#0C0C0D',
-            }}
+            className="px-8 py-4 tg-loadmore"
+            title="Load more designs"
           >
             Load More Designs ({displayCount} of {designs.length})
           </Button>
@@ -214,13 +204,7 @@ export function TattooGallery({
 
       {/* No Results */}
       {designs.length === 0 && (
-        <Card className="p-12 border-2 border-accent/20" style={{
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          background: 'linear-gradient(90deg, hsla(0, 0%, 100%, 0.2), hsla(0, 0%, 100%, 0.05))',
-          borderRadius: '70px',
-          boxShadow: '0 0 40px rgba(0, 0, 0, 0.8)'
-        }}>
+        <Card className="p-12 border-2 border-accent/20 tg-noresults">
           <div className="text-center">
             <p className="text-muted-foreground">
               Oops! No designs found. Please try again with different keywords.
@@ -241,34 +225,31 @@ export function TattooGallery({
           {/* Close Button */}
           <button
             onClick={handleCloseLightbox}
-            className="absolute top-4 right-4 z-[10002] p-3 rounded-full transition-colors hover:bg-white/20"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            }}
+            className="absolute top-4 right-4 z-[10002] p-3 rounded-full transition-colors hover:bg-white/20 tg-lightbox-close"
+            title="Close lightbox"
+            aria-label="Close lightbox"
           >
-            <X size={24} style={{ color: '#ffffff' }} />
+            <X size={24} className="tg-lightbox-icon" />
           </button>
 
           {/* Left Arrow */}
           <button
             onClick={handlePrevImage}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-[10002] p-2 md:p-3 rounded-full transition-all opacity-0 group-hover/lightbox:opacity-100 hover:bg-white/20"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-[10002] p-2 md:p-3 rounded-full transition-all opacity-0 group-hover/lightbox:opacity-100 hover:bg-white/20 tg-lightbox-arrow"
+            title="Previous image"
+            aria-label="Previous image"
           >
-            <ChevronLeft size={28} className="md:w-8 md:h-8" style={{ color: '#ffffff' }} />
+            <ChevronLeft size={28} className="md:w-8 md:h-8 tg-lightbox-icon" />
           </button>
 
           {/* Right Arrow */}
           <button
             onClick={handleNextImage}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-[10002] p-2 md:p-3 rounded-full transition-all opacity-0 group-hover/lightbox:opacity-100 hover:bg-white/20"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-[10002] p-2 md:p-3 rounded-full transition-all opacity-0 group-hover/lightbox:opacity-100 hover:bg-white/20 tg-lightbox-arrow"
+            title="Next image"
+            aria-label="Next image"
           >
-            <ChevronRight size={28} className="md:w-8 md:h-8" style={{ color: '#ffffff' }} />
+            <ChevronRight size={28} className="md:w-8 md:h-8 tg-lightbox-icon" />
           </button>
 
           {/* Image with Favorite Button */}
@@ -276,22 +257,16 @@ export function TattooGallery({
             <img
               src={lightboxImage}
               alt="Gallery design"
-              className="max-w-[95vw] max-h-[85vh] w-auto h-auto"
-              style={{
-                objectFit: 'contain',
-              }}
+              className="max-w-[95vw] max-h-[85vh] w-auto h-auto tg-lightbox-img"
             />
             
             {/* Favorite Button - Bottom Center */}
             <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
               <Button
                 onClick={() => handleFavorite(lightboxImage, displayedDesigns[currentImageIndex]?.title || 'Gallery Design')}
-                className="px-6 py-3 rounded-full"
-                style={{
-                  backgroundColor: favorites.includes(lightboxImage) ? '#57f1d6' : 'rgba(255, 255, 255, 0.15)',
-                  color: favorites.includes(lightboxImage) ? '#0C0C0D' : '#ffffff',
-                  backdropFilter: 'blur(10px)',
-                }}
+                className={`px-6 py-3 rounded-full tg-lightbox-fav ${favorites.includes(lightboxImage) ? 'tg-lightbox-fav-active' : ''}`}
+                title={favorites.includes(lightboxImage) ? 'Remove from favorites' : 'Save to favorites'}
+                aria-label={favorites.includes(lightboxImage) ? 'Remove from favorites' : 'Save to favorites'}
               >
                 <Heart
                   size={18}

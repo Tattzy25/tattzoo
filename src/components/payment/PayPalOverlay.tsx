@@ -14,7 +14,10 @@ interface PayPalOverlayProps {
 }
 
 export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentError, inline = false }: PayPalOverlayProps) {
-  const BACKEND_API_URL = (import.meta as any)?.env?.VITE_BACKEND_API_URL || 'http://localhost:8000';
+  const BACKEND_API_URL = (import.meta as any)?.env?.VITE_BACKEND_API_URL;
+  if (!BACKEND_API_URL) {
+    throw new Error('CRITICAL: VITE_BACKEND_API_URL is not configured');
+  }
   const [email, setEmail] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
@@ -107,40 +110,7 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
     // }
     // ==========================================
     
-    // MOCK: Simulate random payment failures (30% chance)
-    const paymentSucceeds = Math.random() > 0.3; // 70% success rate
-    
-    if (!paymentSucceeds) {
-      // Simulate different types of payment errors
-      const errorTypes = [
-        {
-          message: 'Card Declined',
-          details: 'Your card was declined by the issuing bank. Please try a different payment method.'
-        },
-        {
-          message: 'Insufficient Funds',
-          details: 'The card does not have sufficient funds to complete this transaction.'
-        },
-        {
-          message: 'Invalid Card Details',
-          details: 'The card information provided is invalid. Please check and try again.'
-        },
-        {
-          message: 'Network Error',
-          details: 'Unable to connect to payment processor. Please check your connection and try again.'
-        }
-      ];
-      
-      const randomError = errorTypes[Math.floor(Math.random() * errorTypes.length)];
-      onPaymentError(randomError.message, randomError.details);
-      
-      // Reset form
-      setEmail('');
-      setCardNumber('');
-      setExpiry('');
-      setCvv('');
-      return;
-    }
+    // Remove mock simulation: always attempt backend issuance and fail loud
     
     // Request license issuance from backend
     try {
@@ -395,7 +365,7 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
 
         {/* Secure payment note */}
         <p className="text-center text-white/50 text-xs" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
-          🔒 Secure payment • Demo mode active
+          🔒 Secure payment • Production mode
         </p>
       </div>
     </div>

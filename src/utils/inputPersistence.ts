@@ -12,7 +12,6 @@ interface GeneratorState {
   selectedSize: string | null;
   selectedColorPreference: string | null;
   selectedMood: string | null;
-  selectedSkintone: number;
   timestamp: number;
 }
 
@@ -65,7 +64,6 @@ export async function saveGeneratorState(
   selectedSize: string | null,
   selectedColorPreference: string | null,
   selectedMood: string | null,
-  selectedSkintone: number,
 ): Promise<void> {
   try {
     const state: GeneratorState = {
@@ -74,7 +72,6 @@ export async function saveGeneratorState(
       selectedSize,
       selectedColorPreference,
       selectedMood,
-      selectedSkintone,
       timestamp: Date.now(),
     };
     

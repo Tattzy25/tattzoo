@@ -137,17 +137,6 @@ export interface GenerationRequest {
     mood?: string;
     
     /**
-     * Skin Tone
-     * OPTIONAL
-     * Range: 0-100 (slider value for color interpolation)
-     * Default: 50 (middle tone)
-     * 
-     * Collected from: SkintonePicker component
-     * Used for: Rendering tattoo on realistic skin tone
-     */
-    skintone?: number;
-    
-    /**
      * Aspect Ratio
      * OPTIONAL
      * Default: '1:1' (square)
@@ -229,7 +218,6 @@ export const EXAMPLE_TATTTY_FULL: GenerationRequest = {
     size: 'Medium',
     color: 'Black & Grey',
     mood: 'Nostalgic',
-    skintone: 45,
     aspectRatio: '1:1',
     model: 'sd3.5-large'
   },
@@ -253,7 +241,6 @@ export const EXAMPLE_TATTTY_MINIMAL: GenerationRequest = {
     style: 'Traditional', // Default applied
     color: 'Black & Grey', // Default applied
     mood: 'Happy', // Default applied
-    outputType: 'stencil', // Default
     aspectRatio: '1:1', // Default
     model: 'sd3.5-large' // Default
   },
@@ -284,7 +271,6 @@ export const VALIDATION_RULES = {
     style: 'Traditional',
     color: 'Black & Grey',
     mood: 'Happy',
-    skintone: 50,
     aspectRatio: '1:1',
     model: 'sd3.5-large' as const
   }

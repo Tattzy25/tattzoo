@@ -1,5 +1,4 @@
 import { Users, TrendingUp, Shield, Star } from 'lucide-react';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { socialProofStats, testimonials, sectionHeadings } from '../../data';
 
 const stats = socialProofStats;
@@ -73,7 +72,7 @@ export function SocialProof() {
             </div>
             <p className="text-white text-lg mb-6">{testimonial.text}</p>
             <div className="flex items-center gap-3">
-              <ImageWithFallback
+              <img
                 src={testimonial.avatar}
                 alt={testimonial.name}
                 className="w-12 h-12 rounded-full object-cover border-2 border-accent/30"

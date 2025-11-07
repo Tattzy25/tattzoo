@@ -101,28 +101,27 @@ export function PaymentErrorCard({
           </ul>
         </div>
 
-        {/* Demo mode note */}
+        {/* Production guidance note */}
         <div
-          className="rounded-xl border border-amber-400/30 p-4"
+          className="rounded-xl border border-accent/30 p-4"
           style={{
-            background: 'rgba(251, 191, 36, 0.08)',
+            background: 'rgba(87, 241, 214, 0.08)',
           }}
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-accent shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p 
-                className="text-amber-400"
+                className="text-accent"
                 style={{ fontFamily: 'Roboto Condensed, sans-serif', fontSize: '16px' }}
               >
-                <strong>Demo Mode:</strong> This is a simulated payment error. In production, connect your payment processor here to handle real payment failures.
+                If this keeps happening, contact support with the error details below.
               </p>
               <p 
                 className="text-white/60 text-sm"
                 style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
               >
-                {/* BACKEND INTEGRATION POINT: Replace mock error with real payment gateway response */}
-                Integration point: Handle actual payment processor error codes and messages
+                Your payment was not processed. Please verify your card and network, or try again later.
               </p>
             </div>
           </div>

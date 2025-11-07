@@ -10,6 +10,7 @@ import os
 import logging
 import asyncpg
 from typing import AsyncGenerator, Optional
+import asyncio
 from contextlib import asynccontextmanager
 
 from config.settings import settings
@@ -21,17 +22,23 @@ logger = logging.getLogger(__name__)
 connection_pool: Optional[asyncpg.pool.Pool] = None
 
 
-def init_database():
-    """Initialize database connection pool"""
+async def init_database():
+    """Initialize database connection pool (async, best effort)
+
+    - If `DATABASE_URL` is missing or connection fails, log the error and
+      continue without a pool so the API remains available.
+    - Downstream DB-dependent features must guard usage accordingly.
+    """
     global connection_pool
-    
+
     if not settings.DATABASE_URL:
-        logger.warning("DATABASE_URL not set, database functionality will be disabled")
+        logger.error("CRITICAL: DATABASE_URL is not configured — DB logging disabled")
+        connection_pool = None
         return
-    
+
     try:
-        # Create connection pool
-        connection_pool = asyncpg.create_pool(
+        # Create connection pool (await required)
+        connection_pool = await asyncpg.create_pool(
             dsn=settings.DATABASE_URL,
             min_size=1,
             max_size=10,
@@ -40,12 +47,24 @@ def init_database():
                 "application_name": "tattzoo-backend"
             }
         )
-        
+
         logger.info("✅ Database connection pool initialized successfully")
-        
-    except Exception as e:
-        logger.error(f"❌ Failed to initialize database connection pool: {e}")
-        raise
+
+    except Exception:
+        logger.exception("❌ Failed to initialize database connection pool — continuing without DB")
+        connection_pool = None
+        return
+
+
+async def close_database():
+    """Close the database connection pool"""
+    global connection_pool
+    if connection_pool:
+        try:
+            await connection_pool.close()
+            logger.info("🛑 Database connection pool closed")
+        except Exception:
+            logger.exception("❌ Failed to close database connection pool")
 
 
 @asynccontextmanager

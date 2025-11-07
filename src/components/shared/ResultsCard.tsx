@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Download, Bookmark, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
 import {
   Tooltip,
   TooltipContent,
@@ -245,8 +244,8 @@ export const ResultsCard = ({
         >
           {/* Main Image */}
           <div className="relative rounded-3xl overflow-hidden border-2 border-accent hover:border-accent/80 transition-all">
-            <ImageWithFallback
-              src={currentImage}
+            <img
+              src={currentImage || ''}
               alt="Generated tattoo design"
               className="w-full h-full object-cover object-center"
             />
@@ -326,7 +325,7 @@ export const ResultsCard = ({
       ) : (
         /* Empty State - Placeholder */
         <div className={`w-full ${aspectClass} ${maxWidthClass} mx-auto rounded-3xl overflow-hidden border-2 border-border/30 relative flex items-center justify-center`}>
-          <ImageWithFallback
+          <img
             src="https://images.unsplash.com/photo-1640202430303-a71359ade259?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0YXR0b28lMjBzbGVldmUlMjBwb3J0cmFpdHxlbnwxfHx8fDE3NjIxNDQ1MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
             alt="Tattoo placeholder"
             className="w-full h-full object-cover"

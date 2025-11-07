@@ -51,27 +51,24 @@ export function MoodSelector({
                 <button
                   key={mood.id}
                   onClick={() => onSelectMood(isSelected ? null : mood.id)}
-                  className={`flex flex-col items-center justify-center gap-1 md:gap-1.5 p-1.5 md:p-2 lg:p-2.5 rounded-xl md:rounded-2xl aspect-square transition-all duration-200 border-2 ${
+                  aria-pressed={isSelected}
+                  aria-label={`Select mood: ${mood.label}`}
+                  className={`mood-btn flex flex-col items-center justify-center gap-1 md:gap-1.5 p-1.5 md:p-2 lg:p-2.5 rounded-xl md:rounded-2xl aspect-square transition-all duration-200 border-2 ${
                     isSelected
                       ? 'border-accent bg-accent/10'
                       : 'border-border/50 bg-background/50 hover:border-accent/50 hover:bg-accent/5'
                   }`}
-                  style={{
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    boxShadow: '0 0 40px rgba(0, 0, 0, 0.8)',
-                  }}
                 >
-                  <MoodIcon 
-                    className={`transition-colors ${
-                      isSelected ? 'text-accent' : 'text-muted-foreground'
-                    }`}
-                    style={{ width: 'clamp(32px, 6vw, 48px)', height: 'clamp(32px, 6vw, 48px)' }}
-                  />
+                  {MoodIcon && (
+                    <MoodIcon 
+                      className={`transition-colors ${
+                        isSelected ? 'text-accent' : 'text-muted-foreground'
+                      } mood-icon`}
+                    />
+                  )}
                   <span className={`text-xs md:text-sm text-center transition-colors leading-tight ${
                     isSelected ? 'text-accent' : 'text-muted-foreground'
-                  }`}
-                  style={{ fontSize: 'clamp(11px, 2.2vw, 16px)' }}
+                  } mood-label`}
                   >
                     {mood.label}
                   </span>

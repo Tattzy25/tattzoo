@@ -51,6 +51,8 @@ coverage/
 # Misc
 *.local
 *.log
+ops-dashboard/
+.trae  
 
 # Yarn v2/v3
 .yarn/cache/

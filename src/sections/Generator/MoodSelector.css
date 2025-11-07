@@ -1,0 +1,11 @@
+.mood-btn {
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+}
+.mood-icon {
+  width: clamp(32px, 6vw, 48px);
+  height: clamp(32px, 6vw, 48px);
+}
+.mood-label {
+  font-size: clamp(11px, 2.2vw, 16px);
+}

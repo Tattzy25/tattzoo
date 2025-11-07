@@ -1,0 +1,25 @@
+.gemini-title {
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
+  letter-spacing: 4px;
+  font-size: clamp(2rem, 5vw, 4rem);
+  text-align: center;
+  color: rgb(255, 0, 0);
+  text-transform: uppercase;
+  margin-bottom: 3rem;
+}
+
+.gemini-image-container {
+  height: 300px;
+  width: 300p   x;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gemini-image {
+  object-fit: contain;
+  height: 100%;
+  width: 100%;
+  border-radius: 1rem;
+  background-color: transparent;
+}

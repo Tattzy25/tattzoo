@@ -12,9 +12,6 @@ export interface GeneratorSelections {
   color: string | null;
   mood: string | null;
   
-  // Skintone selection (0-100 continuous value for color interpolation)
-  skintone: number;
-  
   // Text inputs (stored when user clicks Save)
   textInputs: {
     [key: string]: string; // key is the generator type, value is the saved text
@@ -32,7 +29,6 @@ interface GeneratorContextType {
   updateSize: (size: string | null) => void;
   updateColor: (color: string | null) => void;
   updateMood: (mood: string | null) => void;
-  updateSkintone: (skintone: number) => void;
   saveTextInput: (generatorType: string, text: string) => void;
   updateImages: (images: File[]) => void;
   clearAll: () => void;
@@ -62,7 +58,6 @@ const initialSelections: GeneratorSelections = {
   size: null,
   color: null,
   mood: null,
-  skintone: 50, // Default to middle of continuous range (0-100)
   textInputs: {},
   images: [],
 };
@@ -111,11 +106,6 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
   const updateMood = (mood: string | null) => {
     console.log('😊 Mood selected:', mood);
     setSelections(prev => ({ ...prev, mood }));
-  };
-
-  const updateSkintone = (skintone: number) => {
-    console.log('👤 Skintone adjusted:', skintone);
-    setSelections(prev => ({ ...prev, skintone }));
   };
 
   const saveTextInput = (generatorType: string, text: string) => {
@@ -210,7 +200,6 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
         size: selections.size,
         color: finalColor,
         mood: finalMood,
-        skintone: selections.skintone,
         images: selections.images, // Send File[] objects directly, NOT base64
         generatorType: 'tattty'
       };
@@ -292,7 +281,6 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
         updateSize,
         updateColor,
         updateMood,
-        updateSkintone,
         saveTextInput,
         updateImages,
         clearAll,

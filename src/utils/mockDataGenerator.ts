@@ -11,8 +11,6 @@ export interface GenerateParams {
   size?: string | null;
   color?: string;
   mood?: string;
-  skintone?: number;
-  outputType?: 'color' | 'stencil';
   images?: File[]; // File objects, NOT base64 strings
   generatorType?: string;
 }
@@ -82,15 +80,34 @@ export async function generateMockAIResponse(
   };
   
   // Select response based on context and message length
-  const contextResponses = responses[context];
   const messageLength = message.length;
-  
   if (messageLength < 50) {
-    return contextResponses[Object.keys(contextResponses)[0]];
+    // Return the "short" (or "concepts"/"starter") response
+    if (context === 'optimize') {
+      return responses.optimize.short;
+    } else if (context === 'idea') {
+      return responses.idea.concepts;
+    } else if (context === 'brainstorm') {
+      return responses.brainstorm.starter;
+    }
   } else if (messageLength < 150) {
-    return contextResponses[Object.keys(contextResponses)[1]] || contextResponses[Object.keys(contextResponses)[0]];
+    // Use context-specific property for medium response
+    if (context === 'optimize') {
+      return responses.optimize.medium;
+    } else if (context === 'idea') {
+      return responses.idea.detailed;
+    } else if (context === 'brainstorm') {
+      return responses.brainstorm.deep;
+    }
   } else {
-    return contextResponses[Object.keys(contextResponses)[2]] || contextResponses[Object.keys(contextResponses)[0]];
+    // Use context-specific property for long response
+    if (context === 'optimize') {
+      return responses.optimize.long;
+    } else if (context === 'idea') {
+      return responses.idea.personalized;
+    } else if (context === 'brainstorm') {
+      return responses.brainstorm.collaborative;
+    }
   }
 }
 

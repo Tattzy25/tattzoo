@@ -23,7 +23,6 @@ export interface SessionData {
     placement?: string;
     size?: string;
     color?: string;
-    skintone?: string; // Hex color code (e.g., '#D7BD96')
     aspectRatio?: string; // e.g., '1:1', '16:9', '9:16'
     model?: 'sd3.5-large' | 'sd3-turbo'; // Stability AI model
   };
