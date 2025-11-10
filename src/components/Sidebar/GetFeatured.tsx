@@ -11,12 +11,11 @@ export function GetFeatured() {
       </div>
       
       <Card className="group overflow-hidden hover:shadow-lg transition-shadow">
-        <div className="relative aspect-square overflow-hidden">
-          <img
-            src="" // Imported from placeholder-images.ts - see featuredDesign.image
-            alt="Phoenix Rising"
-            className="w-full h-full object-cover transition-transform group-hover:scale-110"
-          />
+        <div className="relative aspect-square overflow-hidden bg-accent/10 flex items-center justify-center">
+          <div className="text-center text-accent/60">
+            <div className="text-4xl font-bold mb-2">🦅</div>
+            <div className="text-sm font-medium">Phoenix Rising</div>
+          </div>
           <div className="absolute top-2 right-2 md:top-3 md:right-3 px-2 md:px-3 py-1 bg-background/90 backdrop-blur-sm rounded-full text-xs">
             TaTTTy
           </div>
@@ -26,11 +25,9 @@ export function GetFeatured() {
             <div className="flex-1">
               <h3 className="text-base md:text-lg mb-1">Phoenix Rising</h3>
               <div className="flex items-center gap-2">
-                <img
-                  src="" // Imported from placeholder-images.ts - see featuredDesign.avatar
-                  alt="Sarah M."
-                  className="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover"
-                />
+                <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center">
+                  <span className="text-accent font-semibold text-xs">S</span>
+                </div>
                 <div className="text-xs md:text-sm">
                   <p className="text-muted-foreground">Sarah M.</p>
                   <p className="text-xs text-muted-foreground">Los Angeles, CA</p>

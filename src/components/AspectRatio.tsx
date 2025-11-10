@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useBoolean } from '../hooks/use-boolean';
 import { SelectionChip } from './shared/SelectionChip';
 import { AspectRatioOption } from '../types/aspectRatio';
 
@@ -16,7 +17,7 @@ export function AspectRatio({
   className = '' 
 }: AspectRatioProps) {
   const [internalValue, setInternalValue] = useState<string>('1:1');
-  const [hasInteracted, setHasInteracted] = useState<boolean>(false);
+  const [hasInteracted, { setTrue: setHasInteractedTrue }] = useBoolean(false);
 
   // Use controlled value if provided, otherwise use internal state
   const selectedValue = controlledValue !== undefined ? controlledValue : internalValue;
@@ -27,7 +28,7 @@ export function AspectRatio({
     } else {
       setInternalValue(value);
     }
-    setHasInteracted(true);
+    setHasInteractedTrue();
   };
 
   // Helper function to get center diamond styling based on centerEffect

@@ -73,6 +73,13 @@ class Settings(BaseSettings):
         env="GROQ_MODEL"
     )
 
+    # Stability AI Configuration
+    STABILITY_API_KEY: Optional[SecretStr] = Field(
+        default=None,
+        description="Stability AI API key for image generation",
+        env="STABILITY_API_KEY"
+    )
+
     # Ask TaTTTy logging toggle
     ASK_TATTTY_LOGGING_ENABLED: bool = Field(
         default=True,

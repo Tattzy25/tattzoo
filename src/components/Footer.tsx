@@ -1,5 +1,6 @@
 import { MapPin } from 'lucide-react';
 import { footerContent } from '../data';
+import { ThemeToggle } from './theme-toggle';
 
 interface FooterProps {
   onNavigate: (page: string) => void;
@@ -13,8 +14,9 @@ export function Footer({ onNavigate }: FooterProps) {
         <div className="w-full">
           <div className="space-y-5 md:space-y-6">
             {/* TaTTTy - Center Aligned */}
-            <div className="flex justify-center">
+            <div className="flex justify-center items-center gap-4">
               <span className="text-black text-[32px]" style={{ fontFamily: 'Rock Salt' }}>{footerContent.brandName}</span>
+              <ThemeToggle />
             </div>
             
             {/* Description - Left Aligned */}

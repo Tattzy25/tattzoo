@@ -1,0 +1,114 @@
+{
+  "tavily": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "tavily-mcp@0.1.4"
+    ],
+    "env": {
+      "TAVILY_API_KEY": "${input:tavily_api_key}"
+    },
+    "type": "stdio"
+  },
+  "playwright": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@executeautomation/playwright-mcp-server"
+    ],
+    "type": "stdio"
+  },
+  "github": {
+    "type": "http",
+    "url": "https://api.githubcopilot.com/mcp/"
+  },
+  "memory": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-memory"
+    ],
+    "type": "stdio"
+  },
+  "fetch": {
+    "command": "uvx",
+    "args": [
+      "mcp-server-fetch"
+    ],
+    "type": "stdio"
+  },
+  "context7": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@upstash/context7-mcp@latest"
+    ],
+    "type": "stdio"
+  },
+  "google-sheets": {
+    "command": "npx",
+    "args": [
+      "mcp-google-sheets"
+    ],
+    "type": "stdio"
+  },
+  "monday": {
+    "command": "npx",
+    "args": [
+      "mcp-server-monday"
+    ],
+    "type": "stdio"
+  },
+  "notion": {
+    "command": "npx",
+    "args": [
+      "notion-mcp-server"
+    ],
+    "type": "stdio"
+  },
+  "filesystem": {
+    "command": "npx",
+    "args": [
+      "@modelcontextprotocol/server-filesystem"
+    ],
+    "type": "stdio"
+  },
+  "slack": {
+    "command": "npx",
+    "args": [
+      "slack-mcp-server"
+    ],
+    "type": "stdio"
+  },
+  "everything": {
+    "command": "npx",
+    "args": [
+      "@modelcontextprotocol/server-everything"
+    ],
+    "type": "stdio"
+  },
+  "TalkToFigma": {
+    "command": "npx",
+    "args": [
+      "@sethdouglasford/mcp-figma@latest"
+    ],
+    "type": "stdio"
+  },
+  "TaTTTy": {
+    "url": "https://mcp.zapier.com/api/mcp/s/NWI2ODc3ZTMtYTE3Ni00N2IwLTliOTEtMWQzZDZkODU3NmM5OjczMjQ2ZGU1LWM2MmUtNDFjOS05MzJlLTY4YzMwNzg1YmI0NQ==/mcp",
+    "type": "http"
+  },
+  "evalstate/hf-mcp-server": {
+    "type": "http",
+    "url": "https://huggingface.co/mcp?login",
+    "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/1094d85c-b89b-4a7b-a4da-74718f67d839",
+    "version": "1.0.0"
+  },
+  "shadcn": {
+    "command": "npx",
+    "args": [
+      "shadcn@latest",
+      "mcp"
+    ]
+  }
+}

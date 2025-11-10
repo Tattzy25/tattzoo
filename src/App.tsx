@@ -3,6 +3,7 @@ import { GeneratorPage } from './components/GeneratorPage';
 import { ScreenshotProtection } from './components/shared/ScreenshotProtection';
 import { GeneratorProvider } from './contexts/GeneratorContext';
 import { LicenseProvider } from './contexts/LicenseContext';
+import { ThemeProvider } from './components/theme-provider';
 
 function AppContent() {
   useEffect(() => {
@@ -26,11 +27,18 @@ function AppContent() {
 
 export default function App() {
   return (
-    <LicenseProvider>
-      <GeneratorProvider>
-        <ScreenshotProtection />
-        <AppContent />
-      </GeneratorProvider>
-    </LicenseProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <LicenseProvider>
+        <GeneratorProvider>
+          <ScreenshotProtection />
+          <AppContent />
+        </GeneratorProvider>
+      </LicenseProvider>
+    </ThemeProvider>
   );
 }

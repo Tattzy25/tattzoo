@@ -74,3 +74,17 @@ class KeyActivateRequest(BaseModel):
 class KeyUsageResponse(BaseModel):
     images_used: int
     ar_views_used: int
+
+
+class GenerateImageRequest(BaseModel):
+    """Request schema for image generation"""
+    prompt: str
+    model: Optional[str] = "sd3.5-large"
+    aspect_ratio: Optional[str] = "1:1"
+    style: Optional[str] = "vivid"
+    negative_prompt: Optional[str] = ""
+    mood: Optional[str] = None
+    tattoo_style: Optional[str] = None
+    placement: Optional[str] = None
+    size: Optional[str] = None
+    color_preference: Optional[str] = None

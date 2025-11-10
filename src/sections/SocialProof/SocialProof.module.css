@@ -1,0 +1,17 @@
+.statCard {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, hsla(0, 0%, 100%, 0.1), hsla(0, 0%, 100%, 0.03));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.statValue {
+  text-shadow: 0 0 20px rgba(87, 241, 214, 0.5);
+}
+
+.testimonialCard {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, hsla(0, 0%, 100%, 0.1), hsla(0, 0%, 100%, 0.03));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}

@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { useDebounce } from '../hooks/use-debounce';
+import { useBoolean } from '../hooks/use-boolean';
 import { 
   Sparkles, 
   Wand2, 
@@ -26,10 +28,9 @@ import {
 import { Mood } from '../types/mood';
 import { PLACEHOLDER_MOODS, PLACEHOLDER_ASPECT_RATIOS } from '../utils/mockDataGenerator';
 import { GeneratorSidebar } from './Sidebar/GeneratorSidebar';
-import { ResultsCard } from './shared/ResultsCard';
-import { Gen1Results } from './shared/gen-1-results';
+import AIImageGeneratorBlock from './creative-tim/blocks/ai-image-generator-01';
 import { SourceCard } from './shared/SourceCard';
-import { AspectRatio } from './AspectRatio';
+
 import { TryItOnButton } from './try-it-on/TryItOnButton';
 import { 
   saveGeneratorState,
@@ -37,6 +38,7 @@ import {
   clearGeneratorState 
 } from '../utils/inputPersistence';
 import { useGenerator } from '../contexts/GeneratorContext';
+import { useLicense } from '../contexts/LicenseContext';
 import { SelectionChip } from './shared/SelectionChip';
 import { TattooGallery } from './shared/TattooGallery';
 import { FullScreenGalleryOverlay } from './shared/FullScreenGalleryOverlay';
@@ -64,12 +66,13 @@ interface GeneratorPageProps {
 
 export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   const generator = useGenerator();
+  const license = useLicense();
   
   const heroBackground: string = '/images/hero-background.jpg';
   const allGalleryDesigns = galleryDesigns;
   
-  const [generating, setGenerating] = useState(false);
-  const [generated, setGenerated] = useState(false);
+  const [generating, { setTrue: setGeneratingTrue, setFalse: setGeneratingFalse }] = useBoolean(false);
+  const [generated, { setTrue: setGeneratedTrue, setFalse: setGeneratedFalse }] = useBoolean(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [selectedColorPreference, setSelectedColorPreferenceState] = useState<string>('Black & Grey');
   const [selectedStyle, setSelectedStyleState] = useState<string>('Traditional');
@@ -77,8 +80,9 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   const [selectedPlacement, setSelectedPlacementState] = useState<string | null>(null);
   const [selectedMood, setSelectedMoodState] = useState<string>('happy');
   const [moodSearchQuery, setMoodSearchQuery] = useState('');
+  const debouncedMoodSearchQuery = useDebounce(moodSearchQuery, 300);
   const [selectedAspectRatio, setSelectedAspectRatioState] = useState<string>('1:1');
-  const [isGalleryOverlayOpen, setIsGalleryOverlayOpen] = useState(false);
+  const [isGalleryOverlayOpen, { setTrue: setGalleryOverlayOpenTrue, setFalse: setGalleryOverlayOpenFalse }] = useBoolean(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   
   const setSelectedStyle = (style: string | null) => {
@@ -160,35 +164,44 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   }, []);
 
   const handleGenerate = async () => {
+    // Check if user has a valid license first
+    if (!license.isVerified || !license.license) {
+      setValidationError('Please verify your license key first');
+      setTimeout(() => setValidationError(null), 3000);
+      return;
+    }
+
     const savedData = sessionDataStore.getSourceCardData();
-    
+
     const q1Answer = savedData?.question1?.answer || '';
     const q2Answer = savedData?.question2?.answer || '';
-    
+
     if (q1Answer.trim().length < 50 || q2Answer.trim().length < 50) {
       console.error('❌ TATTTY requires both questions with minimum 50 characters each');
       setValidationError('Click Submit First!');
       setTimeout(() => setValidationError(null), 3000);
       return;
     }
-    
+
     setValidationError(null);
-    
+
     const finalStyle = selectedStyle || 'Traditional';
     const finalColor = selectedColorPreference || 'Black & Grey';
     const finalMood = selectedMood || 'happy';
-    
+
     sessionDataStore.setOptions({
       style: finalStyle,
       color: finalColor,
       mood: finalMood,
-      placement: selectedPlacement,
-      size: selectedSize,
+      placement: selectedPlacement || undefined,
+      size: selectedSize || undefined,
       aspectRatio: selectedAspectRatio,
       model: generator.selectedModel
     });
-    
+
     console.log('🎨 Generating tattoo with:', {
+      license_key: license.license.key,
+      email: license.license.email,
       question1: savedData?.question1,
       question2: savedData?.question2,
       images: savedData?.images?.length || 0,
@@ -200,46 +213,60 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
       aspectRatio: selectedAspectRatio,
       model: generator.selectedModel
     });
-    
-    setGenerating(true);
-    
-    setTimeout(() => {
-      const shouldFail = Math.random() < 0.1;
-      
-      if (shouldFail) {
-        setGenerating(false);
-        setGenerated(false);
-        setGeneratedImage(null);
-        console.error('Generation timed out. Please try again.');
-      } else {
-        setGenerating(false);
-        setGenerated(true);
-        
-        const mockCanvas = document.createElement('canvas');
-        mockCanvas.width = 512;
-        mockCanvas.height = 512;
-        const ctx = mockCanvas.getContext('2d');
-        if (ctx) {
-          ctx.fillStyle = '#000000';
-          ctx.strokeStyle = '#000000';
-          ctx.lineWidth = 8;
-          ctx.beginPath();
-          ctx.moveTo(256, 400);
-          ctx.bezierCurveTo(150, 350, 100, 250, 150, 150);
-          ctx.bezierCurveTo(180, 100, 230, 100, 256, 140);
-          ctx.bezierCurveTo(282, 100, 332, 100, 362, 150);
-          ctx.bezierCurveTo(412, 250, 362, 350, 256, 400);
-          ctx.closePath();
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(256, 200, 30, 0, Math.PI * 2);
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fill();
-        }
-        const mockDataUrl = mockCanvas.toDataURL('image/png');
-        setGeneratedImage(mockDataUrl);
+
+    setGeneratingTrue();
+
+    try {
+      // Create form data with all the generation parameters
+      const formData = new FormData();
+      formData.append('license_key', license.license.key);
+      formData.append('email', license.license.email);
+      formData.append('question1', q1Answer);
+      formData.append('question2', q2Answer);
+      formData.append('tattoo_style', finalStyle);
+      formData.append('color_preference', finalColor);
+      formData.append('mood', finalMood);
+      formData.append('placement', selectedPlacement || '');
+      formData.append('size', selectedSize || '');
+      formData.append('aspect_ratio', selectedAspectRatio);
+      formData.append('model', generator.selectedModel);
+
+      // Call the actual image generation API
+      const response = await fetch('/api/generate/', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Image generation failed: ${response.status} - ${errorText}`);
       }
-    }, 3000);
+
+      // Get the JSON response with image URL
+      const result = await response.json();
+
+      // For now, since we don't have actual image generation, show a placeholder
+      // In production, this would be the actual image URL from Vercel Blob
+      setGeneratedImage(result.image_url || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+      setGeneratingFalse();
+      setGeneratedTrue();
+
+      // Track the generation in license context
+      license.trackGeneration();
+
+      console.log('✅ Tattoo image generated successfully');
+
+    } catch (error) {
+      console.error('❌ Image generation failed:', error);
+      setGeneratingFalse();
+      setGeneratedFalse();
+      setGeneratedImage(null);
+
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : 'Generation failed. Please try again.';
+      setValidationError(errorMessage);
+      setTimeout(() => setValidationError(null), 5000);
+    }
   };
 
   const filteredMoods = PLACEHOLDER_MOODS.filter(mood =>
@@ -323,7 +350,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
         
         <div className="flex justify-center mt-6 sm:mt-8">
           <Button
-            onClick={() => setIsGalleryOverlayOpen(true)}
+            onClick={() => setGalleryOverlayOpenTrue()}
             className={"px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg " + styles.viewAllButton}
           >
             View All Designs
@@ -364,8 +391,8 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
       </div>
 
       <div className="mt-[80px] sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[60px] sm:gap-[80px] md:gap-[100px] lg:gap-12 items-start">
-          <div className="flex flex-col order-2 lg:order-1">
+        <div className="grid grid-cols-1 gap-[60px] sm:gap-[80px] md:gap-[100px] lg:gap-12 items-start">
+          <div className="flex flex-col">
             <h2 className={"text-4xl sm:text-5xl md:text-6xl lg:text-[68px] font-[Akronim] text-white text-center uppercase mb-8 sm:mb-10 md:mb-12 lg:mb-16 px-2 " + styles.titleShadow}>
               {sectionHeadings.yourStory.title.split('\n').map((line, i) => (
                 <span key={i} className="text-[48px]">
@@ -375,17 +402,6 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
               ))}
             </h2>
             <SourceCard />
-          </div>
-          
-          <div className="flex flex-col order-1 lg:order-2">
-            <h2 className={"text-4xl sm:text-5xl md:text-6xl lg:text-[68px] font-[Akronim] text-white text-center uppercase mb-8 sm:mb-10 md:mb-12 lg:mb-16 px-2 " + styles.titleShadow}>
-              {sectionHeadings.aspectRatio.title}
-            </h2>
-            <AspectRatio 
-              aspectRatios={PLACEHOLDER_ASPECT_RATIOS}
-              selectedAspectRatio={selectedAspectRatio}
-              onSelectAspectRatio={setSelectedAspectRatio}
-            />
           </div>
         </div>
       </div>
@@ -402,12 +418,8 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
         </div>
       </div>
 
-      <div className="flex flex-col items-center pt-[80px] sm:pt-[100px] md:pt-[120px] pr-[0px] pb-[0px] pl-[0px] mt-[0px] mr-[0px] mb-[10px] ml-[0px]">
-        <Gen1Results 
-          onClick={handleGenerate}
-          isGenerating={generating}
-          errorMessage={validationError}
-        />
+      <div className="mt-[80px] sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
+        <AIImageGeneratorBlock />
       </div>
     </>
   );
@@ -462,8 +474,6 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
 
             {renderGeneratorControlsSection()}
 
-            {renderResultsSection()}
-
             <div className="hidden lg:block mt-[80px] sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
               <div className={`relative overflow-hidden rounded-t-[40px] border-t-4 ${styles.footerTopShadow}`}>
                 <Footer onNavigate={onNavigate} />
@@ -487,7 +497,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
       
       <FullScreenGalleryOverlay
         isOpen={isGalleryOverlayOpen}
-        onClose={() => setIsGalleryOverlayOpen(false)}
+        onClose={() => setGalleryOverlayOpenFalse()}
         designs={allGalleryDesigns}
       />
     </>

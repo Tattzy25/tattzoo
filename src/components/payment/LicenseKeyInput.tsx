@@ -4,6 +4,7 @@ import { KeyRound, Mail, AlertCircle, Check } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { useLicense } from '../../contexts/LicenseContext';
+import './LicenseKeyInput.css';
 
 interface LicenseKeyInputProps {
   inline?: boolean;
@@ -18,6 +19,8 @@ export function LicenseKeyInput({ inline = false, onClose, onAccessGranted }: Li
   const [licenseKey, setLicenseKey] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
+
+  const [bannerStatus, setBannerStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const handleVerify = async () => {
     setError('');
@@ -85,13 +88,7 @@ export function LicenseKeyInput({ inline = false, onClose, onAccessGranted }: Li
   // Inline form content (for use below the Enter Key button)
   const formContent = (
     <div
-      className="relative rounded-3xl border-4 border-accent/60 p-8 md:p-10"
-      style={{
-        background: 'linear-gradient(135deg, rgba(87, 241, 214, 0.12), rgba(87, 241, 214, 0.05))',
-        backdropFilter: 'blur(30px)',
-        WebkitBackdropFilter: 'blur(30px)',
-        boxShadow: 'inset 0 0 40px rgba(87, 241, 214, 0.1)',
-      }}
+      className="relative rounded-3xl border-4 border-accent/60 p-8 md:p-10 license-key-form-bg"
     >
       {/* Vault door design */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -261,9 +258,7 @@ export function LicenseKeyInput({ inline = false, onClose, onAccessGranted }: Li
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{
                   background: 'rgba(87, 241, 214, 0.2)',
                 }}
               >
@@ -283,7 +278,6 @@ export function LicenseKeyInput({ inline = false, onClose, onAccessGranted }: Li
           </div>
         </motion.div>
       )}
-
       {/* Modal */}
       <AnimatePresence>
         {isOpen && (
@@ -301,7 +295,6 @@ export function LicenseKeyInput({ inline = false, onClose, onAccessGranted }: Li
                 background: 'rgba(12, 12, 13, 0.85)',
               }}
             />
-
             {/* Vault Modal */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8, rotateY: -30 }}
@@ -315,9 +308,8 @@ export function LicenseKeyInput({ inline = false, onClose, onAccessGranted }: Li
           </>
         )}
       </AnimatePresence>
-
       {/* Access Banner */}
-      <AccessBanner status={bannerStatus} onComplete={handleBannerComplete} />
+      {/* <AccessBanner status={bannerStatus} onComplete={handleBannerComplete} /> */}
     </>
   );
 }

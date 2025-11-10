@@ -205,15 +205,31 @@ export function CarouselPanel({
                         }}
                       >
                         {/* Image */}
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className={`
-                            w-full h-full object-cover pointer-events-none transition-all duration-500
-                            ${isSelected ? 'scale-105 brightness-110' : 'group-hover:scale-105 group-hover:brightness-95'}
-                          `}
-                          draggable="false"
-                        />
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className={`
+                              w-full h-full object-cover pointer-events-none transition-all duration-500
+                              ${isSelected ? 'scale-105 brightness-110' : 'group-hover:scale-105 group-hover:brightness-95'}
+                            `}
+                            draggable="false"
+                          />
+                        ) : (
+                          <div className={`
+                            w-full h-full flex items-center justify-center pointer-events-none transition-all duration-500
+                            ${isSelected ? 'scale-105' : 'group-hover:scale-105'}
+                          `}>
+                            <div className="text-center">
+                              <div className="text-accent/60 text-2xl font-bold mb-2">
+                                {item.title.charAt(0)}
+                              </div>
+                              <div className="text-white/60 text-xs font-medium">
+                                {item.title}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         
                         {/* Gradient Overlay */}
                         <div 
