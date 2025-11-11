@@ -18,5 +18,5 @@ export {
   CarouselPanel,
   MoodSelector,
   SizeColorSelector,
-  StylePlacementSelector
+  StylePlacementSelector,
 } from './Generator';

@@ -16,7 +16,8 @@ import {
   Flame,
   Minus,
   RefreshCw as RefreshIcon,
-  Search
+  Search,
+  Camera
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
@@ -32,7 +33,6 @@ import AIImageGeneratorBlock from './creative-tim/blocks/ai-image-generator-01';
 import { SourceCard } from './shared/SourceCard';
 
 import { TryItOnButton } from './try-it-on/TryItOnButton';
-import { FrostCard } from './FrostCard';
 import { 
   saveGeneratorState,
   getGeneratorState,
@@ -40,6 +40,7 @@ import {
 } from '../utils/inputPersistence';
 import { useGenerator } from '../contexts/GeneratorContext';
 import { useLicense } from '../contexts/LicenseContext';
+import { SelectionChip } from './shared/SelectionChip';
 import { TattooGallery } from './shared/TattooGallery';
 import { FullScreenGalleryOverlay } from './shared/FullScreenGalleryOverlay';
 import { ModelPicker } from './shared/ModelPicker';
@@ -61,6 +62,7 @@ import {
   sectionHeadings
 } from '../data';
 import styles from './GeneratorPage.module.css';
+import SkinToneScanner from './shared/skin-tone-scanner';
 
 interface GeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -86,6 +88,8 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   const [selectedAspectRatio, setSelectedAspectRatioState] = useState<string>('1:1');
   const [isGalleryOverlayOpen, { setTrue: setGalleryOverlayOpenTrue, setFalse: setGalleryOverlayOpenFalse }] = useBoolean(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [detectedSkinTone, setDetectedSkinTone] = useState<{ hex: string; label: string; rgb: [number, number, number] } | null>(null);
   
   const setSelectedStyle = (style: string | null) => {
     console.log('🎨 Style selected:', style);
@@ -201,6 +205,8 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
       model: generator.selectedModel
     });
 
+    const _skinTone = generator.getSelections().skinTone;
+
     console.log('🎨 Generating tattoo with:', {
       license_key: license.license.key,
       email: license.license.email,
@@ -213,7 +219,8 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
       placement: selectedPlacement || 'Not specified',
       size: selectedSize || 'Not specified',
       aspectRatio: selectedAspectRatio,
-      model: generator.selectedModel
+      model: generator.selectedModel,
+      skinTone: _skinTone ? _skinTone : 'none'
     });
 
     setGeneratingTrue();
@@ -232,6 +239,12 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
       formData.append('size', selectedSize || '');
       formData.append('aspect_ratio', selectedAspectRatio);
       formData.append('model', generator.selectedModel);
+      const skinTone = generator.getSelections().skinTone;
+      if (skinTone) {
+        formData.append('skin_tone_label', skinTone.label);
+        formData.append('skin_tone_hex', skinTone.hex);
+        formData.append('skin_tone_rgb', skinTone.rgb.join(','));
+      }
 
       // Call the actual image generation API
       const response = await fetch('/api/generate/', {
@@ -329,7 +342,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   );
 
   const renderLiveTheMagicSection = () => (
-    <div className="mt-20 sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
+    <div className="mt-[80px] sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
       <div className="w-full px-4 md:px-8 space-y-8 sm:space-y-10 md:space-y-12 lg:space-y-16">
         <div className="text-center space-y-3 sm:space-y-4">
           <h2 
@@ -389,15 +402,31 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
               selectedMood={selectedMood}
               onSelectMood={setSelectedMood}
               title={getMoodTitle()}
+              rightAccessory={
+                <button
+                  type="button"
+                  onClick={() => setScannerOpen(true)}
+                  aria-label="Open skin tone scanner"
+                  title="Skin tone scanner"
+                  className="relative inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border border-accent/40 bg-white/5 hover:bg-white/10 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.45)] transition-all group"
+                >
+                  <span className="absolute inset-0 rounded-2xl pointer-events-none" style={{ boxShadow: 'inset 0 0 24px rgba(87,241,214,0.25)' }} />
+                  <Camera className="text-accent group-hover:scale-105 transition-transform" size={26} />
+                </button>
+              }
             />
-          </div>
-          <div className="flex items-center justify-center">
-            <FrostCard
-              image="/images/hero-background.jpg"
-              title="Analyze Skin"
-              description="Click here for TaTTy AI to Analyze your skin color"
-              className="w-full max-w-sm h-96"
-            />
+            {detectedSkinTone && (
+              <div className="flex justify-center mt-2">
+                <SelectionChip
+                  label="Skin Tone"
+                  value={`${detectedSkinTone.label} (${detectedSkinTone.hex})`}
+                  onClear={() => {
+                    setDetectedSkinTone(null);
+                    generator.updateSkinTone(null);
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -511,6 +540,16 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
         isOpen={isGalleryOverlayOpen}
         onClose={() => setGalleryOverlayOpenFalse()}
         designs={allGalleryDesigns}
+      />
+
+      <SkinToneScanner
+        open={scannerOpen}
+        onDetected={(tone) => {
+          setDetectedSkinTone(tone);
+          generator.updateSkinTone({ hex: tone.hex, label: tone.label, rgb: tone.rgb });
+        }}
+        onClose={() => setScannerOpen(false)}
+        privacyUrl="/privacy"
       />
     </>
   );

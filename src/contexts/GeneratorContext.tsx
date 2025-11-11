@@ -11,6 +11,11 @@ export interface GeneratorSelections {
   size: string | null;
   color: string | null;
   mood: string | null;
+  skinTone: {
+    hex: string;
+    label: string;
+    rgb: [number, number, number];
+  } | null;
   
   // Text inputs (stored when user clicks Save)
   textInputs: {
@@ -29,6 +34,7 @@ interface GeneratorContextType {
   updateSize: (size: string | null) => void;
   updateColor: (color: string | null) => void;
   updateMood: (mood: string | null) => void;
+  updateSkinTone: (tone: GeneratorSelections['skinTone']) => void;
   saveTextInput: (generatorType: string, text: string) => void;
   updateImages: (images: File[]) => void;
   clearAll: () => void;
@@ -58,6 +64,7 @@ const initialSelections: GeneratorSelections = {
   size: null,
   color: null,
   mood: null,
+  skinTone: null,
   textInputs: {},
   images: [],
 };
@@ -106,6 +113,11 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
   const updateMood = (mood: string | null) => {
     console.log('😊 Mood selected:', mood);
     setSelections(prev => ({ ...prev, mood }));
+  };
+
+  const updateSkinTone = (tone: GeneratorSelections['skinTone']) => {
+    console.log('🎯 Skin tone detected:', tone);
+    setSelections(prev => ({ ...prev, skinTone: tone }));
   };
 
   const saveTextInput = (generatorType: string, text: string) => {
@@ -281,6 +293,7 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
         updateSize,
         updateColor,
         updateMood,
+  updateSkinTone,
         saveTextInput,
         updateImages,
         clearAll,
