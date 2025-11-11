@@ -1,5 +1,10 @@
 """
 Image Generation Router for handling tattoo image generation endpoints
+
+MIGRATION COMPLETE:
+- Removed hardcoded Form defaults
+- Uses centralized generation_defaults for default values
+- Logs all default usage for monitoring
 """
 import time
 import base64
@@ -9,6 +14,7 @@ from typing import Optional
 from services.tattoo_generation_service import tattoo_generation_service
 from models.schemas import GenerateImageRequest, AIResponse
 from config.settings import settings
+from config.generation_defaults import generation_defaults
 
 router = APIRouter(prefix="/api/generate", tags=["Image Generation"])
 
@@ -19,48 +25,67 @@ async def generate_image(
     email: str = Form(...),
     question1: Optional[str] = Form(None),
     question2: Optional[str] = Form(None),
-    tattoo_style: Optional[str] = Form("Traditional"),
-    color_preference: Optional[str] = Form("Black & Grey"),
-    mood: Optional[str] = Form("happy"),
+    # NO HARDCODED DEFAULTS - Use centralized generation_defaults instead
+    tattoo_style: Optional[str] = Form(None),
+    color_preference: Optional[str] = Form(None),
+    mood: Optional[str] = Form(None),
     placement: Optional[str] = Form(None),
     size: Optional[str] = Form(None),
-    aspect_ratio: Optional[str] = Form("1:1"),
-    model: Optional[str] = Form("sd3.5-large")
+    aspect_ratio: Optional[str] = Form(None),
+    model: Optional[str] = Form(None)
 ) -> Response:
     """
     Generate a tattoo image using the complete workflow
 
     Args:
         All form data from the frontend submission
+        
+    FAIL-LOUD CHANGES:
+        - No hardcoded Form defaults
+        - Missing values use centralized defaults with logging
+        - All default usage is tracked
 
     Returns:
         Image response with generated tattoo
     """
     try:
-        # Compile all generation data
+        # Validate required fields FIRST (before applying defaults)
+        if not question1 or len(question1.strip()) < generation_defaults.MIN_QUESTION_LENGTH:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Question 1 must be at least {generation_defaults.MIN_QUESTION_LENGTH} characters long"
+            )
+        if not question2 or len(question2.strip()) < generation_defaults.MIN_QUESTION_LENGTH:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Question 2 must be at least {generation_defaults.MIN_QUESTION_LENGTH} characters long"
+            )
+        
+        # Apply defaults with logging - NO SILENT FALLBACKS
+        context = f"image_router - user:{email}"
+        
+        final_style = generation_defaults.get_style_default(tattoo_style, context)
+        final_color = generation_defaults.get_color_default(color_preference, context)
+        final_mood = generation_defaults.get_mood_default(mood, context)
+        final_aspect_ratio = generation_defaults.get_aspect_ratio_default(aspect_ratio, context)
+        final_model = generation_defaults.get_model_default(model, context)
+        
+        # Optional fields (no defaults applied, but can be None)
+        final_placement = placement
+        final_size = size
+        
+        # Compile all generation data with defaults applied
         generation_data = {
             "question1": question1,
             "question2": question2,
-            "tattoo_style": tattoo_style,
-            "color_preference": color_preference,
-            "mood": mood,
-            "placement": placement,
-            "size": size,
-            "aspect_ratio": aspect_ratio,
-            "model": model
+            "tattoo_style": final_style,
+            "color_preference": final_color,
+            "mood": final_mood,
+            "placement": final_placement,
+            "size": final_size,
+            "aspect_ratio": final_aspect_ratio,
+            "model": final_model
         }
-
-        # Validate required fields
-        if not question1 or len(question1.strip()) < 50:
-            raise HTTPException(
-                status_code=400,
-                detail="Question 1 must be at least 50 characters long"
-            )
-        if not question2 or len(question2.strip()) < 50:
-            raise HTTPException(
-                status_code=400,
-                detail="Question 2 must be at least 50 characters long"
-            )
 
         # Generate the tattoo using the complete workflow
         result = await tattoo_generation_service.generate_tattoo(generation_data, license_key, email)

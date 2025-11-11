@@ -1,10 +1,20 @@
 """
 Stability AI service for image generation
+
+MIGRATION COMPLETE:
+- Removed hardcoded defaults in function signature
+- Uses centralized generation_defaults for mapping and defaults
+- Logs all mapping operations
+- Fails loudly on configuration errors
 """
 import aiohttp
 import uuid
+import logging
 from typing import Dict, Any, Optional
 from config.settings import settings
+from config.generation_defaults import generation_defaults
+
+logger = logging.getLogger(__name__)
 
 
 class StabilityAIService:
@@ -20,10 +30,10 @@ class StabilityAIService:
     async def generate_image(
         self,
         prompt: str,
-        model: str = "sd3.5-large",
-        aspect_ratio: str = "1:1",
-        style: str = "vivid",
-        negative_prompt: str = ""
+        model: str,
+        aspect_ratio: str,
+        style: str,
+        negative_prompt: str
     ) -> Dict[str, Any]:
         """
         Generate an image using Stability AI
@@ -37,28 +47,26 @@ class StabilityAIService:
 
         Returns:
             Dict containing image data and metadata
+            
+        FAIL-LOUD CHANGES:
+            - No hardcoded defaults in signature
+            - Uses centralized mapping with logging
+            - Explicit error messages
         """
         if not self.api_key:
-            raise ValueError("Stability AI API key not configured")
+            raise ValueError(
+                "CRITICAL: Stability AI API key not configured. "
+                "Set STABILITY_API_KEY environment variable."
+            )
 
-        # Map aspect ratios to Stability AI format
-        aspect_ratio_map = {
-            "1:1": "1:1",
-            "16:9": "16:9",
-            "9:16": "9:16",
-            "4:3": "4:3",
-            "3:4": "3:4",
-            "21:9": "21:9",
-            "9:21": "9:21"
-        }
+        # Use centralized aspect ratio mapping with logging - NO SILENT FALLBACKS
+        context = "stability_ai_service.generate_image"
+        mapped_aspect_ratio = generation_defaults.map_aspect_ratio(aspect_ratio, context)
+        
+        # Use centralized model mapping with logging - NO SILENT FALLBACKS
+        mapped_model = generation_defaults.map_model(model, context)
 
-        # Map model names
-        model_map = {
-            "sd3.5-large": "sd3.5-large",
-            "sd3-turbo": "sd3-turbo"
-        }
-
-        endpoint = f"{self.base_url}/v2beta/stable-image/generate/{model_map.get(model, 'sd3.5-large')}"
+        endpoint = f"{self.base_url}/v2beta/stable-image/generate/{mapped_model}"
 
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -67,10 +75,10 @@ class StabilityAIService:
 
         data = {
             "prompt": prompt,
-            "aspect_ratio": aspect_ratio_map.get(aspect_ratio, "1:1"),
+            "aspect_ratio": mapped_aspect_ratio,
             "style_preset": style,
-            "negative_prompt": negative_prompt or "blurry, low quality, distorted, ugly",
-            "seed": 0,  # For consistent results during development
+            "negative_prompt": negative_prompt,
+            "seed": generation_defaults.STABILITY_SEED,  # Use centralized default
             "output_format": "png"
         }
 
@@ -78,6 +86,9 @@ class StabilityAIService:
             async with session.post(endpoint, headers=headers, data=data) as response:
                 if response.status != 200:
                     error_text = await response.text()
+                    logger.error(
+                        f"❌ STABILITY AI API ERROR: {response.status} - {error_text}"
+                    )
                     raise Exception(f"Stability AI API error: {response.status} - {error_text}")
 
                 # Get the image data
@@ -86,9 +97,9 @@ class StabilityAIService:
                 return {
                     "image_data": image_data,
                     "content_type": response.headers.get("Content-Type", "image/png"),
-                    "model": model,
+                    "model": mapped_model,
                     "prompt": prompt,
-                    "aspect_ratio": aspect_ratio
+                    "aspect_ratio": mapped_aspect_ratio
                 }
 
 

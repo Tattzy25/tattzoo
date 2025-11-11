@@ -1,8 +1,15 @@
 """
 Tattoo Generation Service - Orchestrates the full tattoo generation workflow
+
+MIGRATION COMPLETE:
+- Removed silent fallbacks with .get() defaults
+- Uses centralized generation_defaults for default values
+- Logs all default usage and fallback scenarios
+- Fails loudly when critical errors occur
 """
 import uuid
 import base64
+import logging
 from typing import Dict, Any, Optional
 from datetime import datetime
 
@@ -10,6 +17,9 @@ from services.openai_service import openai_service
 from services.stability_ai_service import stability_ai_service
 from services.key_manager_service import validate_key, record_usage
 from config.settings import settings
+from config.generation_defaults import generation_defaults
+
+logger = logging.getLogger(__name__)
 
 
 class TattooGenerationService:
@@ -42,12 +52,24 @@ class TattooGenerationService:
         enhanced_prompt = await self._enhance_prompt_with_openai(generation_data)
 
         # Step 3: Generate image with Stability AI
+        # Use centralized defaults with explicit logging - NO SILENT FALLBACKS
+        context = "tattoo_generation_service.generate_tattoo"
+        
+        final_model = generation_defaults.get_model_default(
+            generation_data.get("model"), 
+            context
+        )
+        final_aspect_ratio = generation_defaults.get_aspect_ratio_default(
+            generation_data.get("aspect_ratio"),
+            context
+        )
+        
         image_result = await stability_ai_service.generate_image(
             prompt=enhanced_prompt,
-            model=generation_data.get("model", "sd3.5-large"),
-            aspect_ratio=generation_data.get("aspect_ratio", "1:1"),
-            style="vivid",
-            negative_prompt="blurry, low quality, distorted, ugly, text, words, letters"
+            model=final_model,
+            aspect_ratio=final_aspect_ratio,
+            style=generation_defaults.STABILITY_STYLE,  # Use centralized default
+            negative_prompt=generation_defaults.STABILITY_NEGATIVE_PROMPT  # Use centralized default
         )
 
         # Step 4: Upload to Vercel Blob (placeholder - would need Vercel Blob SDK)
@@ -72,7 +94,14 @@ class TattooGenerationService:
         }
 
     async def _enhance_prompt_with_openai(self, generation_data: Dict[str, Any]) -> str:
-        """Create a detailed tattoo generation prompt using OpenAI (heavy enhancement for image gen)"""
+        """
+        Create a detailed tattoo generation prompt using OpenAI (heavy enhancement for image gen)
+        
+        FAIL-LOUD CHANGES:
+        - No silent .get() fallbacks
+        - Uses centralized defaults with logging
+        - Explicit error handling with informative messages
+        """
         # Combine all user inputs into a comprehensive prompt for AI image generation
         prompt_parts = []
 
@@ -82,14 +111,42 @@ class TattooGenerationService:
         if generation_data.get("question2"):
             prompt_parts.append(f"Additional Details: {generation_data['question2']}")
 
-        # Add all the technical specifications
+        # Add all the technical specifications with centralized defaults
+        context = "_enhance_prompt_with_openai"
+        
+        # Use centralized defaults with explicit logging - NO SILENT FALLBACKS
+        style = generation_defaults.get_style_default(
+            generation_data.get('tattoo_style'),
+            context
+        )
+        color = generation_defaults.get_color_default(
+            generation_data.get('color_preference'),
+            context
+        )
+        mood = generation_defaults.get_mood_default(
+            generation_data.get('mood'),
+            context
+        )
+        placement = generation_defaults.get_placement_default(
+            generation_data.get('placement'),
+            context
+        )
+        size = generation_defaults.get_size_default(
+            generation_data.get('size'),
+            context
+        )
+        aspect_ratio = generation_defaults.get_aspect_ratio_default(
+            generation_data.get('aspect_ratio'),
+            context
+        )
+        
         specs = [
-            f"Style: {generation_data.get('tattoo_style', 'Traditional')}",
-            f"Colors: {generation_data.get('color_preference', 'Black & Grey')}",
-            f"Mood: {generation_data.get('mood', 'balanced')}",
-            f"Placement: {generation_data.get('placement', 'forearm')}",
-            f"Size: {generation_data.get('size', 'medium')}",
-            f"Aspect Ratio: {generation_data.get('aspect_ratio', '1:1')}"
+            f"Style: {style}",
+            f"Colors: {color}",
+            f"Mood: {mood}",
+            f"Placement: {placement}",
+            f"Size: {size}",
+            f"Aspect Ratio: {aspect_ratio}"
         ]
         prompt_parts.extend(specs)
 
@@ -127,10 +184,17 @@ Output: A single, comprehensive paragraph (200-400 words) that serves as a compl
             if enhanced_prompt:
                 return enhanced_prompt.strip()
             else:
+                # FAIL LOUD: Log when returning fallback prompt
+                logger.warning(
+                    "⚠️ FALLBACK PROMPT: OpenAI returned empty content, using basic prompt construction"
+                )
                 return f"Professional tattoo design: {full_context}. Highly detailed, realistic tattoo artwork with proper shading, line work, and skin texture."
 
         except Exception as e:
-            # Fallback to basic prompt construction if OpenAI fails
+            # FAIL LOUD: Log OpenAI failure and use fallback
+            logger.error(
+                f"❌ OPENAI ENHANCEMENT FAILED: {str(e)}. Using fallback prompt construction."
+            )
             return f"Professional tattoo design: {full_context}. Highly detailed, realistic tattoo artwork with proper shading, line work, and skin texture."
 
     async def _upload_to_vercel_blob(self, image_data: bytes) -> str:
