@@ -87,6 +87,31 @@ class Settings(BaseSettings):
         env="ASK_TATTTY_LOGGING_ENABLED"
     )
     
+    # Google Sheets Configuration
+    GOOGLE_SERVICE_ACCOUNT_FILE: Optional[str] = Field(
+        default=None,
+        description="Path to Google Service Account JSON file",
+        env="GOOGLE_SERVICE_ACCOUNT_FILE"
+    )
+    
+    GOOGLE_SERVICE_ACCOUNT_JSON: Optional[str] = Field(
+        default=None,
+        description="Google Service Account JSON as string (for cloud deployment)",
+        env="GOOGLE_SERVICE_ACCOUNT_JSON"
+    )
+    
+    TATTOO_LOG_SPREADSHEET_ID: Optional[str] = Field(
+        default=None,
+        description="Google Sheets ID for logging tattoo generations",
+        env="TATTOO_LOG_SPREADSHEET_ID"
+    )
+    
+    FEEDBACK_SPREADSHEET_ID: Optional[str] = Field(
+        default=None,
+        description="Google Sheets ID for user feedback",
+        env="FEEDBACK_SPREADSHEET_ID"
+    )
+    
     # Server Configuration
     HOST: str = Field(
         default="0.0.0.0",

@@ -25,29 +25,12 @@ export function FullScreenGalleryOverlay({
   designs,
 }: FullScreenGalleryOverlayProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilters, setActiveFilters] = useState<Record<FilterType, string[]>>({
-    trending: [],
-    popular: [],
-    style: [],
-    color: [],
-    size: [],
-    vibe: [],
-    gender: [],
-    top10: [],
-  });
   const [displayCount, setDisplayCount] = useState(20);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const [favorites, setFavorites] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  
-  // Mini search for style filter (because it has 70+ options)
-  const [styleSearchQuery, setStyleSearchQuery] = useState('');
-  
-  // Mobile filter sidebar toggle
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   
   // Image aspect ratio detection
   const [imageOrientation, setImageOrientation] = useState<'portrait' | 'landscape' | null>(null);
@@ -311,21 +294,7 @@ export function FullScreenGalleryOverlay({
           <X size={24} style={{ color: '#0C0C0D' }} />
         </button>
 
-        {/* Mobile Filter Toggle Button - Only visible on mobile */}
-        <button
-          onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className="fixed top-4 left-4 md:hidden z-[10000] p-2 rounded-full transition-all"
-          style={{
-            backgroundColor: isFilterOpen ? '#57f1d6' : 'rgba(255, 255, 255, 0.1)',
-          }}
-        >
-          <SlidersHorizontal 
-            size={24} 
-            style={{ color: isFilterOpen ? '#0C0C0D' : '#ffffff' }} 
-          />
-        </button>
-
-        <div className="h-full flex flex-col md:flex-row pt-16 md:pt-20">
+        <div className="h-full flex flex-col pt-16 md:pt-20">
           {/* LEFT SIDEBAR - Filters */}
           <div 
             className={`
@@ -338,6 +307,8 @@ export function FullScreenGalleryOverlay({
               backgroundColor: 'rgba(12, 12, 13, 0.98)',
               paddingTop: '24px',
               marginTop: '0',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
             }}
           >
             <div className="flex items-center justify-between">
@@ -475,7 +446,13 @@ export function FullScreenGalleryOverlay({
                   </div>
                   
                   {/* Style Options */}
-                  <div className="flex flex-wrap gap-2 max-h-64 overflow-y-auto pr-2">
+                  <div 
+                    className="flex flex-wrap gap-2 max-h-64 overflow-y-auto pr-2"
+                    style={{
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none',
+                    }}
+                  >
                     {filteredStyleOptions.length > 0 ? (
                       filteredStyleOptions.map((option) => (
                         <Button
@@ -668,6 +645,10 @@ export function FullScreenGalleryOverlay({
           <div 
             ref={scrollRef}
             className="flex-1 overflow-y-auto p-4 md:p-6"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
           >
             <div>
               {/* Results Count */}

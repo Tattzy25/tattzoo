@@ -171,9 +171,10 @@ export function CarouselPanel({
             
             {/* Scrollable Cards Area */}
             <div 
-              className="overflow-y-auto overflow-x-visible flex-1 px-3 md:px-4 scrollbar-thin scrollbar-thumb-accent/40 hover:scrollbar-thumb-accent/60 scrollbar-track-transparent scroll-smooth"
+              className="overflow-y-auto overflow-x-visible flex-1 px-3 md:px-4 scroll-smooth"
               style={{
-                scrollbarGutter: 'stable',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
               }}
             >
               <Suspense fallback={
@@ -237,8 +238,8 @@ export function CarouselPanel({
                           className={`
                             absolute inset-0 transition-all duration-500
                             ${isSelected 
-                              ? 'bg-gradient-to-t from-accent/40 via-black/60 to-black/20' 
-                              : 'bg-gradient-to-t from-black/90 via-black/50 to-transparent group-hover:from-black/80'
+                              ? 'bg-linear-to-t from-accent/40 via-black/60 to-black/20' 
+                              : 'bg-linear-to-t from-black/90 via-black/50 to-transparent group-hover:from-black/80'
                             }
                           `}
                         />

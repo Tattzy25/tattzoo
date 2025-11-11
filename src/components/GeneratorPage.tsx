@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useDebounce } from '../hooks/use-debounce';
 import { useBoolean } from '../hooks/use-boolean';
 import { 
@@ -26,31 +26,26 @@ import {
   MoodSelector,
   CarouselPanel,
 } from '../sections/Generator';
-import { Mood } from '../types/mood';
-import { PLACEHOLDER_MOODS, PLACEHOLDER_ASPECT_RATIOS } from '../utils/mockDataGenerator';
-import { GeneratorSidebar } from './Sidebar/GeneratorSidebar';
+import { PLACEHOLDER_MOODS } from '../utils/mockDataGenerator';
 import AIImageGeneratorBlock from './creative-tim/blocks/ai-image-generator-01';
 import { SourceCard } from './shared/SourceCard';
 
 import { TryItOnButton } from './try-it-on/TryItOnButton';
 import { 
-  saveGeneratorState,
   getGeneratorState,
   clearGeneratorState 
 } from '../utils/inputPersistence';
 import { useGenerator } from '../contexts/GeneratorContext';
 import { useLicense } from '../contexts/LicenseContext';
-import { SelectionChip } from './shared/SelectionChip';
 import { TattooGallery } from './shared/TattooGallery';
 import { FullScreenGalleryOverlay } from './shared/FullScreenGalleryOverlay';
 import { ModelPicker } from './shared/ModelPicker';
+import { ResultsCard } from './shared/ResultsCard';
 import { HowItWorksTimeline } from './HowItWorksTimeline';
 import { SocialProof } from '../sections/SocialProof/SocialProof';
 import { Pricing } from '../sections/Pricing/Pricing';
 import { Footer } from './Footer';
 import { StyledPhrase } from './shared/StyledPhrase';
-import { Carousel, CarouselContent, CarouselItem } from './ui/carousel';
-import { TattooImageCard } from './shared/TattooImageCard';
 import { sessionDataStore } from '../services/submissionService';
 import { 
   galleryDesigns,
@@ -62,7 +57,6 @@ import {
   sectionHeadings
 } from '../data';
 import styles from './GeneratorPage.module.css';
-import SkinToneScanner from './shared/skin-tone-scanner';
 
 interface GeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -88,8 +82,6 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   const [selectedAspectRatio, setSelectedAspectRatioState] = useState<string>('1:1');
   const [isGalleryOverlayOpen, { setTrue: setGalleryOverlayOpenTrue, setFalse: setGalleryOverlayOpenFalse }] = useBoolean(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [scannerOpen, setScannerOpen] = useState(false);
-  const [detectedSkinTone, setDetectedSkinTone] = useState<{ hex: string; label: string; rgb: [number, number, number] } | null>(null);
   
   const setSelectedStyle = (style: string | null) => {
     console.log('🎨 Style selected:', style);
@@ -402,31 +394,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
               selectedMood={selectedMood}
               onSelectMood={setSelectedMood}
               title={getMoodTitle()}
-              rightAccessory={
-                <button
-                  type="button"
-                  onClick={() => setScannerOpen(true)}
-                  aria-label="Open skin tone scanner"
-                  title="Skin tone scanner"
-                  className="relative inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border border-accent/40 bg-white/5 hover:bg-white/10 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.45)] transition-all group"
-                >
-                  <span className="absolute inset-0 rounded-2xl pointer-events-none" style={{ boxShadow: 'inset 0 0 24px rgba(87,241,214,0.25)' }} />
-                  <Camera className="text-accent group-hover:scale-105 transition-transform" size={26} />
-                </button>
-              }
             />
-            {detectedSkinTone && (
-              <div className="flex justify-center mt-2">
-                <SelectionChip
-                  label="Skin Tone"
-                  value={`${detectedSkinTone.label} (${detectedSkinTone.hex})`}
-                  onClear={() => {
-                    setDetectedSkinTone(null);
-                    generator.updateSkinTone(null);
-                  }}
-                />
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -493,9 +461,9 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
       <div className="w-full overflow-x-hidden">
         {renderHeroSection()}
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_460px] gap-4 sm:gap-6 md:gap-8 py-12 sm:py-16 md:py-20 lg:py-0 bg-background">
+        <div className="w-full bg-background">
           <div 
-            className={`space-y-8 md:space-y-10 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:pt-[120px] pb-12 px-4 md:px-6 lg:pl-2.5 lg:pr-4 ${styles.leftPanelNoScrollbar}`}>
+            className="w-full space-y-8 md:space-y-10 pb-12 px-4 md:px-6">
             
             {renderIntroSection()}
 
@@ -523,10 +491,6 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
 
           </div>
 
-          <GeneratorSidebar>
-            <>
-            </>
-          </GeneratorSidebar>
         </div>
 
         <div className={`lg:hidden w-full ${styles.mobileFooterWrapper}`}>
@@ -540,16 +504,6 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
         isOpen={isGalleryOverlayOpen}
         onClose={() => setGalleryOverlayOpenFalse()}
         designs={allGalleryDesigns}
-      />
-
-      <SkinToneScanner
-        open={scannerOpen}
-        onDetected={(tone) => {
-          setDetectedSkinTone(tone);
-          generator.updateSkinTone({ hex: tone.hex, label: tone.label, rgb: tone.rgb });
-        }}
-        onClose={() => setScannerOpen(false)}
-        privacyUrl="/privacy"
       />
     </>
   );

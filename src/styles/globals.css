@@ -33,14 +33,6 @@
   --chart-4: #f472b6;
   --chart-5: #fb923c;
   --radius: 1rem;
-  --sidebar: #0C0C0D;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #57f1d6;
-  --sidebar-primary-foreground: #0C0C0D;
-  --sidebar-accent: #1a1a1b;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #57f1d6;
   
   /* TaTTTy Brand Colors */
   --teal-echo-1: rgba(87, 241, 214, 0.8);
@@ -76,14 +68,6 @@
   --chart-3: #a78bfa;
   --chart-4: #f472b6;
   --chart-5: #fb923c;
-  --sidebar: #0C0C0D;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #57f1d6;
-  --sidebar-primary-foreground: #0C0C0D;
-  --sidebar-accent: #1a1a1b;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #57f1d6;
   
   /* TaTTTy Brand Colors */
   --teal-echo-1: rgba(87, 241, 214, 0.8);
@@ -123,14 +107,6 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 @layer base {

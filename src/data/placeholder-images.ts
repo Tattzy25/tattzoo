@@ -82,7 +82,7 @@ export const galleryExamples: string[] = [
 
 /**
  * Featured design showcase
- * High-quality featured design for sidebar
+ * High-quality featured design for display
  */
 export const featuredDesign = {
   image: '', // Main featured tattoo design
