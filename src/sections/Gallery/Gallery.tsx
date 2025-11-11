@@ -52,11 +52,10 @@ export function Gallery() {
       </div>
       
       {/* Full Screen Gallery Overlay - Rendered at root level to cover everything */}
-      <FullScreenGalleryOverlay
-        isOpen={isGalleryOverlayOpen}
-        onClose={() => setIsGalleryOverlayOpen(false)}
-        designs={allGalleryDesigns}
-      />
+        <GalleryOverlay
+          isOpen={isGalleryOverlayOpen}
+          onClose={() => setIsGalleryOverlayOpen(false)}
+        />
     </>
   );
 }

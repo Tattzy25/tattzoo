@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 import { generateMockTattooImage, generateMockVariations } from '../utils/mockDataGenerator';
 import { saveGenerationToHistory, saveRecentPrompt } from '../utils/localStorageManager';
 import type { ModelType } from '../components/shared/ModelPicker';
@@ -84,43 +84,43 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
   // Model selection - Default to Quality model
   const [selectedModel, setSelectedModelState] = useState<ModelType>('sd3.5-large');
   
-  const setSelectedModel = (model: ModelType) => {
+  const setSelectedModel = useCallback((model: ModelType) => {
     console.log('⚡ Model selected:', model);
     setSelectedModelState(model);
-  };
+  }, []);
 
   // Selection update functions
-  const updateStyle = (style: string | null) => {
+  const updateStyle = useCallback((style: string | null) => {
     console.log('🎨 Style selected:', style);
     setSelections(prev => ({ ...prev, style }));
-  };
+  }, []);
 
-  const updatePlacement = (placement: string | null) => {
+  const updatePlacement = useCallback((placement: string | null) => {
     console.log('📍 Placement selected:', placement);
     setSelections(prev => ({ ...prev, placement }));
-  };
+  }, []);
 
-  const updateSize = (size: string | null) => {
+  const updateSize = useCallback((size: string | null) => {
     console.log('📏 Size selected:', size);
     setSelections(prev => ({ ...prev, size }));
-  };
+  }, []);
 
-  const updateColor = (color: string | null) => {
+  const updateColor = useCallback((color: string | null) => {
     console.log('🎨 Color selected:', color);
     setSelections(prev => ({ ...prev, color }));
-  };
+  }, []);
 
-  const updateMood = (mood: string | null) => {
+  const updateMood = useCallback((mood: string | null) => {
     console.log('😊 Mood selected:', mood);
     setSelections(prev => ({ ...prev, mood }));
-  };
+  }, []);
 
-  const updateSkinTone = (tone: GeneratorSelections['skinTone']) => {
+  const updateSkinTone = useCallback((tone: GeneratorSelections['skinTone']) => {
     console.log('🎯 Skin tone detected:', tone);
     setSelections(prev => ({ ...prev, skinTone: tone }));
-  };
+  }, []);
 
-  const saveTextInput = (generatorType: string, text: string) => {
+  const saveTextInput = useCallback((generatorType: string, text: string) => {
     console.log(`💬 Text input saved for ${generatorType}:`, text.substring(0, 50) + (text.length > 50 ? '...' : ''));
     setSelections(prev => ({
       ...prev,
@@ -129,20 +129,20 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
         [generatorType]: text,
       },
     }));
-  };
+  }, []);
 
-  const updateImages = (images: File[]) => {
+  const updateImages = useCallback((images: File[]) => {
     console.log(`📸 Images updated in GeneratorContext: ${images.length} file(s)`);
     setSelections(prev => ({ ...prev, images }));
-  };
+  }, []);
 
-  const clearAll = () => {
+  const clearAll = useCallback(() => {
     setSelections(initialSelections);
     setGeneratedDesigns([]);
     setGenerationError(null);
-  };
+  }, []);
 
-  const getSelections = () => selections;
+  const getSelections = useCallback(() => selections, [selections]);
 
   /**
    * MAIN GENERATE HANDLER - Called when user clicks Generate button
@@ -283,36 +283,55 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const contextValue = useMemo(() => ({
+    // Selection state
+    selections,
+    updateStyle,
+    updatePlacement,
+    updateSize,
+    updateColor,
+    updateMood,
+    updateSkinTone,
+    saveTextInput,
+    updateImages,
+    clearAll,
+    getSelections,
+    
+    // Generation state
+    isGenerating,
+    generatedDesigns,
+    generationError,
+    
+    // Model selection
+    selectedModel,
+    setSelectedModel,
+    
+    // Generation functions
+    handleGenerate,
+    generateVariations,
+  }), [
+    selections,
+    updateStyle,
+    updatePlacement,
+    updateSize,
+    updateColor,
+    updateMood,
+    updateSkinTone,
+    saveTextInput,
+    updateImages,
+    clearAll,
+    getSelections,
+    isGenerating,
+    generatedDesigns,
+    generationError,
+    selectedModel,
+    setSelectedModel,
+    handleGenerate,
+    generateVariations,
+  ]);
+
   return (
-    <GeneratorContext.Provider
-      value={{
-        // Selection state
-        selections,
-        updateStyle,
-        updatePlacement,
-        updateSize,
-        updateColor,
-        updateMood,
-  updateSkinTone,
-        saveTextInput,
-        updateImages,
-        clearAll,
-        getSelections,
-        
-        // Generation state
-        isGenerating,
-        generatedDesigns,
-        generationError,
-        
-        // Model selection
-        selectedModel,
-        setSelectedModel,
-        
-        // Generation functions
-        handleGenerate,
-        generateVariations,
-      }}
-    >
+    <GeneratorContext.Provider value={contextValue}>
       {children}
     </GeneratorContext.Provider>
   );

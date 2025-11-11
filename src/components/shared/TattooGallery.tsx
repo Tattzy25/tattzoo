@@ -36,12 +36,12 @@ export function TattooGallery({
   const [touchEnd, setTouchEnd] = useState<number>(0);
 
   // Load favorites from localStorage on mount
-  useState(() => {
+  useEffect(() => {
     const saved = localStorage.getItem('tattty_gallery_favorites');
     if (saved) {
       setFavorites(JSON.parse(saved));
     }
-  });
+  }, []);
 
   const displayedDesigns = designs.slice(0, displayCount);
 

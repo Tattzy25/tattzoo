@@ -87,31 +87,6 @@ class Settings(BaseSettings):
         env="ASK_TATTTY_LOGGING_ENABLED"
     )
     
-    # Google Sheets Configuration
-    GOOGLE_SERVICE_ACCOUNT_FILE: Optional[str] = Field(
-        default=None,
-        description="Path to Google Service Account JSON file",
-        env="GOOGLE_SERVICE_ACCOUNT_FILE"
-    )
-    
-    GOOGLE_SERVICE_ACCOUNT_JSON: Optional[str] = Field(
-        default=None,
-        description="Google Service Account JSON as string (for cloud deployment)",
-        env="GOOGLE_SERVICE_ACCOUNT_JSON"
-    )
-    
-    TATTOO_LOG_SPREADSHEET_ID: Optional[str] = Field(
-        default=None,
-        description="Google Sheets ID for logging tattoo generations",
-        env="TATTOO_LOG_SPREADSHEET_ID"
-    )
-    
-    FEEDBACK_SPREADSHEET_ID: Optional[str] = Field(
-        default=None,
-        description="Google Sheets ID for user feedback",
-        env="FEEDBACK_SPREADSHEET_ID"
-    )
-    
     # Server Configuration
     HOST: str = Field(
         default="0.0.0.0",
@@ -175,6 +150,24 @@ class Settings(BaseSettings):
         description="Streaming response throttle delay in milliseconds",
         env="STREAMING_THROTTLE_MS",
         ge=0
+    )
+
+    # Mixedbread Search Configuration (optional)
+    MIXEDBREAD_API_KEY: Optional[SecretStr] = Field(
+        default=None,
+        description="Mixedbread API key for Search/Stores (optional)",
+        env="MIXEDBREAD_API_KEY"
+    )
+    MIXEDBREAD_TATTOO_STORE_ID: Optional[str] = Field(
+        default=None,
+        description="Default Mixedbread Store identifier for tattoo assets (ID or name)",
+        env="MIXEDBREAD_TATTOO_STORE_ID"
+    )
+    MIXEDBREAD_TIMEOUT_MS: int = Field(
+        default=15000,
+        description="HTTP timeout when calling Mixedbread APIs in milliseconds",
+        env="MIXEDBREAD_TIMEOUT_MS",
+        ge=1000
     )
 
     # Feature Flags

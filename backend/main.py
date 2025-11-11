@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config.settings import settings
-from routers import ai_router, health_router, key_router, image_router
+from routers import ai_router, health_router, key_router, image_router, mixedbread_router
 from db.database_asyncpg import init_database, close_database
 
 # Configure logging
@@ -65,6 +65,7 @@ def create_app() -> FastAPI:
     app.include_router(ai_router.router)
     app.include_router(key_router.router)
     app.include_router(image_router.router)
+    app.include_router(mixedbread_router.router)
 
     return app
 

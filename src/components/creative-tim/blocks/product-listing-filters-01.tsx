@@ -1,7 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { Heart } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Heart, X, ChevronLeft, ChevronRight } from "lucide-react"
+// Reuse shared gallery visual styles (shadows, heart button styles, etc.)
+// so the cards in this gallery have the same deep glow/shadow as the top gallery.
+import "../../shared/TattooGallery.css"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,81 +15,98 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { galleryDesigns } from "@/data/gallery"
+import { tattooStyles, tattooPlacements, tattooSizes, colorPreferences } from "@/data/generator-options"
+import { moods } from "@/data/moods"
+
+type GalleryProduct = {
+  id: string;
+  image: string;
+  name: string;
+  brand?: string;
+  badge?: string | null;
+  price?: string | number;
+  metadata?: Record<string, any>;
+};
+
+interface ProductListingProps {
+  products?: GalleryProduct[];
+  showFilters?: boolean;
+  hidePrice?: boolean;
+  columnsClassName?: string;
+  totalLabel?: string;
+  onLoadMore?: () => void;
+  onItemClick?: (product: GalleryProduct) => void;
+  onFiltersChange?: (filters: Record<string, string>) => void;
+}
 
 const FILTERS = [
   {
-    id: "categories",
-    label: "Categories",
-    options: ["All", "Shirts", "Pants", "Sweaters", "Jackets"],
+    id: "style",
+    label: "Style",
+    options: ["All Styles", ...tattooStyles],
+  },
+  {
+    id: "placement",
+    label: "Placement",
+    options: ["All Placements", ...tattooPlacements],
   },
   {
     id: "size",
     label: "Size",
-    options: ["All Sizes", "XS", "S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: "material",
-    label: "Material",
-    options: ["All Materials", "Cotton", "Cashmere", "Wool", "Silk", "Linen"],
+    options: ["All Sizes", ...tattooSizes],
   },
   {
     id: "color",
     label: "Color",
-    options: ["All Colors", "Black", "Blue", "Gray", "Brown", "White", "Navy"],
+    options: ["All Colors", ...colorPreferences],
   },
   {
-    id: "pattern",
-    label: "Pattern",
-    options: ["All Patterns", "Solid", "Striped", "Cable-knit", "Printed"],
+    id: "mood",
+    label: "Mood",
+    options: ["All Moods", ...moods.map(m => m.label)],
   },
 ]
 
-const PRODUCTS = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1574015974293-817f0ebebb74?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=973",
-    brand: "Zegna",
-    name: "Cable-knit cashmere cardigan",
-    price: "€3,450",
-    badge: "Exclusive",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1559745482-57bfa9ca5a8a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1481",
-    brand: "Zegna",
-    name: "Cotton and cashmere shirt",
-    price: "€675",
-    badge: null,
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1737608734653-d1eaad541d46?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1027",
-    brand: "Zegna",
-    name: "Wool straight pants",
-    price: "€1,450",
-    badge: "Exclusive",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1661327930345-9c6714b603b3?auto=format&fit=crop&q=80&w=400&h=400",
-    brand: "Zegna",
-    name: "Cashmere sweater",
-    price: "€1,950",
-    badge: "New Arrival",
-  },
-]
+// Convert gallery designs to products format
+const TATTOO_PRODUCTS: GalleryProduct[] = galleryDesigns.map(design => ({
+  id: design.id,
+  image: design.image,
+  name: design.title,
+  brand: "TaTTTy",
+  badge: null,
+  metadata: {
+    style: "Various",
+    placement: "Various",
+    size: "Medium",
+    color: "Black & Grey",
+    mood: "Various"
+  }
+}))
 
-export default function ProductListingFilters01() {
-  const [favorites, setFavorites] = useState<number[]>([])
+export default function ImageGallery({
+  products,
+  showFilters = false,
+  hidePrice = false,
+  columnsClassName = "grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-4",
+  totalLabel,
+  onLoadMore,
+  onItemClick,
+  onFiltersChange,
+}: ProductListingProps) {
+  const [favorites, setFavorites] = useState<string[]>([])
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string>
   >({})
 
-  const toggleFavorite = (productId: number) => {
+  // Lightbox state
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null)
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
+
+  // Use provided products or default to TATTOO_PRODUCTS
+  const data = useMemo(() => products || TATTOO_PRODUCTS, [products])
+
+  const toggleFavorite = (productId: string) => {
     setFavorites((prev) =>
       prev.includes(productId)
         ? prev.filter((id) => id !== productId)
@@ -94,56 +114,89 @@ export default function ProductListingFilters01() {
     )
   }
 
+  const handleCloseLightbox = () => {
+    setLightboxImage(null)
+  }
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : data.length - 1))
+  }
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev < data.length - 1 ? prev + 1 : 0))
+  }
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!lightboxImage) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        handlePrevImage()
+      } else if (e.key === 'ArrowRight') {
+        handleNextImage()
+      } else if (e.key === 'Escape') {
+        handleCloseLightbox()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [lightboxImage, currentImageIndex])
+
   return (
-    <section className="py-16">
-      <div className="container mx-auto">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-2">
-            {FILTERS.map((filter) => (
-              <Select
-                key={filter.id}
-                value={selectedFilters[filter.id] || filter.options[0]}
-                onValueChange={(value) =>
-                  setSelectedFilters((prev) => ({
-                    ...prev,
-                    [filter.id]: value,
-                  }))
-                }
-              >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder={filter.label} />
+    <section className="py-16 px-4 md:px-8">
+      <div className="w-full">
+        {showFilters && (
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-2">
+              {FILTERS.map((filter) => (
+                <Select
+                  key={filter.id}
+                  value={selectedFilters[filter.id] || filter.options[0]}
+                  onValueChange={(value) =>
+                    setSelectedFilters((prev) => ({
+                      ...prev,
+                      [filter.id]: value,
+                    }))
+                  }
+                >
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder={filter.label} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filter.options.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ))}
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-muted-foreground text-sm">{data.length} Designs</span>
+              <Select defaultValue="featured">
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
-                  {filter.options.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="featured">Featured</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="newest">Newest</SelectItem>
                 </SelectContent>
               </Select>
-            ))}
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-muted-foreground text-sm">462 Products</span>
-            <Select defaultValue="featured">
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="featured">Featured</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {PRODUCTS.map((product) => (
+          {data.map((product) => (
             <div
               key={product.id}
-              className="group bg-card relative overflow-hidden rounded-lg border transition-all hover:shadow-lg"
+              // Add tg-grid-item to match shadow style of the hero gallery cards
+              className="group bg-card relative overflow-hidden rounded-lg border transition-all tg-grid-item"
             >
               {product.badge && (
                 <Badge
@@ -166,7 +219,13 @@ export default function ProductListingFilters01() {
                 />
               </button>
 
-              <div className="bg-muted/30 aspect-square overflow-hidden">
+              <div
+                className="bg-muted/30 aspect-square overflow-hidden cursor-pointer"
+                onClick={() => {
+                  setLightboxImage(product.image);
+                  setCurrentImageIndex(data.findIndex(p => p.id === product.id));
+                }}
+              >
                 <img
                   src={product.image}
                   alt={product.name}
@@ -183,12 +242,62 @@ export default function ProductListingFilters01() {
                     </p>
                   </div>
                 </div>
-                <p className="mt-2 font-semibold">{product.price}</p>
+                {product.price && !hidePrice && (
+                  <p className="mt-2 font-semibold">{product.price}</p>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      {lightboxImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+          <div className="relative max-w-4xl max-h-full p-4">
+            {/* Close button */}
+            <button
+              onClick={handleCloseLightbox}
+              className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            {/* Navigation buttons */}
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+
+            <button
+              onClick={handleNextImage}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+
+            {/* Image */}
+            <img
+              src={data[currentImageIndex]?.image || lightboxImage}
+              alt={data[currentImageIndex]?.name || "Product image"}
+              className="max-w-full max-h-[80vh] object-contain"
+            />
+
+            {/* Image info */}
+            {data[currentImageIndex] && (
+              <div className="mt-4 text-center text-white">
+                <p className="text-lg font-semibold">{data[currentImageIndex].brand}</p>
+                <p className="text-sm opacity-90">{data[currentImageIndex].name}</p>
+                {data[currentImageIndex].price && !hidePrice && (
+                  <p className="text-sm font-medium mt-1">{data[currentImageIndex].price}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   )
 }
