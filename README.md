@@ -1,5 +1,7 @@
 # TaTTTy — Comprehensive README
 
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/Tattzy25/tattzoo?utm_source=oss&utm_medium=github&utm_campaign=Tattzy25%2Ftattzoo&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
   ## Project snapshot — what this is about
   TaTTTy is a Vite + React single-page app (TypeScript) that helps users generate tattoo concepts and preview them using an AR "Try It On" experience. Key capabilities:
   - TaTTTy AI generator: prompt-based generator where users answer two configurable questions to produce tattoo concepts.
@@ -206,9 +208,5 @@
 
   If you want, I can save a separate `README_FULL.md` instead of replacing this file, or run `git status` now and produce the exact minimal cleanup commands tailored to your current index. Tell me which you prefer.
 
-  ---
-  _Generated/updated by project tooling — keep this file in repo root for deploy and documentation._
-
-
-
-![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/Tattzy25/tattzoo?utm_source=oss&utm_medium=github&utm_campaign=Tattzy25%2Ftattzoo&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+---
+_Generated/updated by project tooling — keep this file in repo root for deploy and documentation._
