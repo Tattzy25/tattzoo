@@ -208,3 +208,7 @@
 
   ---
   _Generated/updated by project tooling — keep this file in repo root for deploy and documentation._
+
+
+
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/Tattzy25/tattzoo?utm_source=oss&utm_medium=github&utm_campaign=Tattzy25%2Ftattzoo&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
