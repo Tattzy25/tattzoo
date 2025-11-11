@@ -109,3 +109,4 @@ out-tsc/
 
 # End of file
 .vercel
+**/__pycache__/
