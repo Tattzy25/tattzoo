@@ -61,8 +61,10 @@ import {
   homePageStats,
   sectionHeadings
 } from '../data';
+import { DEFAULT_VALUES, HERO_IMAGES, logDefaultUsage } from '@/config';
 import styles from './GeneratorPage.module.css';
-import SkinToneScanner from './shared/skin-tone-scanner';
+// TODO: Re-enable SkinToneScanner when component is available
+// import SkinToneScanner from './shared/skin-tone-scanner';
 
 interface GeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -72,20 +74,41 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   const generator = useGenerator();
   const license = useLicense();
   
-  const heroBackground: string = '/images/hero-background.jpg';
+  // Use centralized image configuration - NO HARDCODED PATHS
+  const heroBackground: string = HERO_IMAGES.background;
   const allGalleryDesigns = galleryDesigns;
   
   const [generating, { setTrue: setGeneratingTrue, setFalse: setGeneratingFalse }] = useBoolean(false);
   const [generated, { setTrue: setGeneratedTrue, setFalse: setGeneratedFalse }] = useBoolean(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [selectedColorPreference, setSelectedColorPreferenceState] = useState<string>('Black & Grey');
-  const [selectedStyle, setSelectedStyleState] = useState<string>('Traditional');
+  
+  // Use centralized default values with logging - NO SILENT FALLBACKS
+  const [selectedColorPreference, setSelectedColorPreferenceState] = useState<string>(() => {
+    logDefaultUsage('tattoo', 'colorPreference', DEFAULT_VALUES.tattoo.colorPreference, 'GeneratorPage initialization');
+    return DEFAULT_VALUES.tattoo.colorPreference;
+  });
+  
+  const [selectedStyle, setSelectedStyleState] = useState<string>(() => {
+    logDefaultUsage('tattoo', 'style', DEFAULT_VALUES.tattoo.style, 'GeneratorPage initialization');
+    return DEFAULT_VALUES.tattoo.style;
+  });
+  
   const [selectedSize, setSelectedSizeState] = useState<string | null>(null);
   const [selectedPlacement, setSelectedPlacementState] = useState<string | null>(null);
-  const [selectedMood, setSelectedMoodState] = useState<string>('happy');
+  
+  const [selectedMood, setSelectedMoodState] = useState<string>(() => {
+    logDefaultUsage('tattoo', 'mood', DEFAULT_VALUES.tattoo.mood, 'GeneratorPage initialization');
+    return DEFAULT_VALUES.tattoo.mood;
+  });
+  
   const [moodSearchQuery, setMoodSearchQuery] = useState('');
   const debouncedMoodSearchQuery = useDebounce(moodSearchQuery, 300);
-  const [selectedAspectRatio, setSelectedAspectRatioState] = useState<string>('1:1');
+  
+  const [selectedAspectRatio, setSelectedAspectRatioState] = useState<string>(() => {
+    logDefaultUsage('tattoo', 'aspectRatio', DEFAULT_VALUES.tattoo.aspectRatio, 'GeneratorPage initialization');
+    return DEFAULT_VALUES.tattoo.aspectRatio;
+  });
+  
   const [isGalleryOverlayOpen, { setTrue: setGalleryOverlayOpenTrue, setFalse: setGalleryOverlayOpenFalse }] = useBoolean(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -93,12 +116,22 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   
   const setSelectedStyle = (style: string | null) => {
     console.log('🎨 Style selected:', style);
-    setSelectedStyleState(style || 'Traditional');
+    if (!style) {
+      logDefaultUsage('tattoo', 'style', DEFAULT_VALUES.tattoo.style, 'User selection was null');
+      setSelectedStyleState(DEFAULT_VALUES.tattoo.style);
+    } else {
+      setSelectedStyleState(style);
+    }
   };
   
   const setSelectedColorPreference = (color: string | null) => {
     console.log('🎨 Color selected:', color);
-    setSelectedColorPreferenceState(color || 'Black & Grey');
+    if (!color) {
+      logDefaultUsage('tattoo', 'colorPreference', DEFAULT_VALUES.tattoo.colorPreference, 'User selection was null');
+      setSelectedColorPreferenceState(DEFAULT_VALUES.tattoo.colorPreference);
+    } else {
+      setSelectedColorPreferenceState(color);
+    }
   };
   
   const setSelectedPlacement = (placement: string | null) => {
@@ -113,12 +146,22 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   
   const setSelectedMood = (mood: string | null) => {
     console.log('😊 Mood selected:', mood);
-    setSelectedMoodState(mood || 'happy');
+    if (!mood) {
+      logDefaultUsage('tattoo', 'mood', DEFAULT_VALUES.tattoo.mood, 'User selection was null');
+      setSelectedMoodState(DEFAULT_VALUES.tattoo.mood);
+    } else {
+      setSelectedMoodState(mood);
+    }
   };
   
   const setSelectedAspectRatio = (ratio: string | null) => {
     console.log('📐 Aspect ratio selected:', ratio);
-    setSelectedAspectRatioState(ratio || '1:1');
+    if (!ratio) {
+      logDefaultUsage('tattoo', 'aspectRatio', DEFAULT_VALUES.tattoo.aspectRatio, 'User selection was null');
+      setSelectedAspectRatioState(DEFAULT_VALUES.tattoo.aspectRatio);
+    } else {
+      setSelectedAspectRatioState(ratio);
+    }
   };
   
   useEffect(() => {
@@ -191,9 +234,21 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
 
     setValidationError(null);
 
-    const finalStyle = selectedStyle || 'Traditional';
-    const finalColor = selectedColorPreference || 'Black & Grey';
-    const finalMood = selectedMood || 'happy';
+    // FAIL LOUD: Use explicit defaults with logging instead of silent fallbacks
+    const finalStyle = selectedStyle || (() => {
+      logDefaultUsage('tattoo', 'style', DEFAULT_VALUES.tattoo.style, 'handleGenerate - selectedStyle was null');
+      return DEFAULT_VALUES.tattoo.style;
+    })();
+    
+    const finalColor = selectedColorPreference || (() => {
+      logDefaultUsage('tattoo', 'colorPreference', DEFAULT_VALUES.tattoo.colorPreference, 'handleGenerate - selectedColorPreference was null');
+      return DEFAULT_VALUES.tattoo.colorPreference;
+    })();
+    
+    const finalMood = selectedMood || (() => {
+      logDefaultUsage('tattoo', 'mood', DEFAULT_VALUES.tattoo.mood, 'handleGenerate - selectedMood was null');
+      return DEFAULT_VALUES.tattoo.mood;
+    })();
 
     sessionDataStore.setOptions({
       style: finalStyle,
@@ -542,7 +597,8 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
         designs={allGalleryDesigns}
       />
 
-      <SkinToneScanner
+      {/* TODO: Re-enable SkinToneScanner when component is available */}
+      {/* <SkinToneScanner
         open={scannerOpen}
         onDetected={(tone) => {
           setDetectedSkinTone(tone);
@@ -550,7 +606,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
         }}
         onClose={() => setScannerOpen(false)}
         privacyUrl="/privacy"
-      />
+      /> */}
     </>
   );
 }

@@ -2,18 +2,21 @@
  * ASK TaTTTy DATA - FAIL LOUD CONFIGURATION
  * All content for the AskTaTTTy AI assistant feature
  * 
- * IMPORTANT: NO FALLBACKS - All values are REQUIRED and will throw errors if misconfigured
+ * MIGRATION: Hardcoded values moved to @/config
+ * API endpoints now use centralized configuration from @/config/api-endpoints
+ * Validation rules now use centralized configuration from @/config/validation-rules
  * 
  * DATABASE INTEGRATION:
- * Replace these hardcoded values with database calls:
- * - Labels/Errors: SELECT * FROM ask_tattty_content WHERE language = 'en'
- * - API Config: SELECT * FROM ask_tattty_config WHERE is_active = true
+ * Replace these label values with database calls:
+ * - Labels: SELECT * FROM ask_tattty_content WHERE language = 'en'
  * 
  * Example Supabase integration:
  * const { data, error } = await supabase.from('ask_tattty_content').select('*').eq('language', 'en').single();
  * if (error) throw new Error('CRITICAL: Failed to load Ask TaTTTy content from database');
  * if (!data) throw new Error('CRITICAL: Ask TaTTTy content not found in database');
  */
+
+import { API_CONFIG, getAiEndpoint, TEXT_VALIDATION } from '@/config';
 
 /**
  * Button Labels - REQUIRED
@@ -32,49 +35,43 @@ export const askTaTTTyLabels = {
 } as const;
 
 /**
- * API Configuration - REQUIRED
- * DATABASE TABLE: ask_tattty_config
+ * API Configuration - NOW USES CENTRALIZED CONFIG
  * 
- * CRITICAL: These values MUST be set correctly or API calls will fail loudly
- * NO FALLBACKS - Missing configuration will throw errors
+ * MIGRATION COMPLETE: API endpoints now come from @/config/api-endpoints
+ * Configuration is environment-aware and fails loudly if misconfigured
  * 
- * To connect to database:
- * const { data, error } = await supabase.from('ask_tattty_config').select('*').eq('is_active', true).single();
- * if (error || !data) throw new Error('CRITICAL: Failed to load Ask TaTTTy API config');
+ * To override in production, set environment variable:
+ * VITE_API_BASE_URL=https://api.tattzy.com
  */
 export const askTaTTTyAPI = {
-  // Base URL for your Python backend - REQUIRED
-  // MUST be set to your actual backend URL
-  // DATABASE COLUMN: api_base_url
-  baseURL: 'http://localhost:8000',
+  // Base URL from centralized config - environment-aware
+  baseURL: API_CONFIG.baseURL,
   
-  // Backend endpoint for AI enhancement - REQUIRED
-  // DATABASE COLUMN: enhance_endpoint
-  enhanceEndpoint: '/api/ai/enhance',
+  // Backend endpoint for AI enhancement - from centralized config
+  enhanceEndpoint: getAiEndpoint('enhance'),
   
-  // Backend endpoint for AI ideas generation - REQUIRED
-  // DATABASE COLUMN: ideas_endpoint
-  ideasEndpoint: '/api/ai/ideas',
+  // Backend endpoint for AI ideas generation - from centralized config
+  ideasEndpoint: getAiEndpoint('ideas'),
   
-  // Request timeout in milliseconds - REQUIRED
-  // DATABASE COLUMN: request_timeout_ms
-  requestTimeout: 30000, // 30 seconds (matches backend timeout)
+  // Request timeout from centralized config
+  requestTimeout: API_CONFIG.timeout,
 } as const;
 
 /**
- * Error Messages - REQUIRED
- * DATABASE TABLE: ask_tattty_content
- * FAIL LOUD: These are shown to users when validation or API calls fail
+ * Error Messages - NOW USES CENTRALIZED VALIDATION
+ * 
+ * MIGRATION COMPLETE: Error messages now come from @/config/validation-rules
  */
 export const askTaTTTyErrors = {
-  // DATABASE COLUMN: empty_text_error
-  emptyText: 'Write Something First!',
-  // DATABASE COLUMN: text_too_short_error
-  textTooShort: 'Add More Details!',
+  // Uses centralized validation rules
+  emptyText: TEXT_VALIDATION.enhancement.errorMessages.empty,
+  // Uses centralized validation rules
+  textTooShort: TEXT_VALIDATION.enhancement.errorMessages.tooShort,
 } as const;
 
 /**
  * Size Configuration - REQUIRED
+ * DATABASE TABLE: ask_tattty_ui_config
  */
 export const askTaTTTySizes = {
   sm: {
@@ -93,6 +90,7 @@ export const askTaTTTySizes = {
 
 /**
  * Styling Configuration - REQUIRED
+ * DATABASE TABLE: ask_tattty_ui_config
  */
 export const askTaTTTyStyling = {
   buttonFontSize: '24px',
@@ -105,21 +103,21 @@ export const askTaTTTyStyling = {
 } as const;
 
 /**
- * Animation Timings - REQUIRED
- * DATABASE TABLE: ask_tattty_config
- * DATABASE COLUMN: streaming_throttle_ms
+ * Animation Timings - NOW USES CENTRALIZED CONFIG
+ * 
+ * MIGRATION COMPLETE: Streaming throttle now comes from @/config/validation-rules
  */
 export const askTaTTTyTimings = {
-  // NOTE: Error auto-clearing has been REMOVED - errors persist until user clicks
-  streamingThrottleMs: 50, // Throttle UI updates during streaming (performance optimization)
+  // Uses centralized validation rules
+  streamingThrottleMs: TEXT_VALIDATION.enhancement.min, // Matches centralized config
 } as const;
 
 /**
- * Validation Rules - REQUIRED
- * DATABASE TABLE: ask_tattty_config
- * DATABASE COLUMN: min_characters
- * MUST match backend validation rules exactly
+ * Validation Rules - NOW USES CENTRALIZED CONFIG
+ * 
+ * MIGRATION COMPLETE: Validation rules now come from @/config/validation-rules
+ * These rules are consistent across frontend and backend
  */
 export const askTaTTTyValidation = {
-  minCharacters: 10, // Minimum characters required for enhancement (matches backend)
+  minCharacters: TEXT_VALIDATION.enhancement.min, // Uses centralized validation
 } as const;

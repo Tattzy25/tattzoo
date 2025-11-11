@@ -7,11 +7,37 @@
  * - Required for professional tattoo mockups
  * - Needed for user downloads and editing
  * 
- * TODO: Replace with database call
- * Example: const { data } = await supabase.from('gallery_designs').select('*');
+ * MIGRATION STRATEGY:
+ * Phase 1 (COMPLETE): Centralized data structure with validation requirements
+ * Phase 2 (TODO): Replace with database calls
+ * Phase 3 (TODO): Add Vercel Blob storage integration
+ * Phase 4 (TODO): Add CMS integration for real-time updates
+ * 
+ * DATABASE INTEGRATION:
+ * When ready to migrate, use centralized content endpoints from @/config:
+ * 
+ * import { getContentEndpoint } from '@/config';
+ * 
+ * const galleryUrl = getContentEndpoint('gallery');
+ * const response = await fetch(galleryUrl);
+ * if (!response.ok) {
+ *   throw new Error('CRITICAL: Failed to load gallery from database');
+ * }
+ * const data = await response.json();
+ * 
+ * Example Supabase integration:
+ * const { data, error } = await supabase
+ *   .from('gallery_designs')
+ *   .select('id, title, image_url, thumbnail_url, is_active')
+ *   .eq('is_active', true)
+ *   .order('created_at', { ascending: false });
+ * 
+ * if (error) throw new Error('CRITICAL: Failed to load gallery');
+ * return data;
  */
 
 import { galleryExamples } from './placeholder-images';
+import { GALLERY_IMAGE_REQUIREMENTS } from '@/config';
 
 export interface GalleryDesign {
   id: string;
@@ -19,9 +45,27 @@ export interface GalleryDesign {
   image: string; // MUST be PNG with transparent background
 }
 
-// NOTE: These are PLACEHOLDER images for UI testing only
-// ⚠️ Replace with real transparent-background tattoo PNGs before production
-// Current Imgur images may NOT have transparent backgrounds
+/**
+ * IMPORTANT NOTES ABOUT CURRENT GALLERY IMAGES:
+ * 
+ * ⚠️ TRANSPARENCY WARNING:
+ * The current Imgur URLs are PLACEHOLDER images for UI testing only.
+ * They may NOT have transparent backgrounds, which is REQUIRED for production.
+ * 
+ * MIGRATION PATH:
+ * - Database Table: `gallery_designs`
+ * - API Endpoint: getContentEndpoint('gallery') -> '/api/content/gallery'
+ * - Storage: Vercel Blob or CDN with proper image processing
+ * 
+ * IMAGE REQUIREMENTS (from @/config):
+ * - Format: ${GALLERY_IMAGE_REQUIREMENTS.format}
+ * - Min Width: ${GALLERY_IMAGE_REQUIREMENTS.minWidth}px
+ * - Min Height: ${GALLERY_IMAGE_REQUIREMENTS.minHeight}px
+ * - Max File Size: ${GALLERY_IMAGE_REQUIREMENTS.maxFileSize / 1024 / 1024}MB
+ * - Transparency: ${GALLERY_IMAGE_REQUIREMENTS.requiredTransparency ? 'REQUIRED' : 'Optional'}
+ * 
+ * FAIL LOUD: Replace these URLs with proper transparent PNGs before production
+ */
 export const galleryDesigns: GalleryDesign[] = [
   { id: '1', title: 'Black Design', image: 'https://i.imgur.com/7LSHoSe.png' },
   { id: '2', title: 'Minimalist', image: 'https://i.imgur.com/iEA79XE.png' },
@@ -57,7 +101,57 @@ export const galleryDesigns: GalleryDesign[] = [
 
 /**
  * Fallback images for carousel
- * TODO: Replace with database call for featured designs
+ * 
+ * MIGRATION PATH:
+ * - Database Table: `featured_gallery_designs`
+ * - API Endpoint: getContentEndpoint('gallery') with query parameter ?featured=true
+ * 
  * Imported from centralized placeholder configuration
  */
 export const carouselFallbackImages: string[] = galleryExamples;
+
+/**
+ * Helper function to load gallery from database (future implementation)
+ * 
+ * IMPLEMENTATION NOTES:
+ * - Add error handling with fail-loud approach
+ * - Validate image transparency
+ * - Cache results in memory
+ * - Add loading states
+ * - Validate image dimensions and format
+ * 
+ * FAIL LOUD: Missing or invalid images should throw errors
+ */
+export async function loadGalleryFromDatabase(): Promise<GalleryDesign[]> {
+  // TODO: Implement when database is ready
+  // import { getContentEndpoint } from '@/config';
+  // 
+  // const url = getContentEndpoint('gallery');
+  // const response = await fetch(url);
+  // 
+  // if (!response.ok) {
+  //   throw new Error(`Failed to load gallery from database: ${response.statusText}`);
+  // }
+  // 
+  // const data = await response.json();
+  // 
+  // // Validate all images meet requirements
+  // data.forEach((design: GalleryDesign) => {
+  //   if (!design.image.endsWith('.png')) {
+  //     console.error(
+  //       `❌ GALLERY IMAGE ERROR: ${design.id} "${design.title}" ` +
+  //       `is not a PNG file. Transparent background required.`
+  //     );
+  //   }
+  // });
+  // 
+  // return data;
+  
+  console.warn(
+    '⚠️ USING STATIC GALLERY DATA: Database integration not yet implemented. ' +
+    'Connect to database using getContentEndpoint("gallery") from @/config for dynamic data. ' +
+    '\n⚠️ WARNING: Current Imgur images may not have transparent backgrounds!'
+  );
+  
+  return galleryDesigns;
+}

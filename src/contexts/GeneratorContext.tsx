@@ -3,6 +3,7 @@ import { generateMockTattooImage, generateMockVariations } from '../utils/mockDa
 import { saveGenerationToHistory, saveRecentPrompt } from '../utils/localStorageManager';
 import type { ModelType } from '../components/shared/ModelPicker';
 import { useLicense } from './LicenseContext';
+import { DEFAULT_VALUES, logDefaultUsage } from '@/config';
 
 export interface GeneratorSelections {
   // Carousel selections
@@ -81,8 +82,11 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
   const [generatedDesigns, setGeneratedDesigns] = useState<string[]>([]);
   const [generationError, setGenerationError] = useState<string | null>(null);
   
-  // Model selection - Default to Quality model
-  const [selectedModel, setSelectedModelState] = useState<ModelType>('sd3.5-large');
+  // Model selection - Use centralized default with logging
+  const [selectedModel, setSelectedModelState] = useState<ModelType>(() => {
+    logDefaultUsage('aiModel', 'imageGeneration', DEFAULT_VALUES.aiModel.imageGeneration, 'GeneratorContext initialization');
+    return DEFAULT_VALUES.aiModel.imageGeneration;
+  });
   
   const setSelectedModel = (model: ModelType) => {
     console.log('⚡ Model selected:', model);
@@ -199,10 +203,21 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
       });
       
       // 3. CONSTRUCT COMPLETE PAYLOAD
-      // Apply default fallbacks for TaTTTy AI generator
-      const finalStyle = selections.style || 'Traditional';
-      const finalColor = selections.color || 'Black & Grey';
-      const finalMood = selections.mood || 'Happy';
+      // FAIL LOUD: Apply default values with explicit logging instead of silent fallbacks
+      const finalStyle = selections.style || (() => {
+        logDefaultUsage('tattoo', 'style', DEFAULT_VALUES.tattoo.style, 'GeneratorContext.handleGenerate - selections.style was null');
+        return DEFAULT_VALUES.tattoo.style;
+      })();
+      
+      const finalColor = selections.color || (() => {
+        logDefaultUsage('tattoo', 'colorPreference', DEFAULT_VALUES.tattoo.colorPreference, 'GeneratorContext.handleGenerate - selections.color was null');
+        return DEFAULT_VALUES.tattoo.colorPreference;
+      })();
+      
+      const finalMood = selections.mood || (() => {
+        logDefaultUsage('tattoo', 'mood', DEFAULT_VALUES.tattoo.mood, 'GeneratorContext.handleGenerate - selections.mood was null');
+        return DEFAULT_VALUES.tattoo.mood;
+      })();
       
       const generationParams = {
         prompt,
