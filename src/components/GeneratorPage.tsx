@@ -32,6 +32,7 @@ import AIImageGeneratorBlock from './creative-tim/blocks/ai-image-generator-01';
 import { SourceCard } from './shared/SourceCard';
 
 import { TryItOnButton } from './try-it-on/TryItOnButton';
+import { FrostCard } from './FrostCard';
 import { 
   saveGeneratorState,
   getGeneratorState,
@@ -39,7 +40,6 @@ import {
 } from '../utils/inputPersistence';
 import { useGenerator } from '../contexts/GeneratorContext';
 import { useLicense } from '../contexts/LicenseContext';
-import { SelectionChip } from './shared/SelectionChip';
 import { TattooGallery } from './shared/TattooGallery';
 import { FullScreenGalleryOverlay } from './shared/FullScreenGalleryOverlay';
 import { ModelPicker } from './shared/ModelPicker';
@@ -55,6 +55,8 @@ import {
   galleryDesigns,
   tattooStyles,
   tattooPlacements,
+  tattooSizes,
+  colorPreferences,
   homePageStats,
   sectionHeadings
 } from '../data';
@@ -327,7 +329,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   );
 
   const renderLiveTheMagicSection = () => (
-    <div className="mt-[80px] sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
+    <div className="mt-20 sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
       <div className="w-full px-4 md:px-8 space-y-8 sm:space-y-10 md:space-y-12 lg:space-y-16">
         <div className="text-center space-y-3 sm:space-y-4">
           <h2 
@@ -366,6 +368,8 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
         <CarouselPanel
           styles={tattooStyles}
           placements={tattooPlacements}
+          sizes={tattooSizes}
+          colors={colorPreferences}
           selectedStyle={selectedStyle}
           selectedPlacement={selectedPlacement}
           selectedSize={selectedSize}
@@ -385,6 +389,14 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
               selectedMood={selectedMood}
               onSelectMood={setSelectedMood}
               title={getMoodTitle()}
+            />
+          </div>
+          <div className="flex items-center justify-center">
+            <FrostCard
+              image="/images/hero-background.jpg"
+              title="Analyze Skin"
+              description="Click here for TaTTy AI to Analyze your skin color"
+              className="w-full max-w-sm h-96"
             />
           </div>
         </div>

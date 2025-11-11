@@ -8,6 +8,8 @@ import { getCarouselPlaceholder } from '../../data/placeholder-images';
 interface CarouselPanelProps {
   styles: string[];
   placements: string[];
+  sizes: string[];
+  colors: string[];
   selectedStyle: string | null;
   selectedPlacement: string | null;
   selectedSize: string | null;
@@ -21,6 +23,8 @@ interface CarouselPanelProps {
 export function CarouselPanel({
   styles,
   placements,
+  sizes,
+  colors,
   selectedStyle,
   selectedPlacement,
   selectedSize,
@@ -31,9 +35,6 @@ export function CarouselPanel({
   onSelectColorPreference,
 }: CarouselPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  
-  const sizes = ['Small', 'Medium', 'Large', 'Extra Large'];
-  const colors = ['Black & Grey', 'Color', 'Blackwork', 'Watercolor'];
 
   // Filter all items based on search query
   const filteredStyles = styles.filter(style =>

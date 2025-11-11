@@ -18,6 +18,5 @@ export {
   CarouselPanel,
   MoodSelector,
   SizeColorSelector,
-  SkintonePicker,
   StylePlacementSelector
 } from './Generator';

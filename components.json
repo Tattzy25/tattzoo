@@ -22,6 +22,8 @@
     "@hooks": "https://shadcn-hooks.vercel.app/r/{name}.json",
     "@acme": "https://acme.com/r/{name}.json",
     "@kokonutui": "https://kokonutui.com/r/{name}.json",
-    "@react-bits": "https://reactbits.dev/r/{name}.json"
+    "@react-bits": "https://reactbits.dev/r/{name}.json",
+    "@intentui": "https://intentui.com/r/{name}",
+    "@aceternity": "https://ui.aceternity.com/registry/{name}.json"
   }
 }

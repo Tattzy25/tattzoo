@@ -1,4 +1,4 @@
-import { Sparkle } from 'lucide-react';
+import { ReactNode } from 'react';
 import { Mood } from '../../types/mood';
 import { SelectionChip } from '../../components/shared/SelectionChip';
 
@@ -7,21 +7,34 @@ interface MoodSelectorProps {
   selectedMood: string | null;
   onSelectMood: (moodId: string | null) => void;
   title?: string;
+  rightAccessory?: ReactNode;
 }
 
 export function MoodSelector({ 
   moods, 
   selectedMood, 
   onSelectMood,
-  title = "Set Your Mood"
+  title = "Set Your Mood",
+  rightAccessory,
 }: MoodSelectorProps) {
   const selectedMoodLabel = moods.find(m => m.id === selectedMood)?.label;
   
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <h2 className="text-5xl md:text-6xl lg:text-[68px] font-[Akronim] text-white text-center uppercase mb-12 md:mb-16" style={{ textShadow: '2px 2px 8px rgba(0, 0, 0, 0.9)', letterSpacing: '4px' }}>
-        {title}
-      </h2>
+      <div className="mb-6 md:mb-10">
+        <div className="hidden sm:flex items-center justify-center gap-4">
+          <h2 className="text-5xl md:text-6xl lg:text-[68px] font-[Akronim] text-white text-center uppercase" style={{ textShadow: '2px 2px 8px rgba(0, 0, 0, 0.9)', letterSpacing: '4px' }}>
+            {title}
+          </h2>
+          {rightAccessory ? <div className="ml-2">{rightAccessory}</div> : null}
+        </div>
+        <div className="sm:hidden flex flex-col items-center gap-3">
+          <h2 className="text-5xl font-[Akronim] text-white text-center uppercase" style={{ textShadow: '2px 2px 8px rgba(0, 0, 0, 0.9)', letterSpacing: '4px' }}>
+            {title}
+          </h2>
+          {rightAccessory ? rightAccessory : null}
+        </div>
+      </div>
       
       {selectedMood && selectedMoodLabel && (
         <div className="flex justify-center -mt-8 md:-mt-12 mb-4">

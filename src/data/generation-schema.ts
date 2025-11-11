@@ -287,7 +287,6 @@ export const VALIDATION_RULES = {
  *    ├─ Style/Placement → StylePlacementSelector
  *    ├─ Size/Color → SizeColorSelector
  *    ├─ Mood → MoodSelector
- *    ├─ Skintone → SkintonePicker
  *    ├─ Aspect Ratio → AspectRatio
  *    └─ Model → ModelPicker → GeneratorContext
  * 
