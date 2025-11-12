@@ -4,20 +4,25 @@
 
 :root {
   --font-size: 16px;
-  --background: #2a2a2a;
-  --foreground: #ffffff;
-  --card: #1a1a1b;
-  --card-foreground: #ffffff;
-  --popover: #1a1a1b;
-  --popover-foreground: #ffffff;
-  --primary: #57f1d6;
-  --primary-foreground: #0C0C0D;
-  --secondary: #1f1f20;
-  --secondary-foreground: #ffffff;
+  /* Brand-specified palette */
+  --background: #2a2a2a;            /* hex provided */
+  --foreground: #ffffff;            /* white */
+  --primary: oklch(0.78 0.13 182);  /* brand color provided */
+  --primary-foreground: #0C0C0D;    /* high-contrast text on brand */
+  /* Derived accent for gradient endpoint (slightly lighter than primary) */
+  --primary-2: color-mix(in oklch, var(--primary) 70%, white 30%);
+
+  /* Derived tokens kept for component compatibility */
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --secondary: var(--background);
+  --secondary-foreground: var(--foreground);
   --muted: #2a2a2b;
   --muted-foreground: #9ca3af;
-  --accent: #57f1d6;
-  --accent-foreground: #0C0C0D;
+  --accent: var(--primary);
+  --accent-foreground: var(--primary-foreground);
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.1);
@@ -26,92 +31,52 @@
   --switch-background: #404040;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #57f1d6;
-  --chart-1: #57f1d6;
+  --ring: var(--primary);
+  --chart-1: var(--primary);
   --chart-2: #60a5fa;
   --chart-3: #a78bfa;
   --chart-4: #f472b6;
   --chart-5: #fb923c;
   --radius: 1rem;
-  
-  /* TaTTTy Brand Colors */
-  --teal-echo-1: rgba(87, 241, 214, 0.8);
-  --teal-echo-2: rgba(87, 241, 214, 0.5);
-  --teal-echo-3: rgba(87, 241, 214, 0.3);
-  --teal-echo-shadow: 2px 2px 0px var(--teal-echo-1), 4px 4px 0px var(--teal-echo-2), 6px 6px 0px var(--teal-echo-3);
+}
+
+/* Reusable brand gradient utility */
+.brand-gradient {
+  background-image: linear-gradient(90deg, var(--primary) 0%, var(--primary-2) 100%);
+}
+.brand-gradient:hover {
+  filter: brightness(1.05);
 }
 
 .dark {
-  --background: #2D2D2D;
+  /* Keep dark close to brand background while preserving contrast */
+  --background: #2a2a2a;
   --foreground: #ffffff;
-  --card: #1a1a1b;
-  --card-foreground: #ffffff;
-  --popover: #1a1a1b;
-  --popover-foreground: #ffffff;
-  --primary: #57f1d6;
-  --primary-foreground: #2D2D2D;
-  --secondary: #1f1f20;
-  --secondary-foreground: #ffffff;
+  --primary: oklch(0.78 0.13 182);
+  --primary-foreground: #0C0C0D;
+
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --secondary: var(--background);
+  --secondary-foreground: var(--foreground);
   --muted: #2a2a2b;
   --muted-foreground: #9ca3af;
-  --accent: #57f1d6;
-  --accent-foreground: #0C0C0D;
+  --accent: var(--primary);
+  --accent-foreground: var(--primary-foreground);
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.05);
-  --ring: #57f1d6;
-  --font-weight-medium: 500;
-  --font-weight-normal: 400;
-  --chart-1: #57f1d6;
-  --chart-2: #60a5fa;
-  --chart-3: #a78bfa;
-  --chart-4: #f472b6;
-  --chart-5: #fb923c;
-  
-  /* TaTTTy Brand Colors */
-  --teal-echo-1: rgba(87, 241, 214, 0.8);
-  --teal-echo-2: rgba(87, 241, 214, 0.5);
-  --teal-echo-3: rgba(87, 241, 214, 0.3);
-  --teal-echo-shadow: 2px 2px 0px var(--teal-echo-1), 4px 4px 0px var(--teal-echo-2), 6px 6px 0px var(--teal-echo-3);
+  --ring: var(--primary);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-input-background: var(--input-background);
-  --color-switch-background: var(--switch-background);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-}
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
   }
@@ -121,7 +86,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    background: var(--background);
+    color: var(--foreground);
     overflow-x: hidden;
     /* Screenshot protection - not foolproof but adds friction */
     -webkit-user-select: none;
@@ -132,6 +98,8 @@
 
   html {
     overflow-x: hidden;
+    /* Prevent layout shift when scrollbars appear/disappear in overlays */
+    scrollbar-gutter: stable both-edges;
   }
   
   /* Allow text selection for inputs and textareas */
@@ -151,7 +119,7 @@
     -khtml-user-drag: none;
     -moz-user-drag: none;
     -o-user-drag: none;
-    user-drag: none;
+  /* user-drag non-standard; retained vendor prefixes only */
   }
   
   /* Allow pointer events on interactive elements */

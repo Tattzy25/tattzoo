@@ -1,5 +1,6 @@
 import React from 'react';
-import { TattooGallery } from '../../shared/TattooGallery';
+// Switch to the newer gallery component used elsewhere
+import ImageGallery from '../../creative-tim/blocks/product-listing-filters-01';
 import { sectionHeadings } from '../../../data/content';
 import styles from '../../GeneratorPage.module.css';
 
@@ -26,12 +27,18 @@ const LiveTheMagicSection: React.FC<LiveTheMagicSectionProps> = ({
           </p>
         </div>
 
-        <TattooGallery
-          designs={galleryDesigns.slice(0, 15)}
-          displayCount={15}
-          onLoadMore={() => {}}
-          hasMore={false}
-          columns={3}
+        {/* Use the newer ImageGallery with a curated subset of designs */}
+        <ImageGallery
+          showFilters={false}
+          products={galleryDesigns.slice(0, 20).map(d => ({
+            id: d.id,
+            image: d.image,
+            name: d.title,
+            brand: 'TaTTTy',
+            badge: null,
+            metadata: d.metadata || {}
+          }))}
+          columnsClassName="grid grid-cols-3 gap-6 sm:grid-cols-3 lg:grid-cols-4"
         />
 
         <div className="flex justify-center mt-6 sm:mt-8">

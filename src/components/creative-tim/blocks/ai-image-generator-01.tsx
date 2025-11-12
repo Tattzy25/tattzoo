@@ -144,7 +144,7 @@ export default function AIImageGeneratorBlock() {
               <Button
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="w-full bg-gradient-to-r from-accent to-teal-400 hover:from-accent/80 hover:to-teal-400/80 text-background font-[Orbitron] text-lg py-6 shadow-lg shadow-accent/25"
+                className="w-full brand-gradient text-background font-[Orbitron] text-lg py-6 shadow-lg shadow-accent/25"
               >
                 {isGenerating ? (
                   <>

@@ -4,7 +4,6 @@ import { TryItOnButton } from './try-it-on/TryItOnButton';
 import { useGenerator } from '../contexts/GeneratorContext';
 import { useLicense } from '../contexts/LicenseContext';
 import GalleryOverlay from "./shared/GalleryOverlay";
-import ImageGallery from "./creative-tim/blocks/product-listing-filters-01";
 import { ModelPicker } from "./shared/ModelPicker";
 import { ResultsCard } from './shared/ResultsCard';
 import { HowItWorksTimeline } from './HowItWorksTimeline';
@@ -96,10 +95,7 @@ import {
               onViewAll={() => setIsGalleryOverlayOpen(true)}
             />
 
-            {/* Inline gallery (Mixedbread-backed), no filters, 4 cols x ~5 rows initially */}
-            <div className="mt-12">
-              <ImageGallery showFilters={false} />
-            </div>
+            {/* Removed legacy inline gallery: LiveTheMagicSection now renders the new ImageGallery */}
 
             <div className="mt-[70px] md:mt-[90px]">
               <HowItWorksTimeline />

@@ -7,7 +7,6 @@ import { Heart, X, ChevronLeft, ChevronRight } from "lucide-react"
 import "../../shared/TattooGallery.css"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -90,7 +89,6 @@ export default function ImageGallery({
   hidePrice = false,
   columnsClassName = "grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-4",
   totalLabel,
-  onLoadMore,
   onItemClick,
   onFiltersChange,
 }: ProductListingProps) {
@@ -144,6 +142,11 @@ export default function ImageGallery({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [lightboxImage, currentImageIndex])
 
+  // Notify parent when filters change (if provided)
+  useEffect(() => {
+    onFiltersChange?.(selectedFilters)
+  }, [selectedFilters, onFiltersChange])
+
   return (
     <section className="py-16 px-4 md:px-8">
       <div className="w-full">
@@ -175,7 +178,7 @@ export default function ImageGallery({
               ))}
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-muted-foreground text-sm">{data.length} Designs</span>
+              <span className="text-muted-foreground text-sm">{data.length} {totalLabel || 'Designs'}</span>
               <Select defaultValue="featured">
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Sort by" />
@@ -191,12 +194,12 @@ export default function ImageGallery({
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className={columnsClassName || "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"}>
           {data.map((product) => (
             <div
               key={product.id}
               // Add tg-grid-item to match shadow style of the hero gallery cards
-              className="group bg-card relative overflow-hidden rounded-lg border transition-all tg-grid-item"
+              className="group bg-card relative overflow-hidden rounded-3xl transition-all tg-grid-item"
             >
               {product.badge && (
                 <Badge
@@ -220,10 +223,11 @@ export default function ImageGallery({
               </button>
 
               <div
-                className="bg-muted/30 aspect-square overflow-hidden cursor-pointer"
+                className="bg-muted/30 aspect-square overflow-hidden cursor-pointer rounded-3xl"
                 onClick={() => {
                   setLightboxImage(product.image);
                   setCurrentImageIndex(data.findIndex(p => p.id === product.id));
+                  onItemClick?.(product)
                 }}
               >
                 <img
@@ -233,7 +237,7 @@ export default function ImageGallery({
                 />
               </div>
 
-              <div className="border-t p-4">
+              <div className="p-4">
                 <div className="mb-2 flex items-start justify-between gap-2">
                   <div className="flex-1">
                     <p className="text-sm font-semibold">{product.brand}</p>
@@ -253,20 +257,28 @@ export default function ImageGallery({
 
       {/* Lightbox Modal */}
       {lightboxImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-          <div className="relative max-w-4xl max-h-full p-4">
-            {/* Close button */}
-            <button
-              onClick={handleCloseLightbox}
-              className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors"
-            >
-              <X className="h-6 w-6" />
-            </button>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          onClick={handleCloseLightbox}
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* Global close button: fixed and always visible */}
+          <button
+            onClick={handleCloseLightbox}
+            className="fixed top-4 right-4 z-60 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 backdrop-blur-md text-white hover:bg-white/25 transition-colors"
+            aria-label="Close image"
+          >
+            <X className="h-6 w-6" />
+          </button>
 
+          {/* Content wrapper - stops propagation so clicking image doesn't close */}
+          <div className="relative max-w-4xl max-h-full p-4" onClick={(e) => e.stopPropagation()}>
             {/* Navigation buttons */}
             <button
               onClick={handlePrevImage}
               className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors"
+              aria-label="Previous image"
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
@@ -274,6 +286,7 @@ export default function ImageGallery({
             <button
               onClick={handleNextImage}
               className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors"
+              aria-label="Next image"
             >
               <ChevronRight className="h-6 w-6" />
             </button>

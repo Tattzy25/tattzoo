@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../../components/ui/button';
 import { TattooGallery } from '../../components/shared/TattooGallery';
-import { FullScreenGalleryOverlay } from '../../components/shared/FullScreenGalleryOverlay';
+import GalleryOverlay from '../../components/shared/GalleryOverlay';
 import { galleryDesigns, sectionHeadings } from '../../data';
 
 export function Gallery() {
