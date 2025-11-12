@@ -29,8 +29,8 @@ const LiveTheMagicSection: React.FC<LiveTheMagicSectionProps> = ({
           </p>
         </div>
 
-        {/* Use the GridBento component with fourCells variant - Two sets with more spacing between them */}
-        <div className="flex flex-col lg:flex-row lg:gap-8 w-full">
+        {/* Use the GridBento component with fourCells variant - Two sets side by side */}
+        <div className="flex gap-6 w-full">
           <GridBento variant="fourCells" className="h-screen py-12 px-6 flex-1 place-content-center place-items-center">
             {galleryDesigns.slice(0, 4).map((design, index) => (
               <div key={index} className="overflow-hidden size-full rounded-xl shadow-xl">

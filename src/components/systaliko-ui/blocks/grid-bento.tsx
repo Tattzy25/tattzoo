@@ -3,6 +3,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { cva, VariantProps } from 'class-variance-authority';
 
+
 export const bentoGridVariants = cva(
   'relative grid gap-4 [&>*:first-child]:origin-top-right [&>*:nth-child(3)]:origin-bottom-right [&>*:nth-child(4)]:origin-top-right',
   {
@@ -19,12 +20,20 @@ export const bentoGridVariants = cva(
         threeCells: `
             grid-cols-2 grid-rows-2 [&>*:nth-child(4)]:hidden [&>*:nth-child(5)]:hidden
             [&>*:first-child]:col-span-2
-        `,
+          `,
         fourCells: `
           grid-cols-3 grid-rows-2
           [&>*:first-child]:col-span-1 
           [&>*:nth-child(2)]:col-span-2
           [&>*:nth-child(3)]:col-span-2
+          [&>*:nth-child(5)]:hidden
+        `,
+        threeCellsMobile: `
+          grid-cols-2 grid-rows-2
+          [&>*:first-child]:col-span-2 row-start-1
+          [&>*:nth-child(2)]:col-span-1 row-start-2
+          [&>*:nth-child(3)]:col-span-1 row-start-2
+          [&>*:nth-child(4)]:hidden
           [&>*:nth-child(5)]:hidden
         `,
       },
@@ -34,6 +43,7 @@ export const bentoGridVariants = cva(
     },
   },
 );
+
 
 export const GridBento = React.forwardRef<
   HTMLDivElement,
