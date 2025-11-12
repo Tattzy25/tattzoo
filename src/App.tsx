@@ -4,6 +4,7 @@ import { ScreenshotProtection } from './components/shared/ScreenshotProtection';
 import { GeneratorProvider } from './contexts/GeneratorContext';
 import { LicenseProvider } from './contexts/LicenseContext';
 import { ThemeProvider } from './components/theme-provider';
+import { Analytics } from '@vercel/analytics/react';
 
 function AppContent() {
   useEffect(() => {
@@ -37,6 +38,7 @@ export default function App() {
         <GeneratorProvider>
           <ScreenshotProtection />
           <AppContent />
+          <Analytics />
         </GeneratorProvider>
       </LicenseProvider>
     </ThemeProvider>

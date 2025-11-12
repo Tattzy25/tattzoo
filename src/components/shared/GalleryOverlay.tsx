@@ -40,7 +40,7 @@ export function GalleryOverlay({ isOpen, onClose }: Props) {
   if (!isOpen) return null;
 
   return (
-  <div className="fixed inset-1 md:inset-2 lg:inset-2 z-50 bg-[#2a2a2a]/90 backdrop-blur-md flex flex-col rounded-[28px] border border-[color:var(--primary)]/40 shadow-[0_0_0_1px_var(--primary),0_0_12px_4px_color-mix(in_oklab,var(--primary)_70%,transparent),0_20px_80px_rgba(0,0,0,0.6)] overflow-hidden">
+  <div className="fixed inset-1 md:inset-2 lg:inset-2 z-50 bg-[#2a2a2a]/90 backdrop-blur-md flex flex-col rounded-[28px] border border-(--primary)/40 shadow-[0_0_0_1px_var(--primary),0_0_12px_4px_color-mix(in_oklch,var(--primary)_70%,transparent),0_20px_80px_rgba(0,0,0,0.6)] overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-6 md:px-8 py-4 border-b border-white/10">
         <div className="flex items-center gap-2">
