@@ -1,0 +1,20 @@
+@keyframes text-rotation {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.text-rotate {
+  animation: text-rotation 8s linear infinite;
+}
+
+.button-rotate:hover svg:first-child {
+  transform: translate(150%, -150%);
+  color: black;
+}
+
+.button-rotate:hover svg:last-child {
+  transform: translate(0);
+  color: black;
+  transition-delay: 0.1s;
+}

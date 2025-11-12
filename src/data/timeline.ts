@@ -18,7 +18,7 @@ export interface TimelineStep {
 export const timelineSteps: TimelineStep[] = [
   {
     icon: Sparkles,
-    title: "Get Your Key",
+    title: "Get Your Key on van nuys",
     description: "Unlock unlimited access to all TaTTTy features with a one-time $9.99 license key."
   },
   {

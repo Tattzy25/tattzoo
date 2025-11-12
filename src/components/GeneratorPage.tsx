@@ -1,22 +1,85 @@
 import AIImageGeneratorBlock from './creative-tim/blocks/ai-image-generator-01';
+// React import not needed with automatic JSX runtime
 import { SourceCard } from './shared/SourceCard';
 import { TryItOnButton } from './try-it-on/TryItOnButton';
 import { useGenerator } from '../contexts/GeneratorContext';
 import { useLicense } from '../contexts/LicenseContext';
 import GalleryOverlay from "./shared/GalleryOverlay";
 import { ModelPicker } from "./shared/ModelPicker";
-import { ResultsCard } from './shared/ResultsCard';
-import { HowItWorksTimeline } from './HowItWorksTimeline';
+// Inline fallback ResultsCard component (original module missing)
+// Use the installed Timeline component instead of the old HowItWorksTimeline
+import { Timeline } from './ui/timeline';
+
+interface ResultsCardProps {
+  designs: string[];
+  isGenerating: boolean;
+  aspectRatio?: string;
+  maxWidth?: string;
+  onGenerate: () => void;
+  onNavigate?: (path: string) => void;
+}
+
+const ResultsCard = ({
+  designs,
+  isGenerating,
+  aspectRatio = "1/1",
+  maxWidth = "6xl",
+  onGenerate,
+  onNavigate
+}: ResultsCardProps) => {
+  return (
+    <div className={`mx-auto w-full max-w-${maxWidth} border rounded-xl p-6 bg-gray-900/40 backdrop-blur`}>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-semibold text-white">Generated Designs</h3>
+        <button
+          onClick={onGenerate}
+          disabled={isGenerating}
+          className="px-4 py-2 rounded bg-accent text-black disabled:opacity-50"
+        >
+          {isGenerating ? 'Generating...' : 'Generate'}
+        </button>
+      </div>
+      {designs.length === 0 ? (
+        <p className="text-neutral-400 text-sm">No design yet. Click Generate to create one.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {designs.map((d, i) => (
+            <div key={i} className="relative w-full overflow-hidden rounded-lg bg-black/30">
+              <img
+                src={d}
+                alt={`Result ${i + 1}`}
+                className="w-full h-auto object-cover"
+                style={{ aspectRatio }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+      {onNavigate && (
+        <div className="mt-4 text-right">
+          <button
+            onClick={() => onNavigate('/pricing')}
+            className="text-sm underline text-accent"
+          >
+            Explore Plans
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 import { SocialProof } from '../sections/SocialProof/SocialProof';
 import { Pricing } from '../sections/Pricing/Pricing';
 import { Footer } from './Footer';
+import { Stats } from '../sections';
 import {
   galleryDesigns,
   tattooStyles,
   tattooPlacements,
   tattooSizes,
   colorPreferences,
-  sectionHeadings
+  sectionHeadings,
+  timelineSteps
 } from '../data';
 import styles from './GeneratorPage.module.css';
 
@@ -30,10 +93,11 @@ import {
 } from './generator-page/hooks';
 import {
   HeroSection,
-  IntroSection,
   LiveTheMagicSection,
   GeneratorControlsSection
-} from './generator-page/components';export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
+} from './generator-page/components';
+
+export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   const generator = useGenerator();
   const license = useLicense();
 
@@ -83,13 +147,15 @@ import {
     <>
       <div className="w-full overflow-x-hidden">
         <HeroSection />
+        {/* Restore the top phrases and stats row (no tour button) */}
+        <div className="w-full px-1.5 md:px-2.5 mt-10 md:mt-14">
+          <Stats />
+        </div>
 
         <div className="w-full bg-background">
           <div 
-            className="w-full space-y-8 md:space-y-10 pb-12 px-4 md:px-6">
+            className="w-full space-y-8 md:space-y-10 pb-12 px-1.5 md:px-2.5">
             
-            <IntroSection />
-
             <LiveTheMagicSection
               galleryDesigns={allGalleryDesigns}
               onViewAll={() => setIsGalleryOverlayOpen(true)}
@@ -97,8 +163,29 @@ import {
 
             {/* Removed legacy inline gallery: LiveTheMagicSection now renders the new ImageGallery */}
 
-            <div className="mt-[70px] md:mt-[90px]">
-              <HowItWorksTimeline />
+            <div className="mt-[70px] md:mt-[90px] space-y-6">
+              {/* External title for the timeline section */}
+              <div className="flex justify-center">
+                <h2 className={"text-4xl sm:text-5xl md:text-6xl lg:text-[68px] font-[Akronim] text-white text-center uppercase mb-8 sm:mb-10 md:mb-12 lg:mb-16 tracking-[4px] px-2 border-b-4 border-accent " + styles.titleShadow}>
+                  Started from the Bottom
+                </h2>
+              </div>
+              {/** Map our existing timelineSteps into the installed Timeline's data shape */}
+              <Timeline
+                data={timelineSteps.map((step) => ({
+                  title: step.title,
+                  content: (
+                    <div className="prose dark:prose-invert max-w-none">
+                      <div className="flex items-start gap-3">
+                        <step.icon className="w-6 h-6 text-accent mt-1" />
+                        <p className="text-neutral-700 dark:text-neutral-300 text-base md:text-lg">
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
+                  ),
+                }))}
+              />
             </div>
 
             <div className="mt-20 sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
@@ -199,6 +286,7 @@ import {
         isOpen={isGalleryOverlayOpen}
         onClose={() => setIsGalleryOverlayOpen(false)}
       />
+
     </>
   );
 }

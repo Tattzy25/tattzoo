@@ -2,9 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Heart, X, ChevronLeft, ChevronRight } from "lucide-react"
-// Reuse shared gallery visual styles (shadows, heart button styles, etc.)
-// so the cards in this gallery have the same deep glow/shadow as the top gallery.
-import "../../shared/TattooGallery.css"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -198,8 +195,8 @@ export default function ImageGallery({
           {data.map((product) => (
             <div
               key={product.id}
-              // Add tg-grid-item to match shadow style of the hero gallery cards
-              className="group bg-card relative overflow-hidden rounded-3xl transition-all tg-grid-item"
+              // Card styling with permanent black shadow, no border
+              className="group bg-card relative overflow-hidden rounded-3xl transition-all shadow-xl shadow-black/40 hover:shadow-2xl hover:shadow-black/50"
             >
               {product.badge && (
                 <Badge
@@ -223,7 +220,7 @@ export default function ImageGallery({
               </button>
 
               <div
-                className="bg-muted/30 aspect-square overflow-hidden cursor-pointer rounded-3xl"
+                className="bg-muted/30 aspect-4/5 overflow-hidden cursor-pointer rounded-3xl"
                 onClick={() => {
                   setLightboxImage(product.image);
                   setCurrentImageIndex(data.findIndex(p => p.id === product.id));
@@ -237,17 +234,17 @@ export default function ImageGallery({
                 />
               </div>
 
-              <div className="p-4">
-                <div className="mb-2 flex items-start justify-between gap-2">
+              <div className="p-6">
+                <div className="mb-3 flex items-start justify-between gap-2">
                   <div className="flex-1">
-                    <p className="text-sm font-semibold">{product.brand}</p>
-                    <p className="text-muted-foreground mt-1 text-sm leading-tight">
+                    <p className="text-base font-semibold">{product.brand}</p>
+                    <p className="text-muted-foreground mt-2 text-base leading-tight">
                       {product.name}
                     </p>
                   </div>
                 </div>
                 {product.price && !hidePrice && (
-                  <p className="mt-2 font-semibold">{product.price}</p>
+                  <p className="mt-3 text-lg font-semibold">{product.price}</p>
                 )}
               </div>
             </div>

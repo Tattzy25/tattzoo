@@ -76,7 +76,7 @@ export function Pricing({ onNavigate }: PricingProps) {
   };
 
   return (
-    <section className="w-full px-4">
+    <section className="w-full px-1.5 md:px-2.5">
       <div className="max-w-md mx-auto">
         {!hideContent && (
           <AnimatePresence mode="wait">

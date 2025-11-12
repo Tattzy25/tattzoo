@@ -1,4 +1,3 @@
-import { Sparkles, Wand2, Download, CheckCircle } from 'lucide-react';
 import { timelineSteps, sectionHeadings } from '../data';
 
 interface TimelineStep {
@@ -31,7 +30,7 @@ export function HowItWorksTimeline() {
       <div className="relative">
         {/* Vertical Line - Centered */}
         <div 
-          className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-accent/20 via-accent to-accent/20"
+          className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 bg-linear-to-b from-accent/20 via-accent to-accent/20"
           style={{ 
             boxShadow: '0 0 30px rgba(87, 241, 214, 0.6)'
           }}
@@ -46,7 +45,7 @@ export function HowItWorksTimeline() {
               <div key={index} className="relative">
                 {/* Icon Circle - Centered on Line */}
                 <div 
-                  className="absolute left-1/2 -translate-x-1/2 top-0 z-10 flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-accent text-accent flex-shrink-0"
+                  className="absolute left-1/2 -translate-x-1/2 top-0 z-10 flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-accent text-accent shrink-0"
                   style={{ 
                     background: 'radial-gradient(circle, rgba(12, 12, 13, 1) 0%, rgba(12, 12, 13, 0.95) 70%)',
                     boxShadow: '0 0 40px rgba(87, 241, 214, 0.7), inset 0 0 20px rgba(87, 241, 214, 0.2)'
@@ -56,9 +55,9 @@ export function HowItWorksTimeline() {
                 </div>
 
                 {/* Content Card - Alternating Left/Right */}
-                <div className={`flex justify-center ${isLeft ? 'md:justify-start md:pr-[55%]' : 'md:justify-end md:pl-[55%]'}`}>
+                <div className={`flex ${isLeft ? 'justify-start pr-[55%]' : 'justify-end pl-[55%]'}`}>
                   <div 
-                    className="w-full pt-24 md:pt-6 pb-8 px-8 md:px-10 rounded-[40px] border-2 border-accent/30 relative overflow-hidden"
+                    className="w-full pt-6 pb-8 px-8 md:px-10 rounded-[40px] border-2 border-accent/30 relative overflow-hidden"
                     style={{
                       backdropFilter: 'blur(16px)',
                       WebkitBackdropFilter: 'blur(16px)',

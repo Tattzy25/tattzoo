@@ -1,4 +1,4 @@
-import { Users, TrendingUp, Shield, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { socialProofStats, testimonials, sectionHeadings } from '../../data';
 import styles from './SocialProof.module.css';
 
@@ -6,7 +6,7 @@ const stats = socialProofStats;
 
 export function SocialProof() {
   return (
-    <section className="w-full px-4 space-y-16">
+    <section className="w-full px-1.5 md:px-2.5 space-y-16">
       <div className="text-center">
         <h2 
           className="text-5xl md:text-6xl lg:text-[68px] font-[Akronim] text-white mb-4"
