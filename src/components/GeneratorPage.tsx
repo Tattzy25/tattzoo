@@ -13,7 +13,7 @@ import { Timeline } from './ui/timeline';
 import { SocialProof } from '../sections/SocialProof/SocialProof';
 import { Pricing } from '../sections/Pricing/Pricing';
 import { Footer } from './Footer';
-import { Stats } from '../sections';
+import { Section2 } from '../sections/section2';
 import {
   galleryDesigns,
   tattooStyles,
@@ -40,7 +40,6 @@ import {
 
 export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   const generator = useGenerator();
-  // Removed license usage since generation block was removed
   // const license = useLicense();
 
   const allGalleryDesigns = galleryDesigns;
@@ -76,10 +75,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
     <>
       <div className="w-full overflow-x-hidden">
         <HeroSection />
-        {/* Restore the top phrases and stats row (no tour button) */}
-        <div className="w-full px-1.5 md:px-2.5 mt-10 md:mt-14">
-          <Stats />
-        </div>
+        <Section2 />
 
         <div className="w-full bg-background">
           <div 

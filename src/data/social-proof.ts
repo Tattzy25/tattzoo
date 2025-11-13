@@ -54,18 +54,3 @@ export const testimonials: Testimonial[] = [
     rating: 5
   }
 ];
-
-/**
- * Homepage stats (1K+ Designs, 10K+ Created, 5K+ TaTTTied)
- * TODO: Fetch real-time counts from database
- */
-export interface HomePageStat {
-  value: string;
-  label: string;
-}
-
-export const homePageStats: HomePageStat[] = [
-  { value: '1K+', label: 'Designs' },
-  { value: '10K+', label: 'Created' },
-  { value: '5K+', label: 'TaTTTied' },
-];

@@ -5,7 +5,6 @@
  */
 
 export { Hero } from './Hero/Hero';
-export { Stats } from './Stats/Stats';
 export { SocialProof } from './SocialProof/SocialProof';
 export { Pricing } from './Pricing/Pricing';
 export { Footer } from './Footer/Footer';

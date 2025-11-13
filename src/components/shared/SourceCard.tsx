@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Sparkles, Upload, X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { AskTaTTTy } from './AskTaTTTy';
 import { SaveChip } from './SaveChip';
 import { DiamondLoader } from './DiamondLoader';
@@ -12,7 +12,7 @@ export function SourceCard() {
   // LOAD DYNAMIC QUESTIONS FROM BACKEND
   // Set enableBackend: true to fetch from API
   // Set enableBackend: false to use frontend data file
-  const { questions, isLoading: questionsLoading } = useDynamicQuestions({
+  const { questions } = useDynamicQuestions({
     generatorType: 'tattty',
     language: 'en',
     enableBackend: false, // TODO: Set to true when backend is ready
@@ -193,91 +193,7 @@ export function SourceCard() {
   };
 
   // REMOVED: streamAIResponse - now handled inside AskTaTTTy component
-  const streamAIResponse_REMOVED = async () => {
-    try {
-      const API_URL = import.meta.env?.VITE_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_URL}/api/ai/stream`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type,
-          contextType: 'tattty',
-          targetField: field,
-          targetText,
-          hasSelection,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: response.statusText }));
-        throw new Error(errorData.error || `Stream failed: ${response.statusText}`);
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (!reader) {
-        throw new Error('No response body');
-      }
-
-      const setter = field === 'q1' ? setInputTitle : setQuestionTitle;
-      const ref = field === 'q1' ? q1Ref : q2Ref;
-      const currentValue = field === 'q1' ? inputTitle : questionTitle;
-      
-      let accumulatedText = '';
-      
-      // If replacing selection, preserve before/after text
-      let beforeText = '';
-      let afterText = '';
-      if (replaceSelection && ref.current) {
-        const { selectionStart, selectionEnd } = ref.current;
-        beforeText = currentValue.substring(0, selectionStart);
-        afterText = currentValue.substring(selectionEnd);
-      } else {
-        // Clear field for full replacement
-        setter('');
-      }
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              
-              if (data.token) {
-                accumulatedText += data.token;
-                
-                if (replaceSelection) {
-                  setter(beforeText + accumulatedText + afterText);
-                } else {
-                  setter(accumulatedText);
-                }
-              }
-              
-              if (data.done) {
-                return accumulatedText;
-              }
-            } catch (e) {
-              // Skip invalid JSON
-            }
-          }
-        }
-      }
-
-      return accumulatedText;
-    } catch (error) {
-      console.error('AI streaming error:', error);
-      throw error;
-    }
-  };
+  // Function removed; streaming is handled within AskTaTTTy component.
 
   // Get current text from focused or last edited field for AskTaTTTy
   const getCurrentText = (): string => {
@@ -431,7 +347,7 @@ export function SourceCard() {
 
   return (
     <div className="relative flex flex-col h-full px-[10px]">
-        <div className="flex flex-col pt-[20px] pr-[0px] pb-[0px] pl-[0px] flex-1">
+        <div className="flex flex-col pt-[20px] pr-[0px] pb-[0px] pl-0 flex-1">
           <label className="block text-white px-2 mt-[0px] mr-[0px] mb-[8px] ml-[0px] font-[Roboto_Condensed] font-bold font-normal not-italic text-[24px]" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)' }}>
             {question1.label}
           </label>

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useId, useRef, useState } from "react"
 import { motion } from "motion/react"
-
+import { TextHoverEffect } from "@/components/ui/text-hover-effect"
 import { cn } from "@/lib/utils"
 
 /**
@@ -124,7 +124,7 @@ export function DotPattern({
           <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
         </radialGradient>
       </defs>
-      {dots.map((dot, index) => (
+      {dots.map((dot, _index) => (
         <motion.circle
           key={`${dot.x}-${dot.y}`}
           cx={dot.x}
@@ -159,8 +159,18 @@ export function DotPattern({
 
 export function Hero() {
   return (
-    <div className="relative h-screen w-full overflow-hidden">
-      <DotPattern glow={true} />
+    <div className="relative h-screen w-full flex items-center justify-center">
+      {/* Rounded container that clips content to curved bottom edge */}
+      <div className="absolute inset-0 rounded-b-[48px] overflow-hidden border-b-2 border-teal-400 shadow-[0_8px_40px_rgba(45,212,191,0.6)]">
+        <DotPattern glow={true} />
+        {/* Soft fade into page at the very bottom */}
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-linear-to-b from-transparent to-background pointer-events-none" />
+      </div>
+
+      {/* Foreground content */}
+      <div className="relative z-10 w-full flex items-center justify-center">
+        <TextHoverEffect text="TaTTTy" />
+      </div>
     </div>
   )
 }
