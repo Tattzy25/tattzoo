@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Badge } from '../../components/ui/badge';
 import { Label } from '../../components/ui/label';
 import { Switch } from '../../components/ui/switch';
+import { tattooSizes, colorPreferences } from '../../data';
 
 interface SizeColorSelectorProps {
   selectedSize: string | null;
@@ -13,8 +14,7 @@ interface SizeColorSelectorProps {
   onOutputTypeChange?: (type: 'color' | 'stencil') => void;
 }
 
-const sizes = ['Small', 'Medium', 'Large', 'Extra Large'];
-const colorPreferences = ['Black & Grey', 'Color', 'Blackwork', 'Watercolor'];
+const sizes = tattooSizes;
 
 export function SizeColorSelector({
   selectedSize,

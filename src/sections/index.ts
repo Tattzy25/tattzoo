@@ -4,11 +4,11 @@
  * Sections are exported in the order they appear on the page
  */
 
-export { Hero } from './Hero/Hero';
+// Note: Hero component is in src/components/hero.tsx and used via generator-page/components/hero-section.tsx
+// Note: Footer component is in src/components/Footer.tsx
 export { Stats } from './Stats/Stats';
 export { SocialProof } from './SocialProof/SocialProof';
 export { Pricing } from './Pricing/Pricing';
-export { Footer } from './Footer/Footer';
 
 // Generator Sections
 export { 
