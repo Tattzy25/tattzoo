@@ -3,6 +3,8 @@
  * Generates mock tattoo designs and AI responses locally
  */
 
+import { moods } from '../data/moods';
+
 export interface GenerateParams {
   prompt?: string;
   model?: string;
@@ -158,66 +160,10 @@ export async function mockEditImage(
 }
 
 /**
- * PLACEHOLDER Mood/Theme Data
- * TODO: Replace with database call when backend is connected
- * This data structure matches what will be returned from the database
- */
-import { 
-  Smile, 
-  Moon, 
-  Waves, 
-  Zap, 
-  HeartHandshake, 
-  Sparkle, 
-  Flame, 
-  Minus,
-  Skull,
-  Flower2,
-  Mountain,
-  Stars,
-  Compass,
-  Gem,
-  Feather,
-  Wind,
-  Sun,
-  CloudRain,
-  Heart,
-  Eye
-} from 'lucide-react';
-import { Mood } from '../types/mood';
-
-export const PLACEHOLDER_MOODS: Mood[] = [
-  { id: 'happy', label: 'Happy', icon: Smile },
-  { id: 'dark', label: 'Dark', icon: Moon },
-  { id: 'calm', label: 'Calm', icon: Waves },
-  { id: 'bold', label: 'Bold', icon: Zap },
-  { id: 'romantic', label: 'Romantic', icon: HeartHandshake },
-  { id: 'spiritual', label: 'Spiritual', icon: Sparkle },
-  { id: 'energetic', label: 'Energetic', icon: Flame },
-  { id: 'minimalist', label: 'Minimalist', icon: Minus },
-  { id: 'mysterious', label: 'Mysterious', icon: Skull },
-  { id: 'playful', label: 'Playful', icon: Flower2 },
-  { id: 'fierce', label: 'Fierce', icon: Mountain },
-  { id: 'peaceful', label: 'Peaceful', icon: Stars },
-  { id: 'adventurous', label: 'Adventurous', icon: Compass },
-  { id: 'elegant', label: 'Elegant', icon: Gem },
-  { id: 'free', label: 'Free', icon: Feather },
-  { id: 'wild', label: 'Wild', icon: Wind },
-  { id: 'joyful', label: 'Joyful', icon: Sun },
-  { id: 'melancholy', label: 'Melancholy', icon: CloudRain },
-  { id: 'passionate', label: 'Passionate', icon: Heart },
-  { id: 'mystic', label: 'Mystic', icon: Eye },
-  { id: 'rebellious', label: 'Rebellious', icon: Zap },
-  { id: 'serene', label: 'Serene', icon: Waves },
-  { id: 'powerful', label: 'Powerful', icon: Flame },
-  { id: 'dreamy', label: 'Dreamy', icon: Moon },
-];
-
-/**
  * Fetch moods from database
  * TODO: Implement when database is connected
  */
-export async function fetchMoodsFromDatabase(): Promise<Mood[]> {
+export async function fetchMoodsFromDatabase() {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 500));
   
@@ -225,8 +171,8 @@ export async function fetchMoodsFromDatabase(): Promise<Mood[]> {
   // const response = await fetch('/api/moods');
   // return response.json();
   
-  console.log('📊 Using placeholder mood data. TODO: Connect to database');
-  return PLACEHOLDER_MOODS;
+  console.log('📊 Using mood data from src/data/moods.ts. TODO: Connect to database');
+  return moods;
 }
 
 /**
