@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Zap, Sparkles } from 'lucide-react';
-import { cn } from '../ui/utils';
+import { cn } from '@/lib/utils';
 
 // Stability AI model types
 export type ModelType = 'sd3.5-large' | 'sd3-turbo';

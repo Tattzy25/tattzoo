@@ -1,7 +1,7 @@
 import React from 'react';
 import { CarouselPanel } from '../../../sections/Generator';
 import { MoodSelector } from '../../../sections/Generator';
-import { PLACEHOLDER_MOODS } from '../../../utils/mockDataGenerator';
+import { moods } from '../../../data/moods';
 
 interface GeneratorControlsSectionProps {
   tattooStyles: string[];
@@ -38,7 +38,7 @@ const GeneratorControlsSection: React.FC<GeneratorControlsSectionProps> = ({
   onSelectColorPreference,
   onSelectMood,
 }) => {
-  const filteredMoods = PLACEHOLDER_MOODS.filter(mood =>
+  const filteredMoods = moods.filter(mood =>
     mood.label.toLowerCase().includes(moodSearchQuery.toLowerCase())
   );
 
