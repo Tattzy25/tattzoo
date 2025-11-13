@@ -29,19 +29,32 @@ const LiveTheMagicSection: React.FC<LiveTheMagicSectionProps> = ({
           </p>
         </div>
 
-        {/* Use the GridBento component with fourCells variant - Two sets side by side */}
-        <div className="flex gap-6 w-full">
-          <GridBento variant="fourCells" className="h-screen py-12 px-6 flex-1 place-content-center place-items-center">
+        {/* Consolidate into a single set attached together */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full">
+          <GridBento variant="fourCells" className="h-screen py-2 px-2 flex-1 place-content-center place-items-center">
             {galleryDesigns.slice(0, 4).map((design, index) => (
               <div key={index} className="overflow-hidden size-full rounded-xl shadow-xl">
                 <img className="size-full object-cover" src={design.image} alt={design.title} />
               </div>
             ))}
           </GridBento>
-          
-          <GridBento variant="fourCells" className="h-screen py-12 px-6 flex-1 place-content-center place-items-center">
+          <GridBento variant="fourCells" className="h-screen py-2 px-2 flex-1 place-content-center place-items-center">
             {galleryDesigns.slice(4, 8).map((design, index) => (
               <div key={index + 4} className="overflow-hidden size-full rounded-xl shadow-xl">
+                <img className="size-full object-cover" src={design.image} alt={design.title} />
+              </div>
+            ))}
+          </GridBento>
+          <GridBento variant="fourCells" className="h-screen py-2 px-2 flex-1 place-content-center place-items-center">
+            {galleryDesigns.slice(8, 12).map((design, index) => (
+              <div key={index + 8} className="overflow-hidden size-full rounded-xl shadow-xl">
+                <img className="size-full object-cover" src={design.image} alt={design.title} />
+              </div>
+            ))}
+          </GridBento>
+          <GridBento variant="fourCells" className="h-screen py-2 px-2 flex-1 place-content-center place-items-center">
+            {galleryDesigns.slice(12, 16).map((design, index) => (
+              <div key={index + 12} className="overflow-hidden size-full rounded-xl shadow-xl">
                 <img className="size-full object-cover" src={design.image} alt={design.title} />
               </div>
             ))}

@@ -1,5 +1,4 @@
 # TaTTTy — Comprehensive README
-
 ## Project snapshot — what this is about
 
 TaTTTy is a Vite + React single-page app (TypeScript) that helps users generate tattoo concepts and preview them using an AR "Try It On" experience. Key capabilities:

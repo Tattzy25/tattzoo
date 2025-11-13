@@ -3,71 +3,13 @@ import AIImageGeneratorBlock from './creative-tim/blocks/ai-image-generator-01';
 import { SourceCard } from './shared/SourceCard';
 import { TryItOnButton } from './try-it-on/TryItOnButton';
 import { useGenerator } from '../contexts/GeneratorContext';
-import { useLicense } from '../contexts/LicenseContext';
+// import { useLicense } from '../contexts/LicenseContext';
 import GalleryOverlay from "./shared/GalleryOverlay";
 import { ModelPicker } from "./shared/ModelPicker";
-// Inline fallback ResultsCard component (original module missing)
 // Use the installed Timeline component instead of the old HowItWorksTimeline
 import { Timeline } from './ui/timeline';
 
-interface ResultsCardProps {
-  designs: string[];
-  isGenerating: boolean;
-  aspectRatio?: string;
-  maxWidth?: string;
-  onGenerate: () => void;
-  onNavigate?: (path: string) => void;
-}
-
-const ResultsCard = ({
-  designs,
-  isGenerating,
-  aspectRatio = "1/1",
-  maxWidth = "6xl",
-  onGenerate,
-  onNavigate
-}: ResultsCardProps) => {
-  return (
-    <div className={`mx-auto w-full max-w-${maxWidth} border rounded-xl p-6 bg-gray-900/40 backdrop-blur`}>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold text-white">Generated Designs</h3>
-        <button
-          onClick={onGenerate}
-          disabled={isGenerating}
-          className="px-4 py-2 rounded bg-accent text-black disabled:opacity-50"
-        >
-          {isGenerating ? 'Generating...' : 'Generate'}
-        </button>
-      </div>
-      {designs.length === 0 ? (
-        <p className="text-neutral-400 text-sm">No design yet. Click Generate to create one.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {designs.map((d, i) => (
-            <div key={i} className="relative w-full overflow-hidden rounded-lg bg-black/30">
-              <img
-                src={d}
-                alt={`Result ${i + 1}`}
-                className="w-full h-auto object-cover"
-                style={{ aspectRatio }}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-      {onNavigate && (
-        <div className="mt-4 text-right">
-          <button
-            onClick={() => onNavigate('/pricing')}
-            className="text-sm underline text-accent"
-          >
-            Explore Plans
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
+// Removed inline ResultsCard component per request to remove the block
 import { SocialProof } from '../sections/SocialProof/SocialProof';
 import { Pricing } from '../sections/Pricing/Pricing';
 import { Footer } from './Footer';
@@ -88,8 +30,7 @@ import {
   GeneratorPageProps
 } from './generator-page/types';
 import {
-  useGeneratorState,
-  useGeneration
+  useGeneratorState
 } from './generator-page/hooks';
 import {
   HeroSection,
@@ -99,7 +40,8 @@ import {
 
 export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   const generator = useGenerator();
-  const license = useLicense();
+  // Removed license usage since generation block was removed
+  // const license = useLicense();
 
   const allGalleryDesigns = galleryDesigns;
 
@@ -110,7 +52,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
     selectedMood,
     selectedPlacement,
     selectedSize,
-    selectedAspectRatio,
+    // selectedAspectRatio,
     moodSearchQuery,
     generating,
     generated,
@@ -121,27 +63,14 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
     setSelectedMood,
     setSelectedPlacement,
     setSelectedSize,
-    setGenerating,
-    setGenerated,
-    setGeneratedImage,
+    // setGenerating,
+    // setGenerated,
+    // setGeneratedImage,
     setIsGalleryOverlayOpen,
-    setValidationError,
+    // setValidationError,
   } = useGeneratorState();
 
-  const { handleGenerate } = useGeneration({
-    license,
-    selectedStyle,
-    selectedColorPreference,
-    selectedMood,
-    selectedPlacement,
-    selectedSize,
-    selectedAspectRatio,
-    generator,
-    setGenerating,
-    setGenerated,
-    setGeneratedImage,
-    setValidationError,
-  });
+  // Removed generation handler since the Generated Designs block was removed
 
   return (
     <>
@@ -166,7 +95,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
             <div className="mt-[70px] md:mt-[90px] space-y-6">
               {/* External title for the timeline section */}
               <div className="flex justify-center">
-                <h2 className={"text-4xl sm:text-5xl md:text-6xl lg:text-[68px] font-[Akronim] text-white text-center uppercase mb-8 sm:mb-10 md:mb-12 lg:mb-16 tracking-[4px] px-2 border-b-4 border-accent " + styles.titleShadow}>
+                <h2 className={"text-4xl sm:text-5xl md:text-6xl lg:text-[68px] font-[Akronim] text-white text-center uppercase mb-8 sm:mb-10 md:mb-12 lg:mb-16 tracking-[4px] px-2 " + styles.titleShadow}>
                   Started from the Bottom
                 </h2>
               </div>
@@ -246,16 +175,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
               <AIImageGeneratorBlock />
             </div>
 
-            <div className="mt-20 sm:mt-[100px] md:mt-[140px] lg:mt-[180px] pb-8 md:pb-12">
-              <ResultsCard
-                designs={generated && generatedImage ? [generatedImage] : []}
-                isGenerating={generating}
-                aspectRatio="16/9"
-                maxWidth="6xl"
-                onGenerate={handleGenerate}
-                onNavigate={onNavigate}
-              />
-            </div>
+            {/* Removed the Generated Designs block before the footer per request */}
 
             {generated && generatedImage && !generating && (
               <div className="mt-6 sm:mt-8 md:mt-12 pb-8 md:pb-12">
