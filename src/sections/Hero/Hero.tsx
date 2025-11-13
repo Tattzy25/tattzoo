@@ -1,4 +1,4 @@
-import heroBackground from 'figma:asset/f1e905eeec2209fc44a6e8116683d1e15b57433e.png';
+import heroBackground from '@/assets/f1e905eeec2209fc44a6e8116683d1e15b57433e.png';
 
 interface HeroProps {
   // Props will be added as we extract the hero content

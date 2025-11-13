@@ -30,11 +30,11 @@ import {
   GeneratorPageProps
 } from './generator-page/types';
 import {
-  useGeneratorState
+  useGeneratorState,
 } from './generator-page/hooks';
 import {
   HeroSection,
-  LiveTheMagicSection,
+  ImageGallery,
   GeneratorControlsSection
 } from './generator-page/components';
 
@@ -85,12 +85,12 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
           <div 
             className="w-full space-y-8 md:space-y-10 pb-12 px-1.5 md:px-2.5">
             
-            <LiveTheMagicSection
+            <ImageGallery
               galleryDesigns={allGalleryDesigns}
               onViewAll={() => setIsGalleryOverlayOpen(true)}
             />
 
-            {/* Removed legacy inline gallery: LiveTheMagicSection now renders the new ImageGallery */}
+            {/* Removed legacy inline gallery: ImageGallery now renders the new ImageGallery */}
 
             <div className="mt-[70px] md:mt-[90px] space-y-6">
               {/* External title for the timeline section */}

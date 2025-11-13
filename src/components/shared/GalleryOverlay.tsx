@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 import { X, Menu } from 'lucide-react';
-import ImageGallery from '../creative-tim/blocks/product-listing-filters-01';
+import { ImageGallery } from '../generator-page/components/live-the-magic-section';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { tattooStyles, tattooPlacements, tattooSizes, colorPreferences } from '@/data/generator-options';
@@ -10,7 +10,7 @@ import { moods } from '@/data/moods';
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-};
+                                                                        };
 
 export function GalleryOverlay({ isOpen, onClose }: Props) {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -106,9 +106,8 @@ export function GalleryOverlay({ isOpen, onClose }: Props) {
         {/* Main gallery area */}
         <div className="flex-1 overflow-y-auto overscroll-contain p-4" style={{ scrollbarGutter: 'stable both-edges' as any }}>
           <ImageGallery
-            showFilters={false}
-            onFiltersChange={() => {}}
-            columnsClassName="grid grid-cols-3 gap-6 sm:grid-cols-3 lg:grid-cols-4"
+            galleryDesigns={[]}
+            onViewAll={() => {}}
           />
         </div>
       </div>

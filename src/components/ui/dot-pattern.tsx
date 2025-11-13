@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useEffect, useId, useRef, useState } from "react"
 import { motion } from "motion/react"
 
@@ -154,13 +152,5 @@ export function DotPattern({
         />
       ))}
     </svg>
-  )
-}
-
-export function Hero() {
-  return (
-    <div className="relative h-screen w-full overflow-hidden">
-      <DotPattern glow={true} />
-    </div>
   )
 }

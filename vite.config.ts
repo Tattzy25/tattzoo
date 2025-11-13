@@ -7,6 +7,7 @@ export default defineConfig({
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
+        '@/lib/utils': path.resolve(__dirname, './src/lib/utils.ts'),
         'vaul@1.1.2': 'vaul',
         'sonner@2.0.3': 'sonner',
         'recharts@2.15.2': 'recharts',
