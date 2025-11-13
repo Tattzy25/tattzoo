@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
-import { generateMockTattooImage, generateMockVariations } from '../utils/mockDataGenerator';
 import { saveGenerationToHistory, saveRecentPrompt } from '../utils/localStorageManager';
 import type { ModelType } from '../components/shared/ModelPicker';
 import { useLicense } from './LicenseContext';
@@ -216,7 +215,7 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
         generatorType: 'tattty'
       };
       
-      // 4. SEND REQUEST (MOCK - NO BACKEND)
+      // 4. SEND REQUEST (BACKEND INTEGRATION NEEDED)
       // TODO: When connecting to real backend, use FormData:
       // import { buildFormData } from '../utils/formDataBuilder';
       // const formData = buildFormData(generationParams);
@@ -224,30 +223,9 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
       //   method: 'POST',
       //   body: formData
       // });
-      const generatedImageUrl = await generateMockTattooImage(generationParams);
       
-      // 5. PROCESS RESPONSE & UPDATE STATE
-      setGeneratedDesigns([generatedImageUrl]);
-      
-      // 6. SAVE TO HISTORY (LOCAL STORAGE)
-      saveGenerationToHistory({
-        imageUrl: generatedImageUrl,
-        prompt,
-        params: generationParams
-      });
-      
-      // Save prompt to recent list
-      if (prompt.trim()) {
-        saveRecentPrompt(prompt);
-      }
-      
-      // 6.5. TRACK GENERATION (LICENSE USAGE)
-      trackGeneration();
-      
-      // 7. RESET LOADING STATE & SHOW SUCCESS
-      setIsGenerating(false);
-      console.log('✅ Design generated! Check out your new tattoo concept');
-      console.log(`📊 Generations remaining this hour: ${getRemainingGenerations()}`);
+      // For now, show placeholder error since mock data generator was removed
+      throw new Error('Generation service not available. Please connect to backend API.');
       
     } catch (error) {
       // 8. ERROR HANDLING
@@ -271,11 +249,9 @@ export function GeneratorProvider({ children }: { children: ReactNode }) {
     try {
       setIsGenerating(true);
       
-      const variations = await generateMockVariations(generatedDesigns[0], count);
-      setGeneratedDesigns(variations);
-      
-      setIsGenerating(false);
-      console.log(`Generated ${count} variations!`);
+      // TODO: When connecting to real backend, implement variations API call
+      // For now, show placeholder error since mock data generator was removed
+      throw new Error('Variation service not available. Please connect to backend API.');
     } catch (error) {
       console.error('Variation generation failed:', error);
       setIsGenerating(false);
