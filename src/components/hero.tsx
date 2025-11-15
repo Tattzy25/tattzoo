@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect, useId, useRef, useState } from "react"
-import { motion } from "motion/react"
 import { TextHoverEffect } from "@/components/ui/text-hover-effect"
 import { cn } from "@/lib/utils"
 
@@ -102,8 +101,6 @@ export function DotPattern({
       return {
         x: col * width + cx,
         y: row * height + cy,
-        delay: Math.random() * 5,
-        duration: Math.random() * 3 + 2,
       }
     }
   )
@@ -118,39 +115,13 @@ export function DotPattern({
       )}
       {...props}
     >
-      <defs>
-        <radialGradient id={`${id}-gradient`}>
-          <stop offset="0%" stopColor="currentColor" stopOpacity="1" />
-          <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-        </radialGradient>
-      </defs>
       {dots.map((dot, _index) => (
-        <motion.circle
+        <circle
           key={`${dot.x}-${dot.y}`}
           cx={dot.x}
           cy={dot.y}
           r={cr}
-          fill={glow ? `url(#${id}-gradient)` : "currentColor"}
-          initial={glow ? { opacity: 0.4, scale: 1 } : {}}
-          animate={
-            glow
-              ? {
-                  opacity: [0.4, 1, 0.4],
-                  scale: [1, 1.5, 1],
-                }
-              : {}
-          }
-          transition={
-            glow
-              ? {
-                  duration: dot.duration,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  delay: dot.delay,
-                  ease: "easeInOut",
-                }
-              : {}
-          }
+          fill="currentColor"
         />
       ))}
     </svg>
@@ -162,7 +133,7 @@ export function Hero() {
     <div className="relative h-screen w-full flex items-center justify-center">
       {/* Rounded container that clips content to curved bottom edge */}
       <div className="absolute inset-0 rounded-b-[48px] overflow-hidden border-b-2 border-teal-400 shadow-[0_8px_40px_rgba(45,212,191,0.6)]">
-        <DotPattern glow={true} />
+        <DotPattern />
         {/* Soft fade into page at the very bottom */}
         <div className="absolute inset-x-0 bottom-0 h-48 bg-linear-to-b from-transparent to-background pointer-events-none" />
       </div>

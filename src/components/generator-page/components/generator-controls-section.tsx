@@ -75,6 +75,9 @@ const GeneratorControlsSection: React.FC<GeneratorControlsSectionProps> = ({
               title={getMoodTitle()}
             />
           </div>
+          <div>
+            {/* Removed SkinCheck component */}
+          </div>
         </div>
       </div>
     </>

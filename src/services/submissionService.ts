@@ -35,7 +35,6 @@ export interface SessionData {
 
 class SessionDataStore {
   private currentSession: SessionData | null = null;
-  private readonly ENDPOINT = '/api/generate';
 
   /**
    * Generate a unique session ID
