@@ -30,6 +30,7 @@
     "@aliimam": "https://aliimam.in/r/{name}.json",
     "@systaliko-ui": "https://systaliko-ui.vercel.app/r/{name}.json",
     "@magicui": "https://magicui.design/r/{name}.json",
-    "@scrollxui": "https://www.scrollxui.dev/registry/{name}.json"
+    "@scrollxui": "https://www.scrollxui.dev/registry/{name}.json",
+    "@blocks": "https://blocks.so/r/{name}.json"
   }
 }

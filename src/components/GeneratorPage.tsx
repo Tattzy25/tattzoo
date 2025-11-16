@@ -1,6 +1,6 @@
 import AIImageGeneratorBlock from './creative-tim/blocks/ai-image-generator-01';
 // React import not needed with automatic JSX runtime
-import { SourceCard } from './shared/SourceCard';
+import AI02 from './ai-02';
 import { TryItOnButton } from './try-it-on/TryItOnButton';
 import { useGenerator } from '../contexts/GeneratorContext';
 // import { useLicense } from '../contexts/LicenseContext';
@@ -141,16 +141,18 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
 
             <div className="mt-20 sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
               <div className="grid grid-cols-1 gap-[60px] sm:gap-20 md:gap-[100px] lg:gap-12 items-start">
-                <div className="flex flex-col">
+                <div className="flex flex-col items-center justify-center">
                   <h2 className={"text-4xl sm:text-5xl md:text-6xl lg:text-[68px] font-[Akronim] text-white text-center uppercase mb-8 sm:mb-10 md:mb-12 lg:mb-16 px-2 " + styles.titleShadow}>
-                    {sectionHeadings.yourStory.title.split('\n').map((line, i) => (
-                      <span key={i} className="text-[48px]">
-                        {line}
-                        {i < sectionHeadings.yourStory.title.split('\n').length - 1 && <br />}
-                      </span>
-                    ))}
+                  {sectionHeadings.yourStory.title.split('\n').map((line, i) => (
+                    <span key={i} className="text-[48px]">
+                    {line}
+                    {i < sectionHeadings.yourStory.title.split('\n').length - 1 && <br />}
+                    </span>
+                  ))}
                   </h2>
-                  <SourceCard />
+                  <div className="flex justify-center w-full mt-[100px]">
+                    <AI02 />
+                  </div>
                 </div>
               </div>
             </div>

@@ -48,7 +48,7 @@ export function MoodSelector({
       
       {/* Horizontal scrollable container with generous padding to prevent clipping */}
       <div className="w-full overflow-x-auto overflow-y-visible py-12 -my-12">
-        <div className="px-12 -mx-12">
+        <div className="px-12 -mx-12 flex justify-center">
           <div 
             className="grid gap-2 md:gap-3 lg:gap-4 w-max"
             style={{
@@ -68,7 +68,7 @@ export function MoodSelector({
                   aria-label={`Select mood: ${mood.label}`}
                   className={`mood-btn flex flex-col items-center justify-center gap-1 md:gap-1.5 p-1.5 md:p-2 lg:p-2.5 rounded-xl md:rounded-2xl aspect-square transition-all duration-200 border-2 ${
                     isSelected
-                      ? 'border-accent bg-accent/10'
+                      ? 'border-accent bg-accent/10 shadow-[0_0_20px_rgba(87,241,214,0.6)]'
                       : 'border-border/50 bg-background/50 hover:border-accent/50 hover:bg-accent/5'
                   }`}
                 >

@@ -62,7 +62,7 @@ const initialSelections: GeneratorSelections = {
   placement: null,
   size: null,
   color: null,
-  mood: null,
+  mood: 'happy',
   skinTone: null,
   textInputs: {},
   images: [],

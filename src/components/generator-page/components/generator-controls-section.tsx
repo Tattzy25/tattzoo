@@ -66,17 +66,14 @@ const GeneratorControlsSection: React.FC<GeneratorControlsSectionProps> = ({
       </div>
 
       <div className="mt-20 sm:mt-[100px] md:mt-[140px] lg:mt-[180px] space-y-6 md:space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[60px] sm:gap-20 md:gap-[100px] lg:gap-8 pt-4 md:pt-6">
-          <div>
+        <div className="flex justify-center pt-4 md:pt-6">
+          <div className="w-full max-w-full">
             <MoodSelector
               moods={filteredMoods}
               selectedMood={selectedMood}
               onSelectMood={onSelectMood}
               title={getMoodTitle()}
             />
-          </div>
-          <div>
-            {/* Removed SkinCheck component */}
           </div>
         </div>
       </div>
