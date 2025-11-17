@@ -9,7 +9,6 @@ export * from './gallery';
 
 // Generator Options
 export * from './generator-options';
-export * from './generator-types';
 
 // Timeline
 export * from './timeline';

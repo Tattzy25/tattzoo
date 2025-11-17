@@ -78,6 +78,8 @@ jest.cache
 # Next / other frameworks (safe to ignore if not used)
 .next/
 .nuxt/
+.env
+.env.local
 
 # Lockfiles: usually committed (commented out). Uncomment only if you specifically want to ignore them
 # package-lock.json
