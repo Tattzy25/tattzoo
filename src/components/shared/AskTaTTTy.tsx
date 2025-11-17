@@ -27,6 +27,9 @@ interface AskTaTTTyProps {
     selectedText: string;
     replaceSelection: boolean;
   };
+
+  // Current question id for context routing
+  getQuestionId?: () => 'question_one' | 'question_two';
   
   // Loading state callback (optional)
   onLoadingChange?: (isLoading: boolean) => void;
@@ -50,6 +53,7 @@ export function AskTaTTTy({
   onTextUpdate,
   getCurrentText,
   getSelectionInfo,
+  getQuestionId,
   onLoadingChange,
   enhancementState,
   size = 'md',
@@ -119,6 +123,7 @@ export function AskTaTTTy({
       selectedText: '', 
       replaceSelection: false 
     };
+    const questionId = getQuestionId?.() || 'question_one';
 
     // REQUIRED: API configuration must be complete
     if (!askTaTTTyAPI.baseURL) {
@@ -143,6 +148,7 @@ export function AskTaTTTy({
         contextType,
         targetText: selectionInfo.hasSelection ? selectionInfo.selectedText : currentText,
         hasSelection: selectionInfo.hasSelection,
+        selection_info: questionId,
       }),
       signal: AbortSignal.timeout(askTaTTTyAPI.requestTimeout),
     });

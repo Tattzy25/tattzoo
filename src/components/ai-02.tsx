@@ -2,23 +2,9 @@
 
 import QFlow from "@/components/Q-FLOW";
 import { SelectionChip } from "@/components/shared/SelectionChip";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { AskTaTTTy } from "@/components/shared/AskTaTTTy";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  IconAlertTriangle,
-  IconFileSpark,
-  IconGauge,
-  IconPhotoScan,
-  IconSparkles,
-  IconDroplet,
-} from "@tabler/icons-react";
+import { IconPhotoScan } from "@tabler/icons-react";
 import { Send } from 'lucide-react';
 import React, { useRef, useState, useEffect } from "react";
 import { askTaTTTyAPI } from '../data/ask-tattty';
@@ -26,46 +12,8 @@ import { tatttyQuestions, validateTatttyQuestion } from '../data/field-labels';
 import { sessionDataStore } from '../services/submissionService';
 import { useGenerator } from '../contexts/GeneratorContext';
 
-const PROMPTS = [
-  {
-    icon: IconFileSpark,
-    text: "Write documentation",
-    prompt:
-      "Write comprehensive documentation for this codebase, including setup instructions, API references, and usage examples.",
-  },
-  {
-    icon: IconGauge,
-    text: "Optimize performance",
-    prompt:
-      "Analyze the codebase for performance bottlenecks and suggest optimizations to improve loading times and runtime efficiency.",
-  },
-  {
-    icon: IconAlertTriangle,
-    text: "Find and fix 3 bugs",
-    prompt:
-      "Scan through the codebase to identify and fix 3 critical bugs, providing detailed explanations for each fix.",
-  },
-];
-
-const TATTY_OPTIONS = [
-  {
-    value: "enhance",
-    name: "Optimize",
-    description: "Enhance and improve your text",
-    icon: IconSparkles,
-  },
-  {
-    value: "ideas",
-    name: "Ideas",
-    description: "Generate creative ideas",
-    icon: IconDroplet,
-  },
-];
-
 export default function Ai02() {
   const [inputValue, setInputValue] = useState("");
-  const [selectedTaTTy, setSelectedTaTTy] = useState<typeof TATTY_OPTIONS[number] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [currentQuestionId, setCurrentQuestionId] = useState<'question_one' | 'question_two'>('question_one');
@@ -74,7 +22,6 @@ export default function Ai02() {
   const [answersById, setAnswersById] = useState<{ question_one?: string; question_two?: string }>({});
   const { saveTextInput, updateImages } = useGenerator();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDropdownActive, setIsDropdownActive] = useState(false);
   const controlsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -105,57 +52,9 @@ export default function Ai02() {
     }
   };
 
-  const handleTaTTyChange = (value: string) => {
-    const option = TATTY_OPTIONS.find((m) => m.value === value);
-    if (option) {
-      setSelectedTaTTy(option);
-      setIsDropdownActive(false);
-    }
-  };
+  
 
-  const streamAIResponse = async (type: 'enhance' | 'ideas'): Promise<string> => {
-    const currentText = getCurrentText();
-    
-    if (!askTaTTTyAPI.baseURL) {
-      throw new Error('Ask TaTTTy API not configured');
-    }
-
-    const endpoint = type === 'enhance' 
-      ? askTaTTTyAPI.enhanceEndpoint 
-      : askTaTTTyAPI.ideasEndpoint;
-
-    if (!endpoint) {
-      throw new Error(`${type} endpoint not configured`);
-    }
-
-    const response = await fetch(`${askTaTTTyAPI.baseURL}${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type,
-        contextType: 'tattty',
-        targetText: currentText,
-        hasSelection: false,
-        selection_info: currentQuestionId,
-      }),
-      signal: AbortSignal.timeout(askTaTTTyAPI.requestTimeout || 30000),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    
-    if (!data.result) {
-      throw new Error('Response missing required "result" field');
-    }
-    
-    return data.result;
-  };
+  
 
   const getCurrentText = (): string => {
     return inputRef.current?.value || inputValue || '';
@@ -167,6 +66,8 @@ export default function Ai02() {
     const currentText = getCurrentText().trim();
     const result = validateTatttyQuestion(currentQuestionId, currentText);
     if (!result.isValid) {
+      setError(result.error || 'Invalid input');
+      setTimeout(() => setError(null), 4000);
       return;
     }
     const qId = currentQuestionId;
@@ -204,16 +105,7 @@ export default function Ai02() {
 
   
 
-  useEffect(() => {
-    const onWindowClick = (e: any) => {
-      if (!controlsRef.current) return;
-      if (!controlsRef.current.contains(e.target)) {
-        setIsDropdownActive(false);
-      }
-    };
-    window.addEventListener('click', onWindowClick);
-    return () => window.removeEventListener('click', onWindowClick);
-  }, []);
+  
 
   return (
     <div className="flex flex-col gap-3 w-full max-w-5xl px-3 sm:px-4 md:px-6">
@@ -261,30 +153,17 @@ export default function Ai02() {
         <div ref={controlsRef} className="flex min-h-16 items-center justify-center gap-8 p-4">
           
 
-          <div className="relative flex items-center gap-4 ml-2">
-            <Select
-              value={selectedTaTTy?.value as any}
-              onValueChange={handleTaTTyChange}
-            >
-              <SelectTrigger onClick={() => setIsDropdownActive(true)} className="w-fit border-none bg-transparent! px-4 py-3 text-xl text-muted-foreground hover:text-foreground focus:ring-0 shadow-none">
-                <SelectValue placeholder="Ask TaTTTy" />
-              </SelectTrigger>
-              <SelectContent>
-                {TATTY_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    <div className="flex items-center gap-2">
-                      {React.createElement(option.icon, { className: "h-7 w-7" })}
-                      <span>{option.name}</span>
-                    </div>
-                    <span className="text-muted-foreground block text-sm">
-                      {option.description}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
+          <AskTaTTTy
+            contextType="tattty"
+            size="lg"
+            className="ml-2"
+            getCurrentText={() => getCurrentText()}
+            getQuestionId={() => currentQuestionId}
+            onTextUpdate={(text: string) => {
+              setInputValue(text);
+              if (inputRef.current) inputRef.current.value = text;
+            }}
+          />
           <div className="flex items-center gap-8">
             <input
               ref={fileInputRef}
@@ -318,28 +197,9 @@ export default function Ai02() {
 
       </div>
 
-      <div className="flex flex-wrap justify-center gap-4">
-        {PROMPTS.map((button) => {
-          const IconComponent = button.icon;
-          return (
-            <Button
-              key={button.text}
-              variant="ghost"
-              className="group flex items-center gap-3 rounded-full border px-4 py-3 text-base text-foreground transition-all duration-200 hover:bg-muted/30 h-auto bg-transparent dark:bg-muted"
-              onClick={() => handlePromptClick(button.prompt)}
-            >
-              <IconComponent className="h-5 w-5 text-muted-foreground transition-colors group-hover:text-foreground" />
-              <span>{button.text}</span>
-            </Button>
-          );
-        })}
-      </div>
+      <div className="min-h-12" aria-hidden="true" />
 
-      {error && (
-        <div className="text-red-500 text-base text-center py-2">
-          {error}
-        </div>
-      )}
+      
     </div>
   );
 }

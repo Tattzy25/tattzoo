@@ -80,6 +80,10 @@ jest.cache
 .nuxt/
 .env
 .env.local
+mcp.json
+next-env.d.ts
+mcp-client.ts
+
 
 # Lockfiles: usually committed (commented out). Uncomment only if you specifically want to ignore them
 # package-lock.json

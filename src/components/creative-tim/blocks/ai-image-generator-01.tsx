@@ -162,7 +162,7 @@ export default function AIImageGeneratorBlock() {
               {generatedImage && (
                 <div className="space-y-6">
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-teal-400/20 rounded-lg blur-xl"></div>
+                    <div className="absolute inset-0 bg-linear-to-r from-accent/20 to-teal-400/20 rounded-lg blur-xl"></div>
                     <div className="relative aspect-square w-full overflow-hidden rounded-lg border-2 border-accent/50 bg-card/80 backdrop-blur-sm">
                       <img
                         src={generatedImage}

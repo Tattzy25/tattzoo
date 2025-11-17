@@ -103,6 +103,8 @@ export default function Ai02() {
     </div>
   );
 
+  
+
   return (
     <div className="flex flex-col gap-4 w-[calc(42rem-5rem)]">
       <div className="flex min-h-[120px] flex-col rounded-2xl cursor-text bg-card border border-border shadow-lg">
@@ -180,6 +182,7 @@ export default function Ai02() {
               <IconArrowUp className="h-4 w-4 text-primary-foreground" />
             </Button>
           </div>
+          
         </div>
       </div>
 

@@ -2,7 +2,7 @@ interface SelectionChipProps {
   label: string;
   value: string;
   onClear?: () => void;
-  variant?: 'default' | 'saved';
+  variant?: 'default' | 'saved' | 'error';
   className?: string;
   style?: React.CSSProperties;
 }
@@ -10,11 +10,30 @@ interface SelectionChipProps {
 export function SelectionChip({ 
   label, 
   value, 
-  onClear,
   variant = 'default',
   className = '',
   style 
 }: SelectionChipProps) {
+  
+  if (variant === 'error') {
+    return (
+      <div 
+        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-red-500 bg-red-500/10 ${className}`}
+        style={{
+          ...style,
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-2 h-2 rounded-full bg-red-500"
+          />
+          <span className="text-sm font-[Orbitron] text-red-500 tracking-wider">
+            {label}
+          </span>
+        </div>
+      </div>
+    );
+  }
   
   if (variant === 'saved') {
     return (
