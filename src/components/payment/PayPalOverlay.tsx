@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Mail, AlertCircle, CreditCard, Calendar, Lock } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -14,15 +14,15 @@ interface PayPalOverlayProps {
 }
 
 export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentError, inline = false }: PayPalOverlayProps) {
-  const BACKEND_API_URL = (import.meta as any)?.env?.VITE_BACKEND_API_URL;
-  if (!BACKEND_API_URL) {
-    throw new Error('CRITICAL: VITE_BACKEND_API_URL is not configured');
-  }
+  const BACKEND_API_URL = (import.meta as any)?.env?.VITE_BACKEND_API_URL as string | undefined;
+  const backendConfigured = !!BACKEND_API_URL;
   const [email, setEmail] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
   const [error, setError] = useState('');
+  const [paypalInit, setPaypalInit] = useState(false);
+  usePaypalButton(isOpen, paypalInit, setPaypalInit);
 
   // Lock body scroll and hide overflow when overlay is open (only for modal mode)
   useEffect(() => {
@@ -50,6 +50,10 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
   }, [isOpen, inline]);
 
   const handlePayment = async () => {
+    if (!backendConfigured) {
+      setError('Backend URL is not configured. Set VITE_BACKEND_API_URL.');
+      return;
+    }
     // Validate email
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
@@ -223,6 +227,19 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
 
       {/* Content */}
       <div className="space-y-6 mt-4">
+        {!backendConfigured && (
+          <div
+            className="rounded-lg p-3 border border-red-400/40"
+            style={{ background: 'rgba(239, 68, 68, 0.1)' }}
+          >
+            <div className="flex items-start gap-2">
+              <AlertCircle size={16} className="text-red-400 shrink-0 mt-0.5" />
+              <p className="text-red-400 text-sm" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
+                Backend URL is not configured. Set VITE_BACKEND_API_URL.
+              </p>
+            </div>
+          </div>
+        )}
         <div className="text-center space-y-2">
           <h3 
             className="text-2xl md:text-3xl text-white"
@@ -351,7 +368,7 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
           {/* Payment button */}
           <Button
             onClick={handlePayment}
-            disabled={!email || !cardNumber || !expiry || !cvv}
+            disabled={!backendConfigured || !email || !cardNumber || !expiry || !cvv}
             className={`${inline ? 'flex-1' : 'w-full'} h-12 font-[Orbitron]`}
             style={{
               background: 'linear-gradient(135deg, #57f1d6, #3dd5c0)',
@@ -359,9 +376,11 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
               fontSize: '20px'
             }}
           >
-            Get Access
+            {backendConfigured ? 'Get Access' : 'Backend Not Configured'}
           </Button>
         </div>
+
+        <div id="paypal-button-container-P-4PH289791F392245MNEOEYQQ" className="pt-4" />
 
         {/* Secure payment note */}
         <p className="text-center text-white/50 text-xs" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
@@ -400,7 +419,7 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 50 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-full max-w-md px-4"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-full max-w-md px-4 relative"
           >
             {formContent}
           </motion.div>
@@ -408,4 +427,80 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
       )}
     </AnimatePresence>
   );
+}
+
+class PayPalOverlayErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch() {}
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="fixed inset-0 z-[9999]" style={{ backgroundColor: 'rgba(12, 12, 13, 0.95)' }}>
+          <div className="flex items-center justify-center h-full px-4">
+            <div className="relative rounded-3xl border-4 border-red-400/40 p-8 w-full max-w-md" style={{ background: 'rgba(239, 68, 68, 0.1)' }}>
+              <div className="flex items-start gap-2">
+                <AlertCircle size={20} className="text-red-400 shrink-0" />
+                <div className="space-y-2">
+                  <p className="text-red-400" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>An error occurred in payment UI.</p>
+                  <Button onClick={() => this.setState({ hasError: false })} className="h-10">Retry</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children as any;
+  }
+}
+
+export function PayPalOverlayWithBoundary(props: PayPalOverlayProps) {
+  return (
+    <PayPalOverlayErrorBoundary>
+      <PayPalOverlay {...props} />
+    </PayPalOverlayErrorBoundary>
+  );
+}
+
+function initPaypal(isOpen: boolean, setPaypalInit: (v: boolean) => void) {
+  if (!isOpen) return;
+  const setup = () => {
+    const paypal = (window as any).paypal;
+    if (!paypal) return;
+    const el = document.getElementById('paypal-button-container-P-4PH289791F392245MNEOEYQQ');
+    if (!el) return;
+    el.innerHTML = '';
+    try {
+      paypal
+        .Buttons({
+          style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'subscribe' },
+          createSubscription: function (data: any, actions: any) {
+            return actions.subscription.create({ plan_id: 'P-4PH289791F392245MNEOEYQQ' });
+          },
+          onApprove: function (data: any) {
+            alert((data as any)?.subscriptionID);
+          },
+        })
+        .render('#paypal-button-container-P-4PH289791F392245MNEOEYQQ');
+      setPaypalInit(true);
+    } catch {}
+  };
+  if ((window as any).paypal) {
+    setup();
+    return;
+  }
+  const s = document.createElement('script');
+  s.src = 'https://www.paypal.com/sdk/js?client-id=AXv0pX_4up4nGJaAXJ-VnzxFnxQlpyrqwV5GPbLDe83yrtumx_zNPppH0M9yTIg2KvFT19L41IQIKXSz&vault=true&intent=subscription';
+  s.setAttribute('data-sdk-integration-source', 'button-factory');
+  s.onload = setup;
+  document.head.appendChild(s);
+}
+
+export function usePaypalButton(isOpen: boolean, paypalInit: boolean, setPaypalInit: (v: boolean) => void) {
+  useEffect(() => {
+    if (!paypalInit) initPaypal(isOpen, setPaypalInit);
+  }, [isOpen, paypalInit]);
 }

@@ -1,19 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Droplet, Undo2, Redo2, RotateCw } from 'lucide-react';
+import { Sparkles, Undo2, Redo2, RotateCw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { 
   askTaTTTyLabels, 
-  askTaTTTyAPI,
   askTaTTTyErrors, 
   askTaTTTySizes, 
   askTaTTTyStyling, 
-  askTaTTTyTimings,
   askTaTTTyValidation
 } from '../../data';
+import { enhanceStory } from '../../services/askTaTTTyService'
 
 interface AskTaTTTyProps {
-  // Context for AI suggestions - REQUIRED (TaTTTy AI only)
-  contextType?: 'tattty';
   
   // Text update callback - REQUIRED
   onTextUpdate: (updatedText: string) => void;
@@ -27,9 +24,6 @@ interface AskTaTTTyProps {
     selectedText: string;
     replaceSelection: boolean;
   };
-
-  // Current question id for context routing
-  getQuestionId?: () => 'question_one' | 'question_two';
   
   // Loading state callback (optional)
   onLoadingChange?: (isLoading: boolean) => void;
@@ -49,11 +43,9 @@ interface AskTaTTTyProps {
 }
 
 export function AskTaTTTy({ 
-  contextType,
   onTextUpdate,
   getCurrentText,
   getSelectionInfo,
-  getQuestionId,
   onLoadingChange,
   enhancementState,
   size = 'md',
@@ -88,7 +80,6 @@ export function AskTaTTTy({
         setIsOpen(false);
       }
     }
-
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -113,124 +104,7 @@ export function AskTaTTTy({
   };
 
   // Backend streaming API call - FAILS LOUD
-  const streamAIResponse = async (type: 'enhance' | 'ideas'): Promise<string> => {
-    // REQUIRED: Get current text - will throw if getCurrentText not provided
-    const currentText = getCurrentText();
-    
-    // Optional selection info
-    const selectionInfo = getSelectionInfo?.() || { 
-      hasSelection: false, 
-      selectedText: '', 
-      replaceSelection: false 
-    };
-    const questionId = getQuestionId?.() || 'question_one';
-
-    // REQUIRED: API configuration must be complete
-    if (!askTaTTTyAPI.baseURL) {
-      throw new Error('CRITICAL: askTaTTTyAPI.baseURL is not configured');
-    }
-
-    const endpoint = type === 'enhance' 
-      ? askTaTTTyAPI.enhanceEndpoint 
-      : askTaTTTyAPI.ideasEndpoint;
-
-    if (!endpoint) {
-      throw new Error(`CRITICAL: ${type} endpoint is not configured`);
-    }
-
-    const response = await fetch(`${askTaTTTyAPI.baseURL}${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type,
-        contextType,
-        targetText: selectionInfo.hasSelection ? selectionInfo.selectedText : currentText,
-        hasSelection: selectionInfo.hasSelection,
-        selection_info: questionId,
-      }),
-      signal: AbortSignal.timeout(askTaTTTyAPI.requestTimeout),
-    });
-
-    // FAIL LOUD: No fallbacks for errors
-    if (!response.ok) {
-      const errorData = await response.json();
-      if (!errorData.error) {
-        throw new Error(`Backend error: HTTP ${response.status} ${response.statusText} - No error message provided`);
-      }
-      throw new Error(errorData.error);
-    }
-
-    // REQUIRED: Content type must be present
-    const contentType = response.headers.get('content-type');
-    if (!contentType) {
-      throw new Error('Backend error: No Content-Type header in response');
-    }
-    
-    if (contentType.includes('text/event-stream')) {
-      // Handle streaming response (Server-Sent Events)
-      if (!response.body) {
-        throw new Error('Backend error: No response body for SSE stream');
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedText = '';
-      let lastUpdateTime = Date.now();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            // FAIL LOUD: Invalid JSON must throw
-            const data = JSON.parse(line.slice(6));
-            
-            if (data.token) {
-              accumulatedText += data.token;
-              
-              // Throttle UI updates for performance
-              const now = Date.now();
-              if (now - lastUpdateTime >= askTaTTTyTimings.streamingThrottleMs) {
-                onTextUpdate(accumulatedText);
-                lastUpdateTime = now;
-              }
-            }
-            
-            if (data.done) {
-              // Final update
-              onTextUpdate(accumulatedText);
-              return accumulatedText;
-            }
-          }
-        }
-      }
-
-      // FAIL LOUD: Stream ended without done signal
-      if (accumulatedText.length === 0) {
-        throw new Error('Backend error: SSE stream ended with no data');
-      }
-
-      return accumulatedText;
-      
-    } else {
-      // Handle regular JSON response (non-streaming)
-      const data = await response.json();
-      
-      // FAIL LOUD: result field must exist
-      if (!data.result) {
-        throw new Error('Backend error: Response missing required "result" field');
-      }
-      
-      onTextUpdate(data.result);
-      return data.result;
-    }
-  };
+  // Removed inline streaming function; using centralized service
 
   const handleEnhance = async () => {
     if (isLoading) return;
@@ -259,7 +133,9 @@ export function AskTaTTTy({
     setError(null);
     
     try {
-      const result = await streamAIResponse('enhance');
+      const selectionInfo = getSelectionInfo?.() || { hasSelection: false, selectedText: '', replaceSelection: false };
+      const input = selectionInfo.hasSelection ? selectionInfo.selectedText : currentText;
+      const result = await enhanceStory(input);
       
       // REQUIRED: onTextUpdate callback
       onTextUpdate(result);
@@ -316,7 +192,10 @@ export function AskTaTTTy({
       setError(null);
       
       try {
-        const result = await streamAIResponse('enhance');
+        const currentText = getCurrentText();
+        const selectionInfo = getSelectionInfo?.() || { hasSelection: false, selectedText: '', replaceSelection: false };
+        const input = selectionInfo.hasSelection ? selectionInfo.selectedText : currentText;
+        const result = await enhanceStory(input);
         
         // REQUIRED: onTextUpdate callback
         onTextUpdate(result);
@@ -333,28 +212,7 @@ export function AskTaTTTy({
     }
   };
 
-  const handleIdeas = async () => {
-    if (isLoading) return;
-    
-    // Ideas don't require text validation - they can be generated even with empty input
-    setIsLoading(true);
-    setIsOpen(false);
-    setError(null);
-    
-    try {
-      const result = await streamAIResponse('ideas');
-      
-      // REQUIRED: onTextUpdate callback
-      onTextUpdate(result);
-    } catch (error) {
-      // FAIL LOUD: Re-throw error for parent to handle
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setError(errorMessage);
-      throw error; // Let parent component handle critical failures
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Ideas feature removed: enhance only
 
   // Get size configuration from data
   const sizeConfig = askTaTTTySizes[size];
@@ -389,17 +247,16 @@ export function AskTaTTTy({
   return (
     <div className={`relative ${className}`} ref={tooltipRef}>
       <div className="flex flex-col items-center gap-4">
-        {/* Main Button */}
+        {/* Main Button (Enhance only) */}
         <button
           onClick={() => {
             if (error) {
-              setError(null); // Clear error on click
-            } else {
-              setIsOpen(!isOpen);
+              setError(null);
             }
+            handleEnhance();
           }}
           disabled={isLoading}
-          className={`${sizeConfig.buttonClass} bg-gradient-to-r from-accent/80 to-accent font-[Orbitron] transition-all duration-300 flex items-center gap-2 hover:shadow-[0_0_20px_rgba(87,241,214,0.6)] hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed`}
+          className={`${sizeConfig.buttonClass} bg-linear-to-r from-accent/80 to-accent font-[Orbitron] transition-all duration-300 flex items-center gap-2 hover:shadow-[0_0_20px_rgba(87,241,214,0.6)] hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed`}
           style={{
             boxShadow: `0 0 15px ${askTaTTTyStyling.glowColor}`,
             letterSpacing: askTaTTTyStyling.letterSpacing,
@@ -470,32 +327,7 @@ export function AskTaTTTy({
           </TooltipProvider>
         )}
 
-        {/* Dropdown Tooltip */}
-        {isOpen && (
-          <div
-            className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-[${askTaTTTyStyling.dropdownBg}]/95 backdrop-blur-xl border-2 border-[${askTaTTTyStyling.dropdownBorder}]/30 rounded-2xl p-3 shadow-xl z-50`}
-            style={{
-              boxShadow: '0 0 20px rgba(87, 241, 214, 0.3)',
-            }}
-          >
-            <button
-              onClick={handleEnhance}
-              disabled={isLoading}
-              className={`w-full mb-2 py-2.5 px-4 bg-[${askTaTTTyStyling.dropdownBorder}]/10 hover:bg-[${askTaTTTyStyling.dropdownBorder}]/20 text-[${askTaTTTyStyling.dropdownBorder}] border border-[${askTaTTTyStyling.dropdownBorder}]/30 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>{askTaTTTyLabels.enhanceButton}</span>
-            </button>
-            <button
-              onClick={handleIdeas}
-              disabled={isLoading}
-              className={`w-full py-2.5 px-4 bg-[${askTaTTTyStyling.dropdownBorder}]/10 hover:bg-[${askTaTTTyStyling.dropdownBorder}]/20 text-[${askTaTTTyStyling.dropdownBorder}] border border-[${askTaTTTyStyling.dropdownBorder}]/30 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
-            >
-              <Droplet className="w-4 h-4" />
-              <span>{askTaTTTyLabels.ideasButton}</span>
-            </button>
-          </div>
-        )}
+        {/* Dropdown removed: Enhance triggers directly */}
       </div>
     </div>
   );

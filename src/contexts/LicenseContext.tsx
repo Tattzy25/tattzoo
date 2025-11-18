@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 /**
  * LICENSE CONTEXT
@@ -34,7 +34,7 @@ const LicenseContext = createContext<LicenseContextValue | undefined>(undefined)
 
 const STORAGE_KEY = 'tatty_license';
 const MAX_GENERATIONS_PER_HOUR = 3;
-const BACKEND_API_URL = (import.meta as any)?.env?.VITE_BACKEND_API_URL || 'http://localhost:8000';
+const BACKEND_API_URL = (import.meta as any)?.env?.VITE_BACKEND_API_URL || '';
 
 export function LicenseProvider({ children }: { children: ReactNode }) {
   const [license, setLicense] = useState<LicenseData | null>(null);
@@ -71,16 +71,38 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
     }
 
     // Call backend to validate license status
+    if (!BACKEND_API_URL) {
+      console.error('License validation failed: BACKEND_API_URL not configured');
+      return false;
+    }
     try {
-      const response = await fetch(`${BACKEND_API_URL}/api/key/validate`, {
+      let url: string;
+      try {
+        url = new URL('/api/key/validate', BACKEND_API_URL).toString();
+      } catch {
+        console.error('License validation failed: Invalid BACKEND_API_URL');
+        return false;
+      }
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key, email }),
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(4000),
       });
 
       if (!response.ok) {
-        console.error('License validation failed:', response.status, response.statusText);
+        let msg = `License validation failed: ${response.status} ${response.statusText}`;
+        try {
+          const ct = response.headers.get('content-type') || '';
+          if (ct.includes('application/json')) {
+            const err = await response.json();
+            if (err?.error) msg = err.error;
+          } else {
+            const text = await response.text();
+            if (text) msg = `${msg} - ${text}`;
+          }
+        } catch {}
+        console.error(msg);
         return false;
       }
 

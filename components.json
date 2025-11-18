@@ -19,18 +19,19 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@hooks": "https://shadcn-hooks.vercel.app/r/{name}.json",
     "@acme": "https://acme.com/r/{name}.json",
-    "@kokonutui": "https://kokonutui.com/r/{name}.json",
-    "@react-bits": "https://reactbits.dev/r/{name}.json",
-    "@intentui": "https://intentui.com/r/{name}",
     "@aceternity": "https://ui.aceternity.com/registry/{name}.json",
+    "@aliimam": "https://aliimam.in/r/{name}.json",
+    "@blocks": "https://blocks.so/r/{name}.json",
     "@creative-tim": "https://www.creative-tim.com/ui/r/{name}.json",
     "@cult-ui": "https://cult-ui.com/r/{name}.json",
-    "@aliimam": "https://aliimam.in/r/{name}.json",
-    "@systaliko-ui": "https://systaliko-ui.vercel.app/r/{name}.json",
+    "@efferd": "https://efferd.com/r/{name}.json",
+    "@hooks": "https://shadcn-hooks.vercel.app/r/{name}.json",
+    "@intentui": "https://intentui.com/r/{name}",
+    "@kokonutui": "https://kokonutui.com/r/{name}.json",
     "@magicui": "https://magicui.design/r/{name}.json",
+    "@react-bits": "https://reactbits.dev/r/{name}.json",
     "@scrollxui": "https://www.scrollxui.dev/registry/{name}.json",
-    "@blocks": "https://blocks.so/r/{name}.json"
+    "@systaliko-ui": "https://systaliko-ui.vercel.app/r/{name}.json"
   }
 }

@@ -22,7 +22,4 @@ export interface GenerationParams {
   size: string;
   aspect_ratio: string;
   model: string;
-  skin_tone_label?: string;
-  skin_tone_hex?: string;
-  skin_tone_rgb?: string;
 }

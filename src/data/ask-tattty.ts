@@ -24,7 +24,6 @@ export const askTaTTTyLabels = {
   buttonText: 'Ask TaTTTy',
   loadingText: 'Thinking...',
   enhanceButton: 'Enhance My Text',
-  ideasButton: 'Give Me Ideas',
   revertButton: 'Back',
   reEnhanceButton: 'Redo',
   revertTooltip: 'Revert to original text',
@@ -46,15 +45,11 @@ export const askTaTTTyAPI = {
   // Base URL for your Python backend - REQUIRED
   // MUST be set to your actual backend URL
   // DATABASE COLUMN: api_base_url
-  baseURL: import.meta.env?.VITE_BACKEND_API_URL ?? 'http://localhost:8000',
+  baseURL: import.meta.env?.VITE_BACKEND_API_URL ?? 'https://tattty-mcp-production.up.railway.app',
   
   // Backend endpoint for AI enhancement - REQUIRED
   // DATABASE COLUMN: enhance_endpoint
-  enhanceEndpoint: '/api/ai/enhance',
-  
-  // Backend endpoint for AI ideas generation - REQUIRED
-  // DATABASE COLUMN: ideas_endpoint
-  ideasEndpoint: '/api/ai/ideas',
+  enhanceEndpoint: '/mcp/ask_tattty_enhance',
   
   // Request timeout in milliseconds - REQUIRED
   // DATABASE COLUMN: request_timeout_ms

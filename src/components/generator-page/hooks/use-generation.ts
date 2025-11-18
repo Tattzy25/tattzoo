@@ -33,13 +33,6 @@ export const useGeneration = ({
 }: UseGenerationProps) => {
 
   const handleGenerate = async () => {
-    // Check if user has a valid license first
-    if (!license.isVerified || !license.license) {
-      setValidationError(VALIDATION_MESSAGES.LICENSE_REQUIRED);
-      setTimeout(() => setValidationError(null), TIMEOUTS.VALIDATION_ERROR);
-      return;
-    }
-
     const savedData = sessionDataStore.getSourceCardData();
 
     const q1Answer = savedData?.question1?.answer || '';
@@ -68,14 +61,12 @@ export const useGeneration = ({
       model: generator.selectedModel
     });
 
-    const skinTone = generator.getSelections().skinTone;
-
     setGenerating(true);
 
     try {
       const imageUrl = await GenerationService.generateTattoo({
-        license_key: license.license.key,
-        email: license.license.email,
+        license_key: license.license?.key || '',
+        email: license.license?.email || '',
         question1: q1Answer,
         question2: q2Answer,
         tattoo_style: finalStyle,
@@ -85,11 +76,6 @@ export const useGeneration = ({
         size: selectedSize || '',
         aspect_ratio: selectedAspectRatio,
         model: generator.selectedModel,
-        ...(skinTone && {
-          skin_tone_label: skinTone.label,
-          skin_tone_hex: skinTone.hex,
-          skin_tone_rgb: skinTone.rgb.join(','),
-        }),
       });
 
       setGeneratedImage(imageUrl);

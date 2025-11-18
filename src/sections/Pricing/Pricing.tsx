@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Key, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../../components/ui/button';
+import { Card } from '../../components/ui/card';
 import { sectionHeadings } from '../../data';
-import { PayPalOverlay } from '../../components/payment/PayPalOverlay';
+import { PayPalOverlayWithBoundary as PayPalOverlay } from '../../components/payment/PayPalOverlay';
+import { LicenseKeyInput } from '../../components/payment/LicenseKeyInput';
 import { PaymentSuccessCard } from '../../components/payment/PaymentSuccessCard';
 import { PaymentErrorCard } from '../../components/payment/PaymentErrorCard';
-import { LicenseKeyInput } from '../../components/payment/LicenseKeyInput';
+// Removed LicenseKeyInput per request
 import { PaymentLoader } from '../../components/payment/PaymentLoader';
 import styles from './Pricing.module.css';
 
@@ -47,12 +49,6 @@ export function Pricing({ onNavigate }: PricingProps) {
   };
 
   const handleSuccessContinue = () => {
-    // Close success card and show license key input
-    setCurrentView('keyInput');
-  };
-  
-  const handleKeyInputClose = () => {
-    // Return to initial view when closing key input
     setCurrentView('initial');
   };
   
@@ -71,13 +67,11 @@ export function Pricing({ onNavigate }: PricingProps) {
     setCurrentView('initial');
   };
 
-  const handleAccessGranted = () => {
-    setHideContent(true);
-  };
+  // Access granted flow removed with License UI
 
   return (
     <section className="w-full px-1.5 md:px-2.5">
-      <div className="max-w-md mx-auto">
+      <div className="max-w-4xl mx-auto">
         {!hideContent && (
           <AnimatePresence mode="wait">
             {/* INITIAL CARD - Get Your Private Key */}
@@ -89,170 +83,65 @@ export function Pricing({ onNavigate }: PricingProps) {
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.4 }}
             >
-              <div
-                className={`relative overflow-hidden rounded-[40px] border-3 border-accent/50 p-8 text-center group cursor-pointer ${styles.card}`}
+              <Card
+                className="relative overflow-hidden w-full h-[520px] md:h-[680px] rounded-[40px] border-3 border-black/10 shadow-xl"
                 style={{
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                  background: 'linear-gradient(135deg, hsla(169, 85%, 64%, 0.12), hsla(169, 85%, 64%, 0.05))',
-                  boxShadow: '0 15px 40px rgba(0, 0, 0, 0.7)',
+                  background: '#57f1d6',
+                  boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6)'
                 }}
               >
-          {/* Animated particles */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(8)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-accent rounded-full"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: [0, -20, 0],
-                  opacity: [0.2, 0.8, 0.2],
-                  scale: [1, 1.5, 1],
-                }}
-                transition={{
-                  duration: 2 + Math.random() * 2,
-                  repeat: Infinity,
-                  delay: Math.random() * 2,
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Rotating gradient background */}
-          <motion.div
-            className="absolute inset-0 opacity-20"
-            animate={{
-              background: [
-                'radial-gradient(circle at 50% 50%, rgba(87, 241, 214, 0.4), transparent 60%)',
-                'radial-gradient(circle at 30% 70%, rgba(87, 241, 214, 0.4), transparent 60%)',
-                'radial-gradient(circle at 70% 30%, rgba(87, 241, 214, 0.4), transparent 60%)',
-                'radial-gradient(circle at 50% 50%, rgba(87, 241, 214, 0.4), transparent 60%)',
-              ],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-          />
-
-          <div className="relative z-10 space-y-6">
-            {/* Icon with floating animation */}
-            <motion.div
-              animate={{
-                y: [0, -8, 0],
-                rotate: [0, 5, -5, 0],
-              }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              className="inline-block"
-            >
-              <div
-                className={`relative w-16 h-16 mx-auto rounded-2xl flex items-center justify-center ${styles.iconContainer}`}
-                style={{
-                  background: 'linear-gradient(135deg, rgba(87, 241, 214, 0.25), rgba(87, 241, 214, 0.1))',
-                }}
-              >
-                <Key className="w-8 h-8 text-accent" />
-                
-                {/* Sparkle effects */}
-                <motion.div
-                  className="absolute -top-1 -right-1"
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.5, 1, 0.5],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Sparkles className="w-4 h-4 text-accent" />
-                </motion.div>
-              </div>
-            </motion.div>
-
-            {/* Title */}
-            <div className="space-y-2">
-              <h2
-                className={`text-3xl md:text-4xl font-[Orbitron] text-white ${styles.title}`}
-                style={{
-                  textShadow: '0 0 30px rgba(87, 241, 214, 0.6), 2px 2px 6px rgba(0, 0, 0, 0.9)',
-                  letterSpacing: '3px',
-                }}
-              >
-                {sectionHeadings.licenseKey.title.split('\\n').map((line, i) => (
-                  <span key={i}>
-                    {line}
-                    {i === 0 && <br />}
-                  </span>
-                ))}
-              </h2>
-              
-              {/* Price with pulse effect */}
-              <motion.p
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className={`text-3xl md:text-4xl text-accent font-[Orbitron] ${styles.price}`}
-                style={{ textShadow: '0 0 25px rgba(87, 241, 214, 0.6)' }}
-              >
-                {sectionHeadings.licenseKey.price}
-              </motion.p>
-              
-              <p className="text-lg text-white/80">
-                {sectionHeadings.licenseKey.description}
-              </p>
-            </div>
-
-            {/* Button with hover glow */}
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                size="lg"
-                onClick={() => setCurrentView('payment')}
-                className={`text-lg px-10 py-6 rounded-full border-2 border-accent transition-all duration-300 relative overflow-hidden group ${styles.primaryButton}`}
-                style={{
-                  background: 'linear-gradient(135deg, #57f1d6, #3dd5c0)',
-                  color: '#0C0C0D',
-                  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
-                  textShadow: 'none',
-                }}
-              >
-                <span className="relative z-10 font-[Orbitron] tracking-wider">
-                  {sectionHeadings.licenseKey.buttonText}
-                </span>
-                
-                {/* Button shine effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                  initial={{ x: '-100%' }}
-                  whileHover={{ x: '100%' }}
-                  transition={{ duration: 0.6 }}
-                />
-              </Button>
-            </motion.div>
-
-            {/* Enter Key Button */}
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => setCurrentView('keyInput')}
-                className={`text-lg px-10 py-6 rounded-full border-2 border-accent/50 transition-all duration-300 bg-transparent hover:bg-accent/10 ${styles.secondaryButton}`}
-              >
-                <span className="relative z-10 font-[Orbitron] tracking-wider">
-                  ENTER KEY
-                </span>
-              </Button>
-            </motion.div>
-
-            {/* Payment note */}
-            <p className="text-sm text-muted-foreground">
-              {sectionHeadings.licenseKey.paymentNote}
-            </p>
-          </div>
-        </div>
+                <div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(12,12,13,0.08), transparent 60%)' }} />
+                <div className="relative z-10 w-full flex flex-col items-center text-center gap-1 py-[10px] px-[5px]">
+                  <h2 className="text-black text-[28px] md:text-[36px] font-[Orbitron]">UNLOCK TO GET YOUR UNIQUE TATTOO IMAGE</h2>
+                  <p
+                    className="text-black text-[28px] md:text-[36px] font-[Orbitron]"
+                    style={{ textShadow: '0 3px 8px rgba(0,0,0,0.6)' }}
+                  >
+                    BUILT AND CREATED BY
+                    {' '}
+                    <span
+                      className="brand-gradient bg-clip-text text-transparent"
+                      style={{ fontFamily: 'Rock Salt', textShadow: '0 3px 8px rgba(0,0,0,0.8)' }}
+                    >
+                      TaTTTy
+                    </span>
+                    {' '}based on your story
+                  </p>
+                  <p className="text-black text-[22px] md:text-[26px]" style={{ fontFamily: 'Roboto Condensed' }}>Your Pain. Your Life. Your Power. OUR INK</p>
+                  <div className="flex items-center justify-center gap-3 mt-1">
+                    <span className="relative inline-block text-black text-[26px] md:text-[32px] font-[Orbitron]">
+                      $19.99
+                      <span className="absolute left-0 right-0 top-1/2 h-[3px]" style={{ background: '#ef4444', transform: 'translateY(-50%) rotate(-12deg)' }}></span>
+                    </span>
+                    <span className="text-black text-[28px] md:text-[34px] font-[Orbitron]">$9.99</span>
+                    <span className="text-black/80 text-[18px] md:text-[20px]" style={{ fontFamily: 'Roboto Condensed' }}>for a limited time</span>
+                  </div>
+                  <p className="text-black text-[22px] md:text-[26px] font-[Orbitron] mt-1">How It Works</p>
+                  <div className="flex items-center justify-center gap-3 md:gap-6 text-black/80 text-[18px] md:text-[20px]" style={{ fontFamily: 'Roboto Condensed' }}>
+                    <span>Get Your Private Key</span>
+                    <span className="h-5 w-px bg-black/30" />
+                    <span>Get Access</span>
+                    <span className="h-5 w-px bg-black/30" />
+                    <span>Get TaTTTid</span>
+                  </div>
+                  <div className="mt-4 flex w-full max-w-xl gap-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentView('keyInput')}
+                      className="flex-1 h-14 text-black border-black/30 hover:border-black/60 font-[Orbitron] text-[20px]"
+                    >
+                      ENTER KEY NOW
+                    </Button>
+                    <Button
+                      onClick={() => setCurrentView('payment')}
+                      className="flex-1 h-14 font-[Orbitron] text-[20px]"
+                      style={{ background: 'linear-gradient(135deg, #57f1d6, #3dd5c0)', color: '#0C0C0D' }}
+                    >
+                      UNLOCK NOW
+                    </Button>
+                  </div>
+                </div>
+              </Card>
             </motion.div>
           )}
 
@@ -310,7 +199,6 @@ export function Pricing({ onNavigate }: PricingProps) {
             </motion.div>
           )}
 
-          {/* LICENSE KEY INPUT CARD */}
           {currentView === 'keyInput' && (
             <motion.div
               key="key-input-card"
@@ -319,11 +207,7 @@ export function Pricing({ onNavigate }: PricingProps) {
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.4 }}
             >
-              <LicenseKeyInput 
-                inline 
-                onClose={handleKeyInputClose}
-                onAccessGranted={handleAccessGranted}
-              />
+              <LicenseKeyInput inline onClose={() => setCurrentView('initial')} />
             </motion.div>
           )}
 

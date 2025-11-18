@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { KeyRound, Mail, AlertCircle, Check } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -20,7 +20,10 @@ export function LicenseKeyInput({ inline = false, onClose, onAccessGranted }: Li
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
 
-  const [bannerStatus, setBannerStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  // Keep for future banner hook-up; currently no banner component reads this state
+  useEffect(() => {
+    // No-op: placeholder to maintain effect scheduling for future UI hooks
+  }, [isVerified, error, isVerifying]);
 
   const handleVerify = async () => {
     setError('');
@@ -33,12 +36,26 @@ export function LicenseKeyInput({ inline = false, onClose, onAccessGranted }: Li
       return;
     }
 
+    // Basic format validation for immediate feedback
+    const keyPattern = /^TATY-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!keyPattern.test(licenseKey)) {
+      setError('License key format is invalid (expected TATY-XXXX-XXXX-XXXX)');
+      setIsVerifying(false);
+      return;
+    }
+    if (!emailPattern.test(email)) {
+      setError('Email format is invalid');
+      setIsVerifying(false);
+      return;
+    }
+
     const success = await verifyLicense(licenseKey, email);
     
     setIsVerifying(false);
     
     if (!success) {
-      setError('Invalid license key or email');
+      setError('Verification failed. Check your key, email, or backend connection.');
       return;
     }
     
