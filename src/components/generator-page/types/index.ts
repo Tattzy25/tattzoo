@@ -11,8 +11,8 @@ export interface GeneratorState {
 }
 
 export interface GenerationParams {
-  license_key: string;
-  email: string;
+  license_key?: string;
+  email?: string;
   question1: string;
   question2: string;
   tattoo_style: string;
@@ -22,4 +22,5 @@ export interface GenerationParams {
   size: string;
   aspect_ratio: string;
   model: string;
+  images?: File[];
 }

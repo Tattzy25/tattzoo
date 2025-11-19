@@ -12,9 +12,10 @@ function AppContent() {
   }, []);
 
   const handleNavigate = (page: string) => {
-    console.log('Navigate to:', page);
-    // For single-page landing, navigation is handled via scrolling
-    // You can add scroll-to-section logic here later
+    const el = document.getElementById(page);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (

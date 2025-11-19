@@ -3,7 +3,6 @@ import AIImageGeneratorBlock from './creative-tim/blocks/ai-image-generator-01';
 import AI02 from './ai-02';
 import { TryItOnButton } from './try-it-on/TryItOnButton';
 import { useGenerator } from '../contexts/GeneratorContext';
-// import { useLicense } from '../contexts/LicenseContext';
 import GalleryOverlay from "./shared/GalleryOverlay";
 import { ModelPicker } from "./shared/ModelPicker";
 // Use the installed Timeline component instead of the old HowItWorksTimeline
@@ -14,6 +13,7 @@ import { SocialProof } from '../sections/SocialProof/SocialProof';
 import { Pricing } from '../sections/Pricing/Pricing';
 import { Footer } from './Footer';
 import { Section2 } from '../sections/section2';
+import { Button } from './ui/button';
 import {
   galleryDesigns,
   tattooStyles,
@@ -40,7 +40,6 @@ import {
 
 export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   const generator = useGenerator();
-  // const license = useLicense();
 
   const allGalleryDesigns = galleryDesigns;
 
@@ -197,6 +196,18 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
           <div className={`relative overflow-hidden rounded-t-4xl sm:rounded-t-[40px] border-t-4 w-full ${styles.footerTopShadow}`}>
             <Footer onNavigate={onNavigate} />
           </div>
+        </div>
+
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button
+            onClick={() => {
+              const el = document.getElementById('primary-generate-button');
+              if (el) (el as HTMLButtonElement).click();
+            }}
+            className="h-12 px-6 font-[Orbitron] text-[18px] brand-gradient text-background shadow-lg shadow-accent/25"
+          >
+            CREATE NOW
+          </Button>
         </div>
       </div>
       

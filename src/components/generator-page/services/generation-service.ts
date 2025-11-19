@@ -7,16 +7,11 @@ export class GenerationService {
 
     try {
       const formData = createGenerationFormData(params);
-      const API_BASE = (import.meta as any)?.env?.VITE_BACKEND_API_URL || '';
-      if (!API_BASE) {
-        throw new Error('Backend base URL not configured');
+      const endpoint = (import.meta as any)?.env?.VITE_GENERATE_ENDPOINT as string | undefined;
+      if (!endpoint) {
+        throw new Error('Generate endpoint not configured (VITE_GENERATE_ENDPOINT)');
       }
-      let url: string;
-      try {
-        url = new URL('/api/generate/', API_BASE).toString();
-      } catch {
-        throw new Error('Invalid backend URL configuration');
-      }
+      const url: string = endpoint;
       const response = await fetch(url, {
         method: 'POST',
         body: formData,
@@ -37,11 +32,20 @@ export class GenerationService {
         throw new Error(msg);
       }
 
-      const result = await response.json();
-      if (!result || !result.image_url) {
-        throw new Error('Backend error: Missing image_url in response');
+      let imageUrl: string | null = null;
+      try {
+        const result = await response.json();
+        imageUrl = result?.image_url || result?.imageUrl || result?.url || null;
+      } catch {
+        const text = await response.text();
+        const trimmed = (text || '').trim();
+        if (trimmed.startsWith('http')) imageUrl = trimmed;
       }
-      return result.image_url;
+
+      if (!imageUrl) {
+        throw new Error('Backend error: Missing image URL in response');
+      }
+      return imageUrl;
     } catch (error) {
       console.error('❌ Image generation failed:', error);
       throw error;

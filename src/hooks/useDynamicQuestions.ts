@@ -23,9 +23,8 @@ interface UseDynamicQuestionsResult {
   refetch: () => void;
 }
 
-// BACKEND API CONFIGURATION
-// TODO: Replace with your actual backend URL
-const BACKEND_API_URL = import.meta.env?.VITE_BACKEND_API_URL || 'http://localhost:8000';
+// BACKEND API CONFIGURATION (ENV-ONLY, NO FALLBACKS)
+const BACKEND_API_URL = (import.meta as any)?.env?.VITE_BACKEND_API_URL as string | undefined;
 const QUESTIONS_ENDPOINT = '/api/generator-questions';
 
 /**
@@ -35,6 +34,9 @@ async function fetchQuestionsFromBackend(
   generatorType: string,
   language: string
 ): Promise<TatttyQuestion[]> {
+  if (!BACKEND_API_URL) {
+    throw new Error('Backend URL not configured (VITE_BACKEND_API_URL)');
+  }
   const url = `${BACKEND_API_URL}${QUESTIONS_ENDPOINT}?generator=${generatorType}&language=${language}`;
   
   const response = await fetch(url, {

@@ -17,11 +17,11 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
   const BACKEND_API_URL = (import.meta as any)?.env?.VITE_BACKEND_API_URL as string | undefined;
   const backendConfigured = !!BACKEND_API_URL;
   const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [paypalInit, setPaypalInit] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
-  const [error, setError] = useState('');
-  const [paypalInit, setPaypalInit] = useState(false);
   usePaypalButton(isOpen, paypalInit, setPaypalInit);
 
   // Lock body scroll and hide overflow when overlay is open (only for modal mode)
@@ -62,24 +62,6 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
     }
     if (!emailPattern.test(email)) {
       setError('Please enter a valid email address');
-      return;
-    }
-
-    // Validate card number
-    if (!cardNumber || cardNumber.replace(/\s/g, '').length < 15) {
-      setError('Please enter a valid card number');
-      return;
-    }
-
-    // Validate expiry
-    if (!expiry || expiry.length < 5) {
-      setError('Please enter a valid expiry date');
-      return;
-    }
-
-    // Validate CVV
-    if (!cvv || cvv.length < 3) {
-      setError('Please enter a valid CVV');
       return;
     }
 
@@ -169,38 +151,15 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
 
   // (Removed mock key generator; keys now issued by backend)
 
-  // Format card number with spaces
-  const handleCardNumberChange = (value: string) => {
-    const cleaned = value.replace(/\s/g, '').replace(/\D/g, '');
-    const formatted = cleaned.match(/.{1,4}/g)?.join(' ') || cleaned;
-    setCardNumber(formatted.slice(0, 19)); // Max 16 digits + 3 spaces
-  };
-
-  // Format expiry as MM/YY
-  const handleExpiryChange = (value: string) => {
-    const cleaned = value.replace(/\D/g, '');
-    let formatted = cleaned;
-    if (cleaned.length >= 2) {
-      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
-    }
-    setExpiry(formatted.slice(0, 5));
-  };
-
-  // CVV accepts only numbers
-  const handleCvvChange = (value: string) => {
-    const cleaned = value.replace(/\D/g, '');
-    setCvv(cleaned.slice(0, 4));
-  };
+  // Legacy card input handlers removed (email-only flow)
 
   // Payment form content (reusable for both modal and inline modes)
   const formContent = (
     <div
-      className="relative rounded-3xl border-4 border-accent/60 p-8 md:p-10"
+      className="relative rounded-[40px] border-3 border-black/10 p-8 md:p-10 shadow-xl"
       style={{
-        background: 'linear-gradient(135deg, rgba(87, 241, 214, 0.12), rgba(87, 241, 214, 0.05))',
-        backdropFilter: 'blur(30px)',
-        WebkitBackdropFilter: 'blur(30px)',
-        boxShadow: 'inset 0 0 40px rgba(87, 241, 214, 0.1)',
+        background: '#57f1d6',
+        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6)'
       }}
     >
       {/* Decorative top icon - matching LicenseKeyInput */}
@@ -240,19 +199,15 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
             </div>
           </div>
         )}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-1">
           <h3 
-            className="text-2xl md:text-3xl text-white"
-            style={{ 
-              textShadow: '0 0 20px rgba(87, 241, 214, 0.5)',
-              fontFamily: 'Roboto Condensed, sans-serif'
-            }}
+            className="text-2xl md:text-3xl text-black font-[Orbitron]"
+            style={{ textShadow: '0 3px 8px rgba(0,0,0,0.6)' }}
           >
             UNLOCK NOW
           </h3>
-          
-          <p className="text-accent text-2xl" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>$9.99</p>
-          <p className="text-white/70 text-sm" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>One-time payment • Instant access</p>
+          <p className="text-black text-2xl font-[Orbitron]">$9.99</p>
+          <p className="text-black/70 text-sm" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>One-time payment • Instant access</p>
         </div>
 
         {/* Email input */}
@@ -274,9 +229,8 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
           />
         </div>
 
-        {/* Card Number */}
         <div className="space-y-2">
-          <label className="text-white/80 text-sm flex items-center gap-2" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
+          <label className="text-black/80 text-sm flex items-center gap-2" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
             <CreditCard size={14} className="text-accent" />
             Card Number
           </label>
@@ -288,15 +242,14 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
               handleCardNumberChange(e.target.value);
               setError('');
             }}
-            className="bg-black/30 border-accent/30 text-white placeholder:text-white/40 h-12 tracking-wider"
+            className="bg-black/20 border-black/30 text-black placeholder:text-black/40 h-12 tracking-wider"
             style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
           />
         </div>
 
-        {/* Expiry and CVV */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
-            <label className="text-white/80 text-sm flex items-center gap-2" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
+            <label className="text-black/80 text-sm flex items-center gap-2" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
               <Calendar size={14} className="text-accent" />
               Expiry
             </label>
@@ -308,12 +261,12 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
                 handleExpiryChange(e.target.value);
                 setError('');
               }}
-              className="bg-black/30 border-accent/30 text-white placeholder:text-white/40 h-12"
+              className="bg-black/20 border-black/30 text-black placeholder:text-black/40 h-12"
               style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-white/80 text-sm flex items-center gap-2" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
+            <label className="text-black/80 text-sm flex items-center gap-2" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
               <Lock size={14} className="text-accent" />
               CVV
             </label>
@@ -325,7 +278,7 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
                 handleCvvChange(e.target.value);
                 setError('');
               }}
-              className="bg-black/30 border-accent/30 text-white placeholder:text-white/40 h-12 text-center"
+              className="bg-black/20 border-black/30 text-black placeholder:text-black/40 h-12 text-center"
               style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
             />
           </div>
@@ -368,7 +321,7 @@ export function PayPalOverlay({ isOpen, onClose, onPaymentSuccess, onPaymentErro
           {/* Payment button */}
           <Button
             onClick={handlePayment}
-            disabled={!backendConfigured || !email || !cardNumber || !expiry || !cvv}
+            disabled={!backendConfigured || !email}
             className={`${inline ? 'flex-1' : 'w-full'} h-12 font-[Orbitron]`}
             style={{
               background: 'linear-gradient(135deg, #57f1d6, #3dd5c0)',
@@ -504,3 +457,18 @@ export function usePaypalButton(isOpen: boolean, paypalInit: boolean, setPaypalI
     if (!paypalInit) initPaypal(isOpen, setPaypalInit);
   }, [isOpen, paypalInit]);
 }
+  const handleCardNumberChange = (value: string) => {
+    const v = value.replace(/[^0-9\s]/g, '').slice(0, 19);
+    setCardNumber(v);
+  };
+
+  const handleExpiryChange = (value: string) => {
+    const digits = value.replace(/[^0-9]/g, '').slice(0, 4);
+    const formatted = digits.length > 2 ? `${digits.slice(0,2)}/${digits.slice(2)}` : digits;
+    setExpiry(formatted);
+  };
+
+  const handleCvvChange = (value: string) => {
+    const v = value.replace(/[^0-9]/g, '').slice(0, 4);
+    setCvv(v);
+  };

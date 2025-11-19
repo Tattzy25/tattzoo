@@ -5,7 +5,14 @@ export const createGenerationFormData = (params: GenerationParams): FormData => 
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
-      formData.append(key, value);
+      if (key === 'license_key' || key === 'email') return;
+      if (key === 'images' && Array.isArray(value)) {
+        value.forEach((file, index) => {
+          formData.append(`images[${index}]`, file as File, (file as File).name);
+        });
+        return;
+      }
+      formData.append(key, value as string);
     }
   });
 

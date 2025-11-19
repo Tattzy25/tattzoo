@@ -65,8 +65,6 @@ export const useGeneration = ({
 
     try {
       const imageUrl = await GenerationService.generateTattoo({
-        license_key: license.license?.key || '',
-        email: license.license?.email || '',
         question1: q1Answer,
         question2: q2Answer,
         tattoo_style: finalStyle,
@@ -76,14 +74,14 @@ export const useGeneration = ({
         size: selectedSize || '',
         aspect_ratio: selectedAspectRatio,
         model: generator.selectedModel,
+        images: savedData?.images,
       });
 
       setGeneratedImage(imageUrl);
       setGenerating(false);
       setGenerated(true);
 
-      // Track the generation in license context
-      license.trackGeneration();
+      // Generation success; no license tracking required
 
       console.log('✅ Tattoo image generated successfully');
 

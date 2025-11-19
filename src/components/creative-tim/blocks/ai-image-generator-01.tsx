@@ -95,6 +95,8 @@ export default function AIImageGeneratorBlock() {
 
           <div className="space-y-6">
               <Button
+                id="primary-generate-button"
+                data-testid="primary-generate"
                 onClick={handleGenerate}
                 disabled={generating}
                 className="w-full brand-gradient text-background font-[Orbitron] text-lg py-6 shadow-lg shadow-accent/25"

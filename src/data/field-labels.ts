@@ -37,7 +37,7 @@ export const tatttyQuestions: TatttyQuestion[] = [
     helpText: 'Reflect on a decision you made that could have benefited from external review',
     required: true,
     minCharacters: 50,
-    maxCharacters: 500,
+    
   },
   {
     id: 'question_two',
@@ -47,7 +47,7 @@ export const tatttyQuestions: TatttyQuestion[] = [
     helpText: 'Think about rules or policies you once upheld but now question',
     required: true,
     minCharacters: 50,
-    maxCharacters: 500,
+    
   },
 ];
 
@@ -108,7 +108,7 @@ export function validateTatttyQuestion(questionId: string, value: string): {
   }
   
   if (question.required && !value.trim()) {
-    return { isValid: false, error: `${question.label} is required` };
+    return { isValid: false, error: `Answer is required` };
   }
   
   if (value.trim().length < question.minCharacters) {
@@ -118,12 +118,7 @@ export function validateTatttyQuestion(questionId: string, value: string): {
     };
   }
   
-  if (question.maxCharacters && value.trim().length > question.maxCharacters) {
-    return { 
-      isValid: false, 
-      error: `Maximum ${question.maxCharacters} characters allowed` 
-    };
-  }
+  // Max length validation disabled per UX requirement
   
   return { isValid: true };
 }

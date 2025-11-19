@@ -33,6 +33,14 @@ export default function QFlow() {
     if (!embla) return;
     embla.on("select", onSelect);
     onSelect();
+
+    // Expose external controls for switching questions
+    (window as any).tatttyScrollTo = (index: number) => {
+      if (!embla) return;
+      const clamped = Math.max(0, Math.min(index, tatttyQuestions.length - 1));
+      embla.scrollTo(clamped);
+      syncQuestion(clamped);
+    };
   }, [embla, onSelect]);
 
   useEffect(() => {
@@ -49,7 +57,11 @@ export default function QFlow() {
       }
     };
     window.addEventListener("tattty:answer-submitted", handler);
-    return () => window.removeEventListener("tattty:answer-submitted", handler);
+    window.addEventListener("tattty:answer-draft", handler);
+    return () => {
+      window.removeEventListener("tattty:answer-submitted", handler);
+      window.removeEventListener("tattty:answer-draft", handler);
+    };
   }, []);
 
   const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -64,36 +76,33 @@ export default function QFlow() {
         <div className="flex">
           {tatttyQuestions.map((q) => (
             <div key={q.id} className="min-w-full px-3 sm:px-4 md:px-6">
-              <Card className="min-h-[260px] sm:min-h-80 md:min-h-[420px] p-4 sm:p-6 md:p-8 rounded-2xl border border-accent/50 bg-background/60 shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
+              <Card className="p-4 sm:p-6 md:p-8 rounded-2xl border border-accent/50 bg-background/60 shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
                 <CardHeader>
                   {(q.id === 'question_one' || q.id === 'question_two') ? (
                     (() => {
                       const tq = tattooQuotes[q.id as 'question_one' | 'question_two'];
+                      const size = Math.max(...tq.blocks.map(b => b.size));
                       return (
                         <div className="flex flex-col gap-1">
-                          {tq.blocks.map((b, idx) => (
-                            <div
-                              key={idx}
-                              className={`${tq.colorClass}`}
-                              style={{
-                                fontFamily: tq.fontFamily,
-                                fontSize: `${b.size}px`,
-                                textShadow: tq.textShadow,
-                                textAlign: b.align || 'left',
-                                letterSpacing: '1px',
-                              }}
-                            >
-                              {b.text}
-                            </div>
-                          ))}
+                          <div
+                            className={`${tq.colorClass}`}
+                            style={{
+                              fontFamily: tq.fontFamily,
+                              fontSize: `${size}px`,
+                              textShadow: tq.textShadow,
+                              textAlign: 'center',
+                              letterSpacing: '1px',
+                            }}
+                          >
+                            {q.label}
+                          </div>
                         </div>
                       );
                     })()
                   ) : (
                     <CardTitle className="text-2xl sm:text-3xl md:text-4xl font-[Orbitron] tracking-wider leading-tight text-foreground">{q.label}</CardTitle>
                   )}
-                  {q.helpText && <CardDescription className="text-sm sm:text-base text-muted-foreground">{q.helpText}</CardDescription>}
-                  <div className="text-xs sm:text-sm text-muted-foreground">Min {q.minCharacters} characters</div>
+                  
                 </CardHeader>
                 <CardContent>
                   {answers[q.id] && (

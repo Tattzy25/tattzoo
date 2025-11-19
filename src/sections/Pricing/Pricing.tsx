@@ -70,7 +70,7 @@ export function Pricing({ onNavigate }: PricingProps) {
   // Access granted flow removed with License UI
 
   return (
-    <section className="w-full px-1.5 md:px-2.5">
+    <section id="pricing" className="w-full px-1.5 md:px-2.5">
       <div className="max-w-4xl mx-auto">
         {!hideContent && (
           <AnimatePresence mode="wait">
@@ -92,21 +92,25 @@ export function Pricing({ onNavigate }: PricingProps) {
               >
                 <div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(12,12,13,0.08), transparent 60%)' }} />
                 <div className="relative z-10 w-full flex flex-col items-center text-center gap-1 py-[10px] px-[5px]">
-                  <h2 className="text-black text-[28px] md:text-[36px] font-[Orbitron]">UNLOCK TO GET YOUR UNIQUE TATTOO IMAGE</h2>
-                  <p
+                  <h2
                     className="text-black text-[28px] md:text-[36px] font-[Orbitron]"
                     style={{ textShadow: '0 3px 8px rgba(0,0,0,0.6)' }}
                   >
-                    BUILT AND CREATED BY
-                    {' '}
+                    UNLOCK TO GET YOUR UNIQUE TATTOO IMAGE,
+                    {' '}BUILT AND CREATED BY{' '}
                     <span
-                      className="brand-gradient bg-clip-text text-transparent"
-                      style={{ fontFamily: 'Rock Salt', textShadow: '0 3px 8px rgba(0,0,0,0.8)' }}
+                      className="brand-gradient bg-clip-text text-transparent block md:inline"
+                      style={{
+                        fontFamily: 'Rock Salt',
+                        fontSize: 'clamp(2.75rem, 20vw, 7rem)',
+                        lineHeight: 0.9,
+                        maxWidth: '100%'
+                      }}
                     >
                       TaTTTy
                     </span>
-                    {' '}based on your story
-                  </p>
+                    {' '}BASED ON YOUR STORY
+                  </h2>
                   <p className="text-black text-[22px] md:text-[26px]" style={{ fontFamily: 'Roboto Condensed' }}>Your Pain. Your Life. Your Power. OUR INK</p>
                   <div className="flex items-center justify-center gap-3 mt-1">
                     <span className="relative inline-block text-black text-[26px] md:text-[32px] font-[Orbitron]">

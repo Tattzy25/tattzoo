@@ -45,7 +45,7 @@ export const askTaTTTyAPI = {
   // Base URL for your Python backend - REQUIRED
   // MUST be set to your actual backend URL
   // DATABASE COLUMN: api_base_url
-  baseURL: import.meta.env?.VITE_BACKEND_API_URL ?? 'https://tattty-mcp-production.up.railway.app',
+  baseURL: (import.meta as any)?.env?.VITE_BACKEND_API_URL as string | undefined,
   
   // Backend endpoint for AI enhancement - REQUIRED
   // DATABASE COLUMN: enhance_endpoint
