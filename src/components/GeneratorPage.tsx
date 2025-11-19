@@ -1,47 +1,21 @@
-import AIImageGeneratorBlock from './creative-tim/blocks/ai-image-generator-01';
-// React import not needed with automatic JSX runtime
-import AI02 from './ai-02';
-import { TryItOnButton } from './try-it-on/TryItOnButton';
-import { useGenerator } from '../contexts/GeneratorContext';
-import GalleryOverlay from "./shared/GalleryOverlay";
-import { ModelPicker } from "./shared/ModelPicker";
-// Use the installed Timeline component instead of the old HowItWorksTimeline
-import { Timeline } from './ui/timeline';
-
-// Removed inline ResultsCard component per request to remove the block
-import { SocialProof } from '../sections/SocialProof/SocialProof';
-import { Pricing } from '../sections/Pricing/Pricing';
-import { Footer } from './Footer';
-import { Section2 } from '../sections/section2';
-import { Button } from './ui/button';
-import {
-  galleryDesigns,
-  tattooStyles,
-  tattooPlacements,
-  tattooSizes,
-  colorPreferences,
-  sectionHeadings,
-  timelineSteps
-} from '../data';
-import styles from './GeneratorPage.module.css';
-
-// Import modular components and hooks
-import {
-  GeneratorPageProps
-} from './generator-page/types';
-import {
-  useGeneratorState,
-} from './generator-page/hooks';
-import {
-  HeroSection,
-  ImageGallery,
-  GeneratorControlsSection
-} from './generator-page/components';
+import AIImageGeneratorBlock from './creative-tim/blocks/ai-image-generator-01'
+import AI02 from './ai-02'
+import { TryItOnButton } from './try-it-on/TryItOnButton'
+import { useGenerator } from '../contexts/GeneratorContext'
+import GalleryOverlay from './shared/GalleryOverlay'
+import { ModelPicker } from './shared/ModelPicker'
+import { Footer } from './Footer'
+import { Button } from './ui/button'
+import { tattooStyles, tattooPlacements, tattooSizes, colorPreferences, sectionHeadings } from '../data'
+import styles from './GeneratorPage.module.css'
+import { GeneratorPageProps } from './generator-page/types'
+import { useGeneratorState } from './generator-page/hooks'
+import { GeneratorControlsSection } from './generator-page/components'
 
 export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   const generator = useGenerator();
 
-  const allGalleryDesigns = galleryDesigns;
+  
 
   // Use the custom hooks for state management
   const {
@@ -73,53 +47,8 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
   return (
     <>
       <div className="w-full overflow-x-hidden">
-        <HeroSection />
-        <Section2 />
-
         <div className="w-full bg-background">
-          <div 
-            className="w-full space-y-8 md:space-y-10 pb-12 px-1.5 md:px-2.5">
-            
-            <ImageGallery
-              galleryDesigns={allGalleryDesigns}
-              onViewAll={() => setIsGalleryOverlayOpen(true)}
-            />
-
-            {/* Removed legacy inline gallery: ImageGallery now renders the new ImageGallery */}
-
-            <div className="mt-[70px] md:mt-[90px] space-y-6">
-              {/* External title for the timeline section */}
-              <div className="flex justify-center">
-                <h2 className={"text-4xl sm:text-5xl md:text-6xl lg:text-[68px] font-[Akronim] text-white text-center uppercase mb-8 sm:mb-10 md:mb-12 lg:mb-16 tracking-[4px] px-2 " + styles.titleShadow}>
-                  Started from the Bottom
-                </h2>
-              </div>
-              {/** Map our existing timelineSteps into the installed Timeline's data shape */}
-              <Timeline
-                data={timelineSteps.map((step) => ({
-                  title: step.title,
-                  content: (
-                    <div className="prose dark:prose-invert max-w-none">
-                      <div className="flex items-start gap-3">
-                        <step.icon className="w-6 h-6 text-accent mt-1" />
-                        <p className="text-neutral-700 dark:text-neutral-300 text-base md:text-lg">
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>
-                  ),
-                }))}
-              />
-            </div>
-
-            <div className="mt-20 sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
-              <SocialProof />
-            </div>
-
-            <div className="mt-[130px] sm:mt-[100px] md:mt-[140px] lg:mt-[180px]">
-              <Pricing onNavigate={onNavigate} />
-            </div>
-
+          <div className="w-full space-y-8 md:space-y-10 pb-12 px-1.5 md:px-2.5">
             <GeneratorControlsSection
               tattooStyles={tattooStyles}
               tattooPlacements={tattooPlacements}
@@ -198,7 +127,7 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
           </div>
         </div>
 
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-6 right-6 z-50 flex gap-3">
           <Button
             onClick={() => {
               const el = document.getElementById('primary-generate-button');
@@ -207,6 +136,13 @@ export function GeneratorPage({ onNavigate }: GeneratorPageProps) {
             className="h-12 px-6 font-[Orbitron] text-[18px] brand-gradient text-background shadow-lg shadow-accent/25"
           >
             CREATE NOW
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => onNavigate('home')}
+            className="h-12 px-6 font-[Orbitron] text-[18px]"
+          >
+            HOME
           </Button>
         </div>
       </div>

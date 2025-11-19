@@ -1,0 +1,592 @@
+MIXEDBREAD INTEGRATION BLUEPRINT
+EXECUTIVE SUMMARY
+What Mixedbread Does for You:
+
+✅ Stores images permanently with AI-powered metadata extraction
+
+✅ No manual parsing needed - Auto-extracts everything from images
+
+✅ Semantic search - Find images by description, not just filename
+
+✅ Returns permanent URLs - Direct image URLs for rendering
+
+✅ Handles all formats - PNG, JPG, WEBP, etc.
+
+✅ Multimodal understanding - Understands image content automatically
+
+Your Flow: Stability AI → Mixedbread Upload → Get permanent URL → Render in frontend
+
+ARCHITECTURE DIAGRAM
+text
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         USER INTERACTION                                 │
+│  Frontend clicks "Generate Tattoo" with prompt/style/color/etc.         │
+└────────────────────────────┬─────────────────────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    FRONTEND (MCP Client)                                 │
+│  Calls: groq_to_stability_chain via MCP                                 │
+└────────────────────────────┬─────────────────────────────────────────────┘
+                             │ JSON-RPC + SSE
+                             ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    RAILWAY MCP SERVER                                    │
+│                                                                          │
+│  Tool: groq_to_stability_chain                                          │
+│                                                                          │
+│  Step 1: Groq Prompt Enhancement                                        │
+│  ┌────────────────────────────────────────┐                             │
+│  │ Input: User questions + style params   │                             │
+│  │ API: Groq LLaMA 3.3 70B                │                             │
+│  │ Output: Enhanced detailed prompt       │                             │
+│  └────────────────┬───────────────────────┘                             │
+│                   │                                                      │
+│                   ▼                                                      │
+│  Step 2: Stability AI Image Generation                                  │
+│  ┌────────────────────────────────────────┐                             │
+│  │ Input: Enhanced prompt + params        │                             │
+│  │ API: Stability SD3.5 Large             │                             │
+│  │ Output: PNG image (bytes)              │                             │
+│  └────────────────┬───────────────────────┘                             │
+│                   │                                                      │
+│                   ▼                                                      │
+│  Step 3: Mixedbread Upload & Storage  ← NEW                            │
+│  ┌────────────────────────────────────────────────────────────────┐    │
+│  │ A. Create/Get Store                                            │    │
+│  │    - Store name: "tattzy-generations"                          │    │
+│  │    - Permanent, no expiration                                  │    │
+│  │                                                                │    │
+│  │ B. Upload Image to Store                                       │    │
+│  │    - File: PNG bytes from Stability                           │    │
+│  │    - Metadata: {                                               │    │
+│  │       prompt: enhanced_prompt,                                 │    │
+│  │       style: "Japanese",                                       │    │
+│  │       color: "full-color",                                     │    │
+│  │       mood: "powerful",                                        │    │
+│  │       placement: "back",                                       │    │
+│  │       size: "large",                                           │    │
+│  │       model: "sd3-large",                                      │    │
+│  │       generated_at: timestamp,                                 │    │
+│  │       user_id: optional                                        │    │
+│  │     }                                                          │    │
+│  │                                                                │    │
+│  │ C. Mixedbread Processing                                       │    │
+│  │    - Auto-parses image content                                 │    │
+│  │    - Extracts visual elements                                  │    │
+│  │    - Generates embeddings                                      │    │
+│  │    - Creates searchable index                                  │    │
+│  │                                                                │    │
+│  │ D. Returns File Object                                         │    │
+│  │    - file_id: "file_abc123"                                    │    │
+│  │    - url: Direct download URL                                  │    │
+│  │    - metadata: Enhanced with AI analysis                       │    │
+│  │    - status: "completed"                                       │    │
+│  └────────────────┬───────────────────────────────────────────────┘    │
+│                   │                                                      │
+│                   ▼                                                      │
+│  Step 4: Return to Frontend                                             │
+│  ┌────────────────────────────────────────┐                             │
+│  │ Return via SSE:                        │                             │
+│  │ {                                       │                             │
+│  │   image_url: Mixedbread download URL,  │                             │
+│  │   file_id: "file_abc123",              │                             │
+│  │   enhanced_prompt: "...",              │                             │
+│  │   metadata: {...}                      │                             │
+│  │ }                                       │                             │
+│  └────────────────────────────────────────┘                             │
+└──────────────────────────────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    FRONTEND RENDERING                                    │
+│  - Display image from Mixedbread URL                                    │
+│  - Show enhanced prompt                                                  │
+│  - Enable editing (remove background, upscale)                          │
+│  - Save file_id for user's gallery                                      │
+└──────────────────────────────────────────────────────────────────────────┘
+MIXEDBREAD API FLOW
+1. Store Creation (One-Time Setup)
+python
+# Railway MCP Server - Initialization
+import httpx
+from typing import Optional
+
+MIXEDBREAD_API_KEY = os.getenv("MIXEDBREAD_API_KEY")
+MIXEDBREAD_API_URL = "https://api.mixedbread.ai/v1"
+STORE_NAME = "tattzy-generations"
+
+async def get_or_create_store() -> str:
+    """Get existing store or create new one"""
+    async with httpx.AsyncClient() as client:
+        # Try to get existing store
+        response = await client.get(
+            f"{MIXEDBREAD_API_URL}/stores/{STORE_NAME}",
+            headers={
+                "Authorization": f"Bearer {MIXEDBREAD_API_KEY}"
+            }
+        )
+        
+        if response.status_code == 200:
+            store = response.json()
+            return store['id']
+        
+        # Create new store
+        response = await client.post(
+            f"{MIXEDBREAD_API_URL}/stores",
+            headers={
+                "Authorization": f"Bearer {MIXEDBREAD_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "name": STORE_NAME,
+                "description": "AI-generated tattoo images with semantic search",
+                "is_public": False,  # Private store
+                "expires_after": None  # Never expires
+            }
+        )
+        
+        store = response.json()
+        return store['id']
+2. Image Upload to Mixedbread
+python
+async def upload_to_mixedbread(
+    image_bytes: bytes,
+    metadata: dict,
+    filename: Optional[str] = None
+) -> dict:
+    """
+    Upload image to Mixedbread Store and get permanent URL.
+    
+    Args:
+        image_bytes: PNG image from Stability AI
+        metadata: {
+            "prompt": enhanced_prompt,
+            "style": "Japanese",
+            "color": "full-color",
+            "mood": "powerful",
+            "placement": "back",
+            "size": "large",
+            "model": "sd3-large",
+            "generated_at": timestamp
+        }
+        filename: Optional custom filename
+    
+    Returns:
+        {
+            "file_id": "file_abc123",
+            "url": "https://api.mixedbread.ai/v1/files/file_abc123/download",
+            "metadata": {...},
+            "status": "completed"
+        }
+    """
+    
+    # Get store ID
+    store_id = await get_or_create_store()
+    
+    # Generate filename if not provided
+    if not filename:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        style_slug = metadata.get('style', 'tattoo').lower().replace(' ', '-')
+        filename = f"tattoo_{style_slug}_{timestamp}.png"
+    
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        # Prepare multipart form data
+        files = {
+            'file': (filename, image_bytes, 'image/png')
+        }
+        
+        data = {
+            'metadata': json.dumps(metadata)
+        }
+        
+        # Upload to store
+        response = await client.post(
+            f"{MIXEDBREAD_API_URL}/stores/{store_id}/files",
+            headers={
+                "Authorization": f"Bearer {MIXEDBREAD_API_KEY}"
+            },
+            files=files,
+            data=data
+        )
+        
+        if response.status_code not in [200, 201]:
+            raise Exception(f"Mixedbread upload failed: {response.text}")
+        
+        file_obj = response.json()
+        
+        # Return file info
+        return {
+            "file_id": file_obj['id'],
+            "url": f"{MIXEDBREAD_API_URL}/files/{file_obj['id']}/download",
+            "metadata": file_obj.get('metadata', {}),
+            "status": file_obj['status'],
+            "filename": filename
+        }
+3. Updated groq_to_stability_chain Tool
+python
+# Railway MCP Server - Updated tool
+async def groq_to_stability_chain_handler(arguments: dict, session_id: str):
+    """
+    Complete chain with Mixedbread storage.
+    Streams progress via SSE.
+    """
+    
+    # Step 1: Groq Enhancement (33% progress)
+    yield progress_event(session_id, 0, "Enhancing prompt with Groq...")
+    
+    groq_result = await call_groq_api(arguments)
+    enhanced_prompt = groq_result['enhanced_prompt']
+    
+    yield progress_event(session_id, 33, "Prompt enhanced successfully")
+    
+    # Step 2: Stability Generation (33-66% progress)
+    yield progress_event(session_id, 33, "Generating image with Stability AI...")
+    
+    stability_result = await call_stability_api(
+        prompt=enhanced_prompt,
+        aspect_ratio=arguments.get('aspect_ratio', '1:1'),
+        model=arguments.get('model', 'sd3-large')
+    )
+    
+    image_bytes = stability_result['image']
+    
+    yield progress_event(session_id, 66, "Image generated successfully")
+    
+    # Step 3: Mixedbread Upload (66-100% progress)
+    yield progress_event(session_id, 66, "Uploading to permanent storage...")
+    
+    # Prepare metadata
+    metadata = {
+        "prompt": enhanced_prompt,
+        "original_questions": arguments['questions'],
+        "style": arguments['style'],
+        "color": arguments['color'],
+        "mood": arguments['mood'],
+        "placement": arguments['placement'],
+        "size": arguments['size'],
+        "model": arguments.get('model', 'sd3-large'),
+        "aspect_ratio": arguments.get('aspect_ratio', '1:1'),
+        "generated_at": datetime.now().isoformat(),
+        "type": "tattoo_generation"
+    }
+    
+    # Upload to Mixedbread
+    mixedbread_result = await upload_to_mixedbread(
+        image_bytes=image_bytes,
+        metadata=metadata
+    )
+    
+    yield progress_event(session_id, 100, "Complete")
+    
+    # Final result
+    yield result_event(session_id, {
+        "image_url": mixedbread_result['url'],
+        "file_id": mixedbread_result['file_id'],
+        "enhanced_prompt": enhanced_prompt,
+        "metadata": metadata,
+        "filename": mixedbread_result['filename']
+    })
+
+def progress_event(session_id: str, progress: int, message: str):
+    """SSE progress notification"""
+    return {
+        "jsonrpc": "2.0",
+        "method": "notifications/progress",
+        "params": {
+            "sessionId": session_id,
+            "progress": progress,
+            "total": 100,
+            "message": message
+        }
+    }
+
+def result_event(session_id: str, data: dict):
+    """SSE final result"""
+    return {
+        "jsonrpc": "2.0",
+        "id": session_id,
+        "result": {
+            "content": [{
+                "type": "text",
+                "text": json.dumps(data)
+            }]
+        }
+    }
+MIXEDBREAD BONUS FEATURES
+1. Semantic Search Gallery
+python
+# Railway MCP Server - New tool
+@mcp.tool()
+async def search_tattoo_gallery(query: str, filters: dict = None) -> list:
+    """
+    Search user's tattoo gallery with natural language.
+    
+    Examples:
+    - "Japanese dragon tattoos"
+    - "black and grey back pieces"
+    - "small wrist tattoos with flowers"
+    """
+    
+    store_id = await get_or_create_store()
+    
+    async with httpx.AsyncClient() as client:
+        search_body = {
+            "query": query,
+            "store_identifiers": [store_id],
+            "top_k": 20,
+            "search_options": {
+                "score_threshold": 0.55
+            }
+        }
+        
+        # Add metadata filters
+        if filters:
+            search_body["filter"] = filters
+            # Example: {"style": {"$eq": "Japanese"}}
+        
+        response = await client.post(
+            f"{MIXEDBREAD_API_URL}/stores/search",
+            headers={
+                "Authorization": f"Bearer {MIXEDBREAD_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json=search_body
+        )
+        
+        results = response.json()
+        
+        # Format results
+        tattoos = []
+        for item in results.get('data', []):
+            tattoos.append({
+                "file_id": item['file_id'],
+                "url": item['url'],
+                "score": item['score'],
+                "metadata": item.get('metadata', {}),
+                "filename": item.get('filename')
+            })
+        
+        return tattoos
+2. User Gallery Filtering
+python
+# Example metadata filters for search
+
+# Find all Japanese style tattoos
+filters = {
+    "style": {"$eq": "Japanese"}
+}
+
+# Find large back pieces
+filters = {
+    "$and": [
+        {"placement": {"$eq": "back"}},
+        {"size": {"$eq": "large"}}
+    ]
+}
+
+# Find recent generations
+filters = {
+    "generated_at": {
+        "$gte": "2025-11-01T00:00:00"
+    }
+}
+
+# Combine multiple filters
+filters = {
+    "$and": [
+        {"style": {"$eq": "Japanese"}},
+        {"color": {"$eq": "full-color"}},
+        {"size": {"$in": ["medium", "large"]}}
+    ]
+}
+3. Question Answering on Gallery
+python
+# Railway MCP Server - New tool
+@mcp.tool()
+async def ask_about_tattoos(question: str) -> str:
+    """
+    Ask questions about your tattoo gallery.
+    
+    Examples:
+    - "What are my most popular tattoo styles?"
+    - "Show me all dragon tattoos I've generated"
+    - "What's the difference between my Japanese and traditional styles?"
+    """
+    
+    store_id = await get_or_create_store()
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{MIXEDBREAD_API_URL}/stores/question-answering",
+            headers={
+                "Authorization": f"Bearer {MIXEDBREAD_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "query": question,
+                "store_identifiers": [store_id],
+                "include_citations": True
+            }
+        )
+        
+        result = response.json()
+        
+        return {
+            "answer": result['answer'],
+            "citations": result.get('citations', [])
+        }
+ENVIRONMENT VARIABLES
+bash
+# Railway MCP Server .env
+GROQ_API_KEY=gsk_...
+STABILITY_API_KEY=sk-...
+MIXEDBREAD_API_KEY=mxbai_...  # ← NEW
+
+# Store configuration
+MIXEDBREAD_STORE_NAME=tattzy-generations
+FRONTEND INTEGRATION
+Response Format from MCP
+typescript
+// Frontend receives this from MCP tool call
+interface TattooGenerationResult {
+  image_url: string;           // Direct Mixedbread download URL
+  file_id: string;             // For future operations
+  enhanced_prompt: string;      // Show to user
+  metadata: {
+    style: string;
+    color: string;
+    mood: string;
+    placement: string;
+    size: string;
+    model: string;
+    generated_at: string;
+  };
+  filename: string;
+}
+
+// Usage in component
+const result = await mcpClient.callTool(
+  'groq_to_stability_chain',
+  params,
+  onProgress
+);
+
+// Render image
+<img src={result.image_url} alt={result.enhanced_prompt} />
+
+// Save file_id for later edits
+sessionStorage.setItem('current_tattoo_file_id', result.file_id);
+Gallery Search Integration
+typescript
+// New MCP tool call for search
+async function searchGallery(query: string, filters?: any) {
+  const results = await mcpClient.callTool(
+    'search_tattoo_gallery',
+    { query, filters }
+  );
+  
+  // results = [{file_id, url, score, metadata}, ...]
+  return results;
+}
+
+// Usage
+const dragonTattoos = await searchGallery("dragon tattoos");
+const japaneseBackPieces = await searchGallery("", {
+  style: { $eq: "Japanese" },
+  placement: { $eq: "back" }
+});
+TESTING CHECKLIST
+Manual API Testing (Before Integration)
+bash
+# 1. Create Store
+curl -X POST https://api.mixedbread.ai/v1/stores \
+  -H "Authorization: Bearer YOUR_MIXEDBREAD_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "tattzy-test",
+    "description": "Test store for tattoo images"
+  }'
+
+# 2. Upload Test Image
+curl -X POST https://api.mixedbread.ai/v1/stores/STORE_ID/files \
+  -H "Authorization: Bearer YOUR_MIXEDBREAD_KEY" \
+  -F "file=@test_tattoo.png" \
+  -F 'metadata={"style":"Japanese","color":"full-color"}'
+
+# 3. Search
+curl -X POST https://api.mixedbread.ai/v1/stores/search \
+  -H "Authorization: Bearer YOUR_MIXEDBREAD_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "dragon tattoos",
+    "store_identifiers": ["STORE_ID"],
+    "top_k": 5
+  }'
+
+# 4. Download Image
+curl https://api.mixedbread.ai/v1/files/FILE_ID/download \
+  -H "Authorization: Bearer YOUR_MIXEDBREAD_KEY" \
+  --output downloaded_tattoo.png
+Integration Testing
+ MCP server creates/gets store successfully
+
+ Image upload returns valid file_id and URL
+
+ Download URL renders image in browser
+
+ Metadata is searchable
+
+ Search returns relevant results
+
+ Frontend displays image from Mixedbread URL
+
+ User gallery shows all generated tattoos
+
+ Semantic search works ("dragon tattoos")
+
+ Metadata filters work (style, color, etc.)
+
+COST & LIMITS
+Mixedbread Pricing (as of 2025):
+
+Free Tier: 1GB storage, 10K API calls/month
+
+Starter: $29/month - 10GB storage, 100K calls
+
+Pro: $99/month - 100GB storage, 1M calls
+
+Your Usage Estimate:
+
+Average tattoo image: ~500KB
+
+100 generations = ~50MB storage
+
+2,000 generations = ~1GB (free tier limit)
+
+Recommendation: Start with free tier, upgrade to Starter when you hit limits.
+
+MIGRATION PATH
+Phase 1: Add Mixedbread (Don't Remove Old Code)
+Add Mixedbread upload to groq_to_stability_chain
+
+Return both old response + Mixedbread URL
+
+Test in parallel
+
+Phase 2: Switch Frontend
+Update frontend to use Mixedbread URLs
+
+Phase 3: Add Gallery Features
+Implement search tool
+
+Add gallery UI
+
+Enable semantic search
+
+Phase 4: Clean Up
+Remove old storage code
+
+Remove fallbacks
+
+Production-ready

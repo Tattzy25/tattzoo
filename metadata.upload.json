@@ -1,0 +1,124 @@
+{
+  "store_name": "tattty",
+  "store_visibility": "private",
+  "file_id": "",
+  "url": "",
+  "mime_type": "",
+  "width": 0,
+  "height": 0,
+  "aspect_ratio": "1:1",
+
+  "question_one": { "prompt": "", "answer": "" },
+  "question_two": { "prompt": "", "answer": "" },
+  "prompt_original": "",
+  "enhanced_prompt": "",
+
+  "style": "",
+  "mood": "",
+  "placement": "",
+  "size": "",
+  "color": "",
+  "model": "",
+  "color_mode": "",
+  "size_category": "",
+  "deprecated": false,
+
+  "model_provider": "stability",
+  "model_id": "",
+  "seed": null,
+  "steps": null,
+  "cfg_scale": null,
+  "mcp_session_id": "",
+  "tool_name": "groq_to_stability_chain",
+  "tool_version": "",
+
+  "inspiration_image_ids": [],
+  "source_gallery_ids": [],
+
+  "tags": [],
+  "prompt_summary": "",
+
+  "moderation_enabled": false,
+  "age_gate_required": false,
+  "nsfw": null,
+  "labels": [],
+  "prohibited_categories": [],
+
+  "user_id": null,
+  "session_id": "",
+
+  "status": "ready",
+  "generated_at": "",
+  "stored_at": "",
+  "updated_at": ""
+  ,
+  "public_ui_content": [
+    {
+      "id": "8b3e273f-5a59-4547-808a-f1654e837c85",
+      "language": "en",
+      "created_at": "2025-11-04T15:17:20.713371",
+      "updated_at": "2025-11-04T15:17:20.713371",
+      "button_text": "Ask TaTTTy",
+      "ideas_button": "Give Me Ideas",
+      "loading_text": "Thinking...",
+      "revert_button": "Back",
+      "enhance_button": "Enhance My Text",
+      "revert_tooltip": "Revert to original text",
+      "empty_text_error": "Write Something First!",
+      "re_enhance_button": "Redo",
+      "re_enhance_tooltip": "Re-enhance with new result",
+      "text_too_short_error": "Add More Details!"
+    }
+  ],
+  "public_session_data": [],
+  "public_tattoo_moods": [
+    {
+      "id": 1,
+      "slug": "bold",
+      "is_active": true,
+      "mood_name": "Bold",
+      "created_at": "2025-11-04T15:17:16.724637+00:00",
+      "updated_at": "2025-11-04T15:17:16.724637+00:00",
+      "description": "Strong, confident designs with heavy lines and striking contrasts",
+      "intensity_level": 8,
+      "popularity_rank": 1,
+      "color_palette_type": "vibrant"
+    },
+    {
+      "id": 2,
+      "slug": "vibrant",
+      "is_active": true,
+      "mood_name": "Vibrant",
+      "created_at": "2025-11-04T15:17:16.724637+00:00",
+      "updated_at": "2025-11-04T15:17:16.724637+00:00",
+      "description": "Energetic, colorful designs that pop with life and movement",
+      "intensity_level": 9,
+      "popularity_rank": 2,
+      "color_palette_type": "vibrant"
+    },
+    {
+      "id": 3,
+      "slug": "dark",
+      "is_active": true,
+      "mood_name": "Dark",
+      "created_at": "2025-11-04T15:17:16.724637+00:00",
+      "updated_at": "2025-11-04T15:17:16.724637+00:00",
+      "description": "Mysterious, shadowy designs with gothic or occult influences",
+      "intensity_level": 7,
+      "popularity_rank": 3,
+      "color_palette_type": "cool"
+    },
+    {
+      "id": 4,
+      "slug": "elegant",
+      "is_active": true,
+      "mood_name": "Elegant",
+      "created_at": "2025-11-04T15:17:16.724637+00:00",
+      "updated_at": "2025-11-04T15:17:16.724637+00:00",
+      "description": "Sophisticated, refined designs with graceful lines",
+      "intensity_level": 6,
+      "popularity_rank": 4,
+      "color_palette_type": "neutral"
+    }
+  ]
+}

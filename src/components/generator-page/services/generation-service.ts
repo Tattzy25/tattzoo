@@ -1,54 +1,67 @@
 import { GenerationParams } from '../types';
-import { createGenerationFormData, logGenerationParams } from '../utilities';
+import { logGenerationParams } from '../utilities';
+import { McpHttpClient } from '../../../services/mcpClient';
 
 export class GenerationService {
-  static async generateTattoo(params: GenerationParams): Promise<string> {
+  private static client: McpHttpClient | null = null;
+
+  static async generateTattoo(
+    params: GenerationParams,
+    onProgress?: (message: string, progress: number) => void
+  ): Promise<any> {
     logGenerationParams(params);
 
+    const endpoint = ((import.meta as any)?.env?.VITE_MCP_ENDPOINT as string | undefined)
+      || 'https://tattzy-mcp.up.railway.app/mcp';
+    if (!this.client) {
+      this.client = new McpHttpClient(endpoint);
+      await this.client.initialize();
+    }
+
+    const questions = `${(params.question1 || '').trim()}\n\n${(params.question2 || '').trim()}`.trim();
+    const args = {
+      questions,
+      style: params.tattoo_style,
+      color: params.color_preference,
+      mood: params.mood,
+      placement: params.placement,
+      size: params.size,
+      aspect_ratio: params.aspect_ratio,
+      model: params.model,
+    };
+
     try {
-      const formData = createGenerationFormData(params);
-      const endpoint = (import.meta as any)?.env?.VITE_GENERATE_ENDPOINT as string | undefined;
-      if (!endpoint) {
-        throw new Error('Generate endpoint not configured (VITE_GENERATE_ENDPOINT)');
-      }
-      const url: string = endpoint;
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData,
-      });
+      const result = await this.client.callTool('groq_to_stability_chain', args, onProgress);
+      const url = result?.image_url || result?.url || result?.data_url || null;
+      if (typeof url === 'string' && (url.startsWith('http') || url.startsWith('data:'))) return result;
+      throw new Error('Generation result missing image url');
+    } catch (e: any) {
+      const msg = e?.message || 'Generation failed';
+      throw new Error(msg);
+    }
+  }
 
-      if (!response.ok) {
-        let msg = `Image generation failed: ${response.status}`;
-        try {
-          const ct = response.headers.get('content-type') || '';
-          if (ct.includes('application/json')) {
-            const errorJson = await response.json();
-            if (errorJson?.error) msg = errorJson.error;
-          } else {
-            const errorText = await response.text();
-            if (errorText) msg = `${msg} - ${errorText}`;
-          }
-        } catch {}
-        throw new Error(msg);
-      }
-
-      let imageUrl: string | null = null;
-      try {
-        const result = await response.json();
-        imageUrl = result?.image_url || result?.imageUrl || result?.url || null;
-      } catch {
-        const text = await response.text();
-        const trimmed = (text || '').trim();
-        if (trimmed.startsWith('http')) imageUrl = trimmed;
-      }
-
-      if (!imageUrl) {
-        throw new Error('Backend error: Missing image URL in response');
-      }
-      return imageUrl;
-    } catch (error) {
-      console.error('❌ Image generation failed:', error);
-      throw error;
+  static async generateTattooDirectStability(
+    params: GenerationParams,
+    onProgress?: (message: string, progress: number) => void
+  ): Promise<any> {
+    logGenerationParams(params);
+    const endpoint = ((import.meta as any)?.env?.VITE_MCP_ENDPOINT as string | undefined)
+      || 'https://tattzy-mcp.up.railway.app/mcp';
+    if (!this.client) {
+      this.client = new McpHttpClient(endpoint);
+      await this.client.initialize();
+    }
+    const prompt = `${(params.question1 || '').trim()}\n\n${(params.question2 || '').trim()}`.trim();
+    const args = { prompt, output_format: 'png' };
+    try {
+      const result = await this.client.callTool('stability_sd35_generate', args, onProgress);
+      const url = result?.image_url || result?.url || result?.data_url || null;
+      if (typeof url === 'string' && (url.startsWith('http') || url.startsWith('data:'))) return result;
+      throw new Error('Generation result missing image url');
+    } catch (e: any) {
+      const msg = e?.message || 'Generation failed';
+      throw new Error(msg);
     }
   }
 }

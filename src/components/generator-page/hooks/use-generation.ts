@@ -1,6 +1,7 @@
 import { GenerationService } from '../services/generation-service';
 import { VALIDATION_MESSAGES, TIMEOUTS } from '../constants';
 import { sessionDataStore } from '../../../services/submissionService';
+import { saveGenerationToHistory, saveRecentPrompt } from '../../../utils/localStorageManager';
 
 interface UseGenerationProps {
   license: any;
@@ -15,6 +16,7 @@ interface UseGenerationProps {
   setGenerated: (generated: boolean) => void;
   setGeneratedImage: (image: string | null) => void;
   setValidationError: (error: string | null) => void;
+  onProgress?: (message: string, progress: number) => void;
 }
 
 export const useGeneration = ({
@@ -64,7 +66,7 @@ export const useGeneration = ({
     setGenerating(true);
 
     try {
-      const imageUrl = await GenerationService.generateTattoo({
+      const result = await GenerationService.generateTattoo({
         question1: q1Answer,
         question2: q2Answer,
         tattoo_style: finalStyle,
@@ -75,15 +77,35 @@ export const useGeneration = ({
         aspect_ratio: selectedAspectRatio,
         model: generator.selectedModel,
         images: savedData?.images,
-      });
+      }, onProgress);
 
-      setGeneratedImage(imageUrl);
+      const imageUrl = result?.image_url || result?.url || result?.data_url || null;
+      setGeneratedImage(typeof imageUrl === 'string' ? imageUrl : null);
       setGenerating(false);
       setGenerated(true);
 
       // Generation success; no license tracking required
 
       console.log('✅ Tattoo image generated successfully');
+
+      const enhancedPrompt = typeof result?.enhanced_prompt === 'string' ? result.enhanced_prompt : `${q1Answer}\n\n${q2Answer}`;
+      saveRecentPrompt(enhancedPrompt);
+      saveGenerationToHistory({
+        imageUrl: typeof imageUrl === 'string' ? imageUrl : '',
+        prompt: enhancedPrompt,
+        params: {
+          style: finalStyle,
+          color: finalColor,
+          mood: finalMood,
+          placement: selectedPlacement || '',
+          size: selectedSize || '',
+          aspectRatio: selectedAspectRatio,
+          model: generator.selectedModel,
+          fileId: result?.file_id,
+          metadata: result?.metadata,
+          filename: result?.filename,
+        },
+      });
 
     } catch (error) {
       console.error('❌ Image generation failed:', error);

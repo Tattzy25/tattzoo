@@ -15,6 +15,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { useGeneratorState } from "../../generator-page/hooks/use-generator-state"
 import { useGeneration } from "../../generator-page/hooks/use-generation"
+import { DiamondLoader } from "../../shared/DiamondLoader"
 
 
 const ASPECT_OPTIONS = ["1:1", "16:9", "9:16"] as const
@@ -36,6 +37,9 @@ export default function AIImageGeneratorBlock() {
     generator,
   } = useGeneratorState()
 
+  const [progress, setProgress] = useState(0)
+  const [progressMessage, setProgressMessage] = useState('')
+
   const { handleGenerate } = useGeneration({
     license,
     selectedStyle: generator.getSelections().style || 'Traditional',
@@ -49,6 +53,10 @@ export default function AIImageGeneratorBlock() {
     setGenerated,
     setGeneratedImage,
     setValidationError,
+    onProgress: (message, value) => {
+      setProgressMessage(message)
+      setProgress(value)
+    },
   })
 
   const handleDownload = () => {
@@ -103,7 +111,7 @@ export default function AIImageGeneratorBlock() {
               >
                 {generating ? (
                   <>
-                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                    <DiamondLoader size={48} scale={0.5} className="mr-3" />
                     CREATING YOUR TATTOO...
                   </>
                 ) : (
@@ -113,6 +121,19 @@ export default function AIImageGeneratorBlock() {
                   </>
                 )}
               </Button>
+              {generating && (
+                <div className="space-y-3">
+                  <div className="w-full h-2 bg-white/10 rounded">
+                    <div className="h-2 bg-accent rounded" style={{ width: `${progress}%` }} />
+                  </div>
+                  <p className="text-center text-sm text-white/80">{progressMessage}</p>
+                </div>
+              )}
+              {generating && (
+                <div className="flex justify-center py-6">
+                  <DiamondLoader size={100} scale={0.6} />
+                </div>
+              )}
               {validationError && (
                 <div className="mt-2 text-center">
                   <span className="text-sm text-red-500 font-[Orbitron]" style={{ textShadow: '0 0 4px rgba(255,0,0,0.6)' }}>
